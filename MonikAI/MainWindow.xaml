@@ -1,0 +1,24 @@
+﻿<Window x:Class="MonikAI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MonikAI"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="512" Width="800" ShowInTaskbar="False" WindowState="Normal" WindowStyle="None"
+        AllowsTransparency="True" FontSize="20"
+        Topmost="True" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+        IsHitTestVisible="False"
+        Loaded="Window_Loaded"
+        >
+    <Window.Background>
+        <SolidColorBrush Opacity="0.0" Color="White" />
+    </Window.Background>
+    <Grid HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Top" IsHitTestVisible="False">
+        <Image x:Name="main" Margin="100,-60,100,0" Source="pack://application:,,,/monika/1.png" StretchDirection="Both" Stretch="Uniform" IsHitTestVisible="False"  />
+        <Image x:Name="face" Margin="302,126,322,262" Stretch="Fill" Source="/monika/b.png" IsHitTestVisible="False" />
+        <Image x:Name="textWindow" Margin="50,390,50,20" Stretch="Fill" Source="pack://application:,,,/gui/textbox.png" IsHitTestVisible="False" Visibility="Hidden"/>
+        <TextBlock x:Name="textBlock" Margin="70,410,70,40" Text="Тестовый текст" Foreground="White" IsHitTestVisible="False"/>
+
+    </Grid>
+</Window>
