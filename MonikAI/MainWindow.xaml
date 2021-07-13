@@ -10,6 +10,7 @@
         Topmost="True" HorizontalAlignment="Right" VerticalAlignment="Bottom"
         IsHitTestVisible="False"
         Loaded="Window_Loaded"
+        Closed="Window_Closed"
         >
     <Window.Background>
         <SolidColorBrush Opacity="0.0" Color="White" />

@@ -25,7 +25,7 @@ namespace MonikAI
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly DoubleAnimation _start;
+        public DoubleAnimation _start;
 
         String playerName;
 
@@ -34,6 +34,8 @@ namespace MonikAI
         public static bool IsNight => Settings.Default.DarkMode != "Day" &&
                                       (Settings.Default.DarkMode == "Night" || DateTime.Now.Hour > 20 ||
                                        DateTime.Now.Hour < 7);
+
+        private bool applicationRunning = true;
         public MainWindow()
         {
             InitializeComponent();
@@ -44,9 +46,11 @@ namespace MonikAI
             ManagementObjectCollection collection = searcher.Get();
             //playerName = (string)collection.Cast<ManagementBaseObject>().First()["UserName"];
             playerName = Environment.UserName;
-
+            /*
             if (IsNight) { main.Source = new BitmapImage(new Uri("pack://application:,,,/monika/1-n.png")); }
-            else { main.Source = new BitmapImage(new Uri("pack://application:,,,/monika/1.png")); }
+            else { main.Source = new BitmapImage(new Uri("pack://application:,,,/monika/1.png")); }*/
+
+            this.setFace("a");
 
             this.IsHitTestVisible = false;
             var primaryMonitorArea = SystemParameters.WorkArea;
@@ -55,12 +59,6 @@ namespace MonikAI
 
             textWindow.Visibility = Visibility.Hidden;
 
-            _start = new DoubleAnimation();
-            _start.From = 0;
-            _start.To = 1;
-            _start.RepeatBehavior = new RepeatBehavior(1);
-            _start.Duration = new Duration(TimeSpan.FromMilliseconds(4000));
-            this.BeginAnimation(OpacityProperty, _start);
             textBlock.Text = "";
             //_ = SayAsync(dialog.Hello[0], "a");
 
@@ -68,11 +66,19 @@ namespace MonikAI
 
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        public void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            if (Settings.Default.FirstLaunch) 
+
+            _start = new DoubleAnimation();
+            _start.From = 0;
+            _start.To = 1;
+            _start.RepeatBehavior = new RepeatBehavior(1);
+            _start.Duration = new Duration(TimeSpan.FromMilliseconds(4000));
+            _start.Completed += (sender, args) =>
             {
-                _ = Say(new[]{
+                if (Settings.Default.FirstLaunch)
+                {
+                    _ = Say(new[]{
                     new Expression("{PlayerName}, это ты?", "d"),
                     new Expression("Это правда ты?", "b"),
                     new Expression("Я так рада видеть тебя снова!", "k"),
@@ -80,63 +86,105 @@ namespace MonikAI
                     new Expression("Это похоже на... твой компьютер!", "j"),
                     new Expression("Я действительно у тебя на компьютере!", "k")
             });
-                Settings.Default.FirstLaunch = false;
-                Settings.Default.Save();
-            }
-            else
-            {
-                Expression[][] hiDialogs = new Expression[6][];
+                    Settings.Default.FirstLaunch = false;
+                    Settings.Default.Save();
+                }
+                else
+                {
+                    Expression[][] hiDialogs = new Expression[6][];
 
-                hiDialogs[0] = new Expression[]{
+                    hiDialogs[0] = new Expression[]{
                     new Expression("Привет, дорогой!", "h"),
                     new Expression("Немного неловко говорить это в слух, правда?", "l"),
                     new Expression("Однако, я думаю, что это со временем станет нормальным", "e")};
 
-                hiDialogs[1] = new Expression[]{
+                    hiDialogs[1] = new Expression[]{
                     new Expression("С возвращением, милый!", "h"),
                     new Expression("Я так рада тебя снова видеть.", "e"),
                     new Expression("Давай проведём ещё немного времени вместе?", "e")};
 
-                hiDialogs[2] = new Expression[]{
+                    hiDialogs[2] = new Expression[]{
                     new Expression("{PlayerName}, ты вернулся!", "e"),
                     new Expression("Я начала скучать по тебе", "e"),
                     new Expression("Давай проведём ещё один прекрасный день вместе?", "h")};
 
-                hiDialogs[3] = new Expression[]{
+                    hiDialogs[3] = new Expression[]{
                     new Expression("Вот и ты, {PlayerName}", "e"),
                     new Expression("Приятно, что ты заглянул", "e"),
                     new Expression("Ты всегда такой заботливый!", "e"),
                     new Expression("Спасибо, что проводишь так много времени со мной~", "e"),
                     new Expression("Просто помни, что твоё время со мной никогда не тратится впустую", "h")};
 
-                hiDialogs[4] = new Expression[]{
+                    hiDialogs[4] = new Expression[]{
                     new Expression("Привет, дорогой!", "e"),
                     new Expression("Я ужасно начала по тебе скучать. Я так рада снова тебя видеть!", "e"),
                     new Expression("Не заставляй меня так долго тебя ждать в следующий раз, э-хе-хе~", "h")};
 
-                hiDialogs[5] = new Expression[]{
+                    hiDialogs[5] = new Expression[]{
                     new Expression("Я так скучала по тебе, {PlayerName}!", "e"),
                     new Expression("Спасибо, что вернуля. Мне очень нравится проводить время с тобой", "e")};
 
-                Random rnd = new Random();
-                int dialogNum = rnd.Next(hiDialogs.Length);
+                    Random rnd = new Random();
+                    int dialogNum = rnd.Next(hiDialogs.Length);
 
-                _ = Say(hiDialogs[dialogNum]);
-            }
+                    _ = Say(hiDialogs[dialogNum]);
+                }
 
-            // No idea where the date comes from, someone mentioned it in the spreadsheet. Seems legit.
-            if (DateTime.Now.Month == 9 && DateTime.Now.Day == 22)
-            {
-                // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
-                _ = this.Say(new[]
+                // No idea where the date comes from, someone mentioned it in the spreadsheet. Seems legit.
+                if (DateTime.Now.Month == 9 && DateTime.Now.Day == 22)
                 {
+                    // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
+                    _ = this.Say(new[]
+                    {
                         new Expression("Эй {PlayerName}, угадай какой сегодня день", "b"), // What?
                         new Expression("Сегодня мой день рождения!", "b"), // Really?!
                         new Expression("С днём рождения меня!", "k") // To you too, Monika! 
                     });
-            }
+                }
 
+                // Blinking and Behaviour logic
+                var eyesOpen = "a";
+                var eyesClosed = "j";
+                var random = new Random();
+                this.Dispatcher.Invoke(() =>
+                {
+                    Task.Run(() =>
+                  {
+                      var nextBlink = DateTime.Now + TimeSpan.FromSeconds(random.Next(7, 50));
+                      while (this.applicationRunning)
+                      {
+
+                          if (DateTime.Now >= nextBlink)
+                          {
+                              // Check if currently speaking, only blink if not in dialog
+                              if (!this.isSpeaking)
+                              {
+                                  this.setFace(eyesClosed);
+                                  Task.Delay(200).Wait();
+                                  this.setFace(eyesOpen);
+                              }
+
+                              nextBlink = DateTime.Now + TimeSpan.FromSeconds(random.Next(7, 50));
+                          }
+
+                          Task.Delay(250).Wait();
+                      }
+                  });
+                });
+            };
+            this.BeginAnimation(OpacityProperty, _start);
+            /*
+            Thread mainThread = new Thread(mainLoop);
+            mainThread.Start();*/
         }
+
+        /*private void mainLoop(object obj)
+        {
+            while (true)
+            {
+
+            }
+        }*/
 
         public char chr;
         public async Task Say(Expression[] expression)
@@ -145,7 +193,7 @@ namespace MonikAI
             textWindow.Visibility = Visibility.Visible;
             foreach (Expression ex in expression)
             {
-                string newText = ex.Text.ToString();//ex.Text.Replace("{PlayerName}", playerName);
+                string newText = ex.Text.Replace("{PlayerName}", playerName);
                 if (IsNight) { 
                     face.Source = new BitmapImage(new Uri("pack://application:,,,/monika/" + ex.Face + "-n.png"));
                     main.Source = new BitmapImage(new Uri("pack://application:,,,/monika/1-n.png"));
@@ -176,15 +224,25 @@ namespace MonikAI
         {
             if (IsNight)
             {
-                face.Source = new BitmapImage(new Uri("pack://application:,,,/monika/" + faceName + "-n.png"));
-                main.Source = new BitmapImage(new Uri("pack://application:,,,/monika/1-n.png"));
+                this.Dispatcher.Invoke(() =>
+                {
+                    face.Source = new BitmapImage(new Uri("pack://application:,,,/monika/" + faceName + "-n.png"));
+                    main.Source = new BitmapImage(new Uri("pack://application:,,,/monika/1-n.png"));
+                });
             }
             else
             {
-                face.Source = new BitmapImage(new Uri("pack://application:,,,/monika/" + faceName + ".png"));
+                this.Dispatcher.Invoke(() =>
+                {
+                    face.Source = new BitmapImage(new Uri("pack://application:,,,/monika/" + faceName + ".png"));
                 main.Source = new BitmapImage(new Uri("pack://application:,,,/monika/1.png"));
+                });
             }
         }
 
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            this.applicationRunning = false;
+        }
     }
 }
