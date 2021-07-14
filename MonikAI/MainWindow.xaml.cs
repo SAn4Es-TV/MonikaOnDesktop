@@ -19,7 +19,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Reflection;
 
-namespace MonikAI
+namespace MonikaOnDesktop
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

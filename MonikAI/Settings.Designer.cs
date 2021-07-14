@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace MonikAI {
+namespace MonikaOnDesktop {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
