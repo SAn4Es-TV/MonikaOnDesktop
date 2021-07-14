@@ -32,10 +32,10 @@ namespace MonikaOnDesktop
 
 
         string greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/greetings.txt"; // Greetings
-        string idleDialogPath = "pack://application:,,,/Dialogs/idle.txt";           // Idle
-        string progsDialogPath = "pack://application:,,,/Dialogs/progs.txt";         // Programs
-        string sitesDialogPath = "pack://application:,,,/Dialogs/sites.txt";         // Sites
-        string googleDialogPath = "pack://application:,,,/Dialogs/google.txt";       // Google search
+        string idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/idle.txt";           // Idle
+        string progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/progs.txt";         // Programs
+        string sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/sites.txt";         // Sites
+        string googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/google.txt";       // Google search
 
         public bool isSpeaking = false;
         public static bool IsNight => Settings.Default.DarkMode != "Day" &&
@@ -72,7 +72,7 @@ namespace MonikaOnDesktop
             _start.RepeatBehavior = new RepeatBehavior(1);
             _start.Duration = new Duration(TimeSpan.FromMilliseconds(4000));
             _start.Completed += (sender, args) =>
-            {/*
+            {
                 if (Settings.Default.FirstLaunch)
                 {
                     _ = Say(new[]{
@@ -88,45 +88,8 @@ namespace MonikaOnDesktop
                 }
                 else
                 {
-                    Expression[][] hiDialogs = new Expression[6][];
-
-                    hiDialogs[0] = new Expression[]{
-                    new Expression("Привет, дорогой!", "h"),
-                    new Expression("Немного неловко говорить это в слух, правда?", "l"),
-                    new Expression("Однако, я думаю, что это со временем станет нормальным", "e")};
-
-                    hiDialogs[1] = new Expression[]{
-                    new Expression("С возвращением, милый!", "h"),
-                    new Expression("Я так рада тебя снова видеть.", "e"),
-                    new Expression("Давай проведём ещё немного времени вместе?", "e")};
-
-                    hiDialogs[2] = new Expression[]{
-                    new Expression("{PlayerName}, ты вернулся!", "e"),
-                    new Expression("Я начала скучать по тебе", "e"),
-                    new Expression("Давай проведём ещё один прекрасный день вместе?", "h")};
-
-                    hiDialogs[3] = new Expression[]{
-                    new Expression("Вот и ты, {PlayerName}", "e"),
-                    new Expression("Приятно, что ты заглянул", "e"),
-                    new Expression("Ты всегда такой заботливый!", "e"),
-                    new Expression("Спасибо, что проводишь так много времени со мной~", "e"),
-                    new Expression("Просто помни, что твоё время со мной никогда не тратится впустую", "h")};
-
-                    hiDialogs[4] = new Expression[]{
-                    new Expression("Привет, дорогой!", "e"),
-                    new Expression("Я ужасно начала по тебе скучать. Я так рада снова тебя видеть!", "e"),
-                    new Expression("Не заставляй меня так долго тебя ждать в следующий раз, э-хе-хе~", "h")};
-
-                    hiDialogs[5] = new Expression[]{
-                    new Expression("Я так скучала по тебе, {PlayerName}!", "e"),
-                    new Expression("Спасибо, что вернуля. Мне очень нравится проводить время с тобой", "e")};
-
-                    Random rnd = new Random();
-                    int dialogNum = rnd.Next(hiDialogs.Length);
-
-                    _ = Say(hiDialogs[dialogNum]);
-                }*/
-                readGreetingsTxt();
+                    readGreetingsTxt();
+                }
 
                 // No idea where the date comes from, someone mentioned it in the spreadsheet. Seems legit.
                 if (DateTime.Now.Month == 9 && DateTime.Now.Day == 22)
