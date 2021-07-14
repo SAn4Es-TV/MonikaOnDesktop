@@ -17,6 +17,7 @@ using System.Management;
 using System.Threading;
 using System.IO;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace MonikAI
 {
@@ -27,28 +28,28 @@ namespace MonikAI
     {
         public DoubleAnimation _start;
 
-        String playerName;
+        String playerName; 
+
+
+        string greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/greetings.txt"; // Greetings
+        string idleDialogPath = "pack://application:,,,/Dialogs/idle.txt";           // Idle
+        string progsDialogPath = "pack://application:,,,/Dialogs/progs.txt";         // Programs
+        string sitesDialogPath = "pack://application:,,,/Dialogs/sites.txt";         // Sites
+        string googleDialogPath = "pack://application:,,,/Dialogs/google.txt";       // Google search
 
         public bool isSpeaking = false;
-        //public static bool IsNight => DateTime.Now.Hour > 20 || DateTime.Now.Hour < 7;
         public static bool IsNight => Settings.Default.DarkMode != "Day" &&
                                       (Settings.Default.DarkMode == "Night" || DateTime.Now.Hour > 20 ||
                                        DateTime.Now.Hour < 7);
-
         private bool applicationRunning = true;
         public MainWindow()
         {
             InitializeComponent();
 
-        // Roughly estimating night time
-
-        ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT UserName FROM Win32_ComputerSystem");
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT UserName FROM Win32_ComputerSystem");
             ManagementObjectCollection collection = searcher.Get();
             //playerName = (string)collection.Cast<ManagementBaseObject>().First()["UserName"];
             playerName = Environment.UserName;
-            /*
-            if (IsNight) { main.Source = new BitmapImage(new Uri("pack://application:,,,/monika/1-n.png")); }
-            else { main.Source = new BitmapImage(new Uri("pack://application:,,,/monika/1.png")); }*/
 
             this.setFace("a");
 
@@ -60,10 +61,6 @@ namespace MonikAI
             textWindow.Visibility = Visibility.Hidden;
 
             textBlock.Text = "";
-            //_ = SayAsync(dialog.Hello[0], "a");
-
-
-
         }
 
         public void Window_Loaded(object sender, RoutedEventArgs e)
@@ -75,7 +72,7 @@ namespace MonikAI
             _start.RepeatBehavior = new RepeatBehavior(1);
             _start.Duration = new Duration(TimeSpan.FromMilliseconds(4000));
             _start.Completed += (sender, args) =>
-            {
+            {/*
                 if (Settings.Default.FirstLaunch)
                 {
                     _ = Say(new[]{
@@ -128,7 +125,8 @@ namespace MonikAI
                     int dialogNum = rnd.Next(hiDialogs.Length);
 
                     _ = Say(hiDialogs[dialogNum]);
-                }
+                }*/
+                readGreetingsTxt();
 
                 // No idea where the date comes from, someone mentioned it in the spreadsheet. Seems legit.
                 if (DateTime.Now.Month == 9 && DateTime.Now.Day == 22)
@@ -177,16 +175,6 @@ namespace MonikAI
             Thread mainThread = new Thread(mainLoop);
             mainThread.Start();*/
         }
-
-        /*private void mainLoop(object obj)
-        {
-            while (true)
-            {
-
-            }
-        }*/
-
-        public char chr;
         public async Task Say(Expression[] expression)
         {
             isSpeaking = true;
@@ -218,8 +206,6 @@ namespace MonikAI
             isSpeaking = false;
 
         }
-
-
         public void setFace(string faceName)
         {
             if (IsNight)
@@ -239,10 +225,32 @@ namespace MonikAI
                 });
             }
         }
-
         private void Window_Closed(object sender, EventArgs e)
         {
             this.applicationRunning = false;
+        }
+        public void readGreetingsTxt()
+        {
+            string mainFile = File.ReadAllText(greetingsDialogPath);
+            string[] dialogs = mainFile.Split(new string[] { "\r\n=\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            Expression[][] hiDialogs = new Expression[dialogs.Length][];
+
+            Debug.WriteLine(dialogs[0].Substring(2).ToString());
+            for (int a = 0; a < dialogs.Length; a++)
+            {
+                string[] express = dialogs[a].Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                Expression[] hiDialog = new Expression[express.Length];
+                for (int b = 0; b < express.Length; b++)
+                {
+                    hiDialog[b] = new Expression(express[b].Substring(2), (express[b])[0].ToString());
+                }
+                    hiDialogs[a] = hiDialog;
+            }
+
+            Random rnd = new Random();
+            int dialogNum = rnd.Next(hiDialogs.Length);
+
+            _ = Say(hiDialogs[dialogNum]);
         }
     }
 }
