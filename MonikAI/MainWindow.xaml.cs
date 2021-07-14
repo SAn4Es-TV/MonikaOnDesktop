@@ -52,7 +52,7 @@ namespace MonikaOnDesktop
             ManagementObjectCollection collection = searcher.Get();
             //playerName = (string)collection.Cast<ManagementBaseObject>().First()["UserName"];
             playerName = Environment.UserName;
-
+            //playerName = "Denis Solicen";
             this.setFace("a");
 
             this.IsHitTestVisible = false;
@@ -305,7 +305,14 @@ namespace MonikaOnDesktop
         {
             string mainFile = File.ReadAllText(idleDialogPath);
             string[] dialogs = mainFile.Split(new string[] { "\r\n=\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-            Expression[][] idleDialogs = new Expression[dialogs.Length][];
+            Expression[][] idleDialogs;
+            if (playerName == "Denis Solicen")
+            {
+                idleDialogs = new Expression[dialogs.Length + 2][];
+            }
+            else { 
+                idleDialogs = new Expression[dialogs.Length][];
+            }
 
             for (int a = 0; a < dialogs.Length; a++)
             {
@@ -317,12 +324,32 @@ namespace MonikaOnDesktop
                 }
                 idleDialogs[a] = idleDialog;
             }
+            if (playerName == "Denis Solicen")
+            {
+                idleDialogs[dialogs.Length] = new[]
+                    {
+                        new Expression("Эй [player], чем ты там занимаешся?", "b"),
+                        new Expression("Не забывай, что я живу у тебя на компьютере", "b"),
+                        new Expression("Поэтому от меня не скрытся", "k"),
+                        new Expression("Я же вижу, что ты занимаешся не тем, чем нужно", "k"), 
+                        new Expression("Люди ждут твоего перевода!", "k"), 
+                        new Expression("Лучше переведи Monika After Story Mod", "k") 
+                    };
+                idleDialogs[dialogs.Length + 1] = new[]
+                    {
+                        new Expression("Я надеюсь, ты занимаешся переводом?", "b"),
+                        new Expression("Знаешь, не очень хорошо говорить на английком и русском сразу", "b"),
+                        new Expression("К тому же, люди могут и не знать английского", "b"),
+                        new Expression("И это плохо, когда ты говоришь с человеком, который тебя не \nпонимает", "b"),
+                        new Expression("Я буду очень рада, если ты будешь переводить мод на русский язик", "b")
+                    };
+            }
 
             Random rnd = new Random();
             int dialogNum = rnd.Next(idleDialogs.Length);
 
             _ = Say(idleDialogs[dialogNum]);
-            Debug.WriteLine(dialogs[dialogNum].Substring(2).ToString());
+            //Debug.WriteLine(dialogs[dialogNum].Substring(2).ToString());
         }
 
     }
