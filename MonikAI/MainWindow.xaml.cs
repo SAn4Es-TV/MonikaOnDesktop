@@ -151,43 +151,30 @@ namespace MonikaOnDesktop
                     });
                 });
 
-                try
+                var randomDialog = new Random();
+                this.Dispatcher.Invoke(() =>
                 {
-                    var randomDialog = new Random();
-                    this.Dispatcher.Invoke(() =>
+                    Task.Run(() =>
                     {
-                        Task.Run(() =>
+                        var nextGialog = DateTime.Now + TimeSpan.FromSeconds(randomDialog.Next(120, 300));
+                        while (this.applicationRunning)
                         {
-                            var nextGialog = DateTime.Now + TimeSpan.FromSeconds(randomDialog.Next(120, 300));
-                            while (this.applicationRunning)
+
+                            if (DateTime.Now >= nextGialog)
                             {
-
-                                if (DateTime.Now >= nextGialog)
+                                    // Check if currently speaking, only blink if not in dialog
+                                    if (!isSpeaking)
                                 {
-                                // Check if currently speaking, only blink if not in dialog
-                                if (!isSpeaking)
-                                    {
-                                        readIdleTxt();
-                                    }
-
-                                    nextGialog = DateTime.Now + TimeSpan.FromSeconds(randomDialog.Next(120, 300));
+                                    readIdleTxt();
                                 }
 
-                                Task.Delay(250).Wait();
+                                nextGialog = DateTime.Now + TimeSpan.FromSeconds(randomDialog.Next(120, 300));
                             }
-                        });
+
+                            Task.Delay(250).Wait();
+                        }
                     });
-                }
-
-                catch (InvalidOperationException exc)
-                {
-                    MessageBox.Show(exc.ToString());
-                }
-
-                catch (Exception exception)
-                {
-                    MessageBox.Show(exception.Message);
-                }
+                });
             };
             this.BeginAnimation(OpacityProperty, _start);
             /*
@@ -203,7 +190,7 @@ namespace MonikaOnDesktop
                   textWindow.Visibility = Visibility.Visible;
                   foreach (Expression ex in expression)
                   {
-                      string newText = ex.Text.Replace("[player]", playerName);
+                      string newText = ex.Text.Replace("[player]", playerName); //замена
                       if (IsNight)
                       {
                           face.Source = new BitmapImage(new Uri("pack://application:,,,/monika/" + ex.Face + "-n.png"));
@@ -218,12 +205,12 @@ namespace MonikaOnDesktop
                       {
                           this.textBlock.Text += newText[i];
                           if (newText[i].ToString() == ".") { await Task.Delay(500); }//set 500 if you need uncoment this line |
-                        else if (newText[i] == ',') { await Task.Delay(50); }                                   //           |
-                        else { await Task.Delay(30); }                                                          //           |
-                                                                                                                //           |
-                    }                                                                                           //           |
-                    await Task.Delay(newText.Length * 30 + 700);                                                //         <-- this line
-                    delay = newText.Length * 30 + 700;
+                          else if (newText[i] == ',') { await Task.Delay(50); }                                   //           |
+                          else { await Task.Delay(30); }                                                          //           |
+                                                                                                                  //           |
+                      }                                                                                           //           |
+                      await Task.Delay(newText.Length * 30 + 700);                                                //         <-- this line
+                      delay = newText.Length * 30 + 700;
                       textBlock.Text = "";
                   }
                   setFace("a");
@@ -310,7 +297,8 @@ namespace MonikaOnDesktop
             {
                 idleDialogs = new Expression[dialogs.Length + 2][];
             }
-            else { 
+            else
+            {
                 idleDialogs = new Expression[dialogs.Length][];
             }
 
@@ -331,9 +319,9 @@ namespace MonikaOnDesktop
                         new Expression("Эй [player], чем ты там занимаешся?", "b"),
                         new Expression("Не забывай, что я живу у тебя на компьютере", "b"),
                         new Expression("Поэтому от меня не скрытся", "k"),
-                        new Expression("Я же вижу, что ты занимаешся не тем, чем нужно", "k"), 
-                        new Expression("Люди ждут твоего перевода!", "k"), 
-                        new Expression("Лучше переведи Monika After Story Mod", "k") 
+                        new Expression("Я же вижу, что ты занимаешся не тем, чем нужно", "k"),
+                        new Expression("Люди ждут твоего перевода!", "k"),
+                        new Expression("Лучше переведи Monika After Story Mod", "k")
                     };
                 idleDialogs[dialogs.Length + 1] = new[]
                     {
