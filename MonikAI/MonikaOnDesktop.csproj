@@ -12,6 +12,7 @@
     <None Remove="monika\1-n.png" />
     <None Remove="monika\1.png" />
     <None Remove="monika\1a-n.png" />
+    <None Remove="monika\1a.ico" />
     <None Remove="monika\1a.png" />
     <None Remove="monika\a-n.png" />
     <None Remove="monika\a.png" />
@@ -54,6 +55,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.1.0" />
     <PackageReference Include="System.Management" Version="5.0.0" />
   </ItemGroup>
 
@@ -68,6 +70,9 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="monika\1a-n.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="monika\1a.ico">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="monika\1a.png">
@@ -190,17 +195,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Settings.Designer.cs">
+    <Compile Update="MonikaSettings.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
+      <DependentUpon>MonikaSettings.settings</DependentUpon>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Settings.settings">
+    <None Update="MonikaSettings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+      <LastGenOutput>MonikaSettings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
 

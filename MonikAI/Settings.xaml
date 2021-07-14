@@ -1,0 +1,16 @@
+﻿<Window x:Class="MonikaOnDesktop.Settings"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MonikaOnDesktop"
+        mc:Ignorable="d"
+        Title="Настройки" Height="450" Width="800">
+    <Grid>
+        <Button x:Name="save" Content="Сохранить" HorizontalAlignment="Left" Margin="601,404,0,10" Width="92"/>
+        <Button x:Name="close" Content="Закрыть" HorizontalAlignment="Left" Margin="698,404,0,10" Width="92"/>
+        <Slider x:Name="slider" HorizontalAlignment="Left" Margin="168,18,0,0" VerticalAlignment="Top" Width="622"/>
+        <Label x:Name="label" Content="Размер" FontSize="20" HorizontalAlignment="Left" Height="35" Margin="10,10,0,0" VerticalAlignment="Top" Width="153"/>
+
+    </Grid>
+</Window>
