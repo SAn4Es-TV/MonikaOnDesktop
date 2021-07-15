@@ -46,20 +46,6 @@ namespace MonikaOnDesktop
         private bool applicationRunning = true;
         public bool isSpeaking;
 
-        private double scaleBaseWidth,
-            scaleBaseHeight,
-            scaleBaseFacePictureWidth,
-            scaleBaseFacePictureHeight,
-            scaleBaseTextPictureWidth,
-            scaleBaseTextPictureHeight,
-            scaleBaseTextBoxWidth,
-            scaleBaseTextBoxHeight,
-            scaleBaseTextBoxFontSize;
-
-        private bool initializedScales;
-        private float dpiScale = 1.0f;
-
-        private Thickness basePictureThickness, baseTextThickness;
 
         private Settings settingsWindow;
         public MainWindow()
@@ -85,6 +71,40 @@ namespace MonikaOnDesktop
             textBlock.Text = "";
             SetupScale(MonikaSettings.Default.Scaler);
 
+            try
+            {
+                ManagementEventWatcher startWatch = new ManagementEventWatcher(new WqlEventQuery("SELECT * FROM Win32_ProcessStartTrace"));
+                startWatch.EventArrived += new EventArrivedEventHandler(startWatch_EventArrived);
+                startWatch.Start();
+
+                ManagementEventWatcher stopWatch = new ManagementEventWatcher(new WqlEventQuery("SELECT * FROM Win32_ProcessStopTrace"));
+                stopWatch.EventArrived += new EventArrivedEventHandler(stopWatch_EventArrived);
+                stopWatch.Start();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(this,
+                    "An error occured: " + ex.Message + "\r\n\r\n(Try run this app as an administrator.)");
+            }
+
+        }
+
+        private void stopWatch_EventArrived(object sender, EventArrivedEventArgs e)
+        {
+            // Check if currently speaking, only blink if not in dialog
+            if (!isSpeaking)
+            {
+                //_ = Say(new[] { new Expression("Process stopped:" + e.NewEvent.Properties["ProcessName"].Value, "a") });
+            }
+        }
+
+        private void startWatch_EventArrived(object sender, EventArrivedEventArgs e)
+        {
+            if (!isSpeaking)
+            {
+                //_ = Say(new[] { new Expression("Process started:" + e.NewEvent.Properties["ProcessName"].Value, "a") });
+                //readProgsTxt(e.NewEvent.Properties["ProcessName"].Value.ToString());
+            }
         }
 
         private void MenuSettings_Click(object sender, RoutedEventArgs e)
@@ -281,14 +301,15 @@ namespace MonikaOnDesktop
         }
         public void readGreetingsTxt()
         {
-            string mainFile = File.ReadAllText(greetingsDialogPath);
-            string[] dialogs = mainFile.Split(new string[] { "\r\n=\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            string mf = File.ReadAllText(greetingsDialogPath);
+            string mainFile = mf.Replace("\r", String.Empty);
+            string[] dialogs = mainFile.Split(new string[] { "\n=\n" }, StringSplitOptions.RemoveEmptyEntries);
             Expression[][] hiDialogs = new Expression[dialogs.Length][];
 
             Debug.WriteLine(dialogs[0].Substring(2).ToString());
             for (int a = 0; a < dialogs.Length; a++)
             {
-                string[] express = dialogs[a].Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                string[] express = dialogs[a].Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
                 Expression[] hiDialog = new Expression[express.Length];
                 for (int b = 0; b < express.Length; b++)
                 {
@@ -327,8 +348,9 @@ namespace MonikaOnDesktop
         }
         public void readIdleTxt()
         {
-            string mainFile = File.ReadAllText(idleDialogPath);
-            string[] dialogs = mainFile.Split(new string[] { "\r\n=\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            string mf = File.ReadAllText(idleDialogPath);
+            string mainFile = mf.Replace("\r", String.Empty);
+            string[] dialogs = mainFile.Split(new string[] { "\n=\n" }, StringSplitOptions.RemoveEmptyEntries);
             Expression[][] idleDialogs;
             if (playerName == "Denis Solicen")
             {
@@ -341,7 +363,8 @@ namespace MonikaOnDesktop
 
             for (int a = 0; a < dialogs.Length; a++)
             {
-                string[] express = dialogs[a].Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                string ex = dialogs[a].Replace("\r", String.Empty);
+                string[] express = dialogs[a].Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
                 Expression[] idleDialog = new Expression[express.Length];
                 for (int b = 0; b < express.Length; b++)
                 {
@@ -373,8 +396,32 @@ namespace MonikaOnDesktop
             Random rnd = new Random();
             int dialogNum = rnd.Next(idleDialogs.Length);
 
-            _ = Say(idleDialogs[dialogNum]);
+            _ = Say(idleDialogs[0]);
             
+        }
+        public void readProgsTxt(string process)
+        {
+            string mf = File.ReadAllText(progsDialogPath);
+            string mainFile = mf.Replace("\r", String.Empty);
+            string[] dialogs = mainFile.Split(new string[] { "\r\n=\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            Expression[][] hiDialogs = new Expression[dialogs.Length][];
+
+            Debug.WriteLine(dialogs[0].Substring(2).ToString());
+            for (int a = 0; a < dialogs.Length; a++)
+            {
+                string[] express = dialogs[a].Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                Expression[] hiDialog = new Expression[express.Length];
+                for (int b = 1; b < express.Length; b++)
+                {
+                    hiDialog[b] = new Expression(express[b].Substring(2), (express[b])[0].ToString());
+                }
+                hiDialogs[a] = hiDialog;
+            }
+
+            Random rnd = new Random();
+            int dialogNum = rnd.Next(hiDialogs.Length);
+
+            _ = Say(hiDialogs[dialogNum]);
         }
         public void SetupScale(int scaler)
         {
@@ -423,7 +470,6 @@ namespace MonikaOnDesktop
             //Top = primaryMonitorArea.Bottom - this.Height;
             GoToSecondaryMonitor();
         }
-
         public void GoToSecondaryMonitor()
         {
             Screen screen;

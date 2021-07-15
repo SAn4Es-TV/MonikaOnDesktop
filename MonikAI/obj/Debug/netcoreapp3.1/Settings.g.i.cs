@@ -182,7 +182,7 @@ namespace MonikaOnDesktop {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/MonikaOnDesktop;V1.0.0.0;component/settings.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/MonikaOnDesktop;component/settings.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\Settings.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);
