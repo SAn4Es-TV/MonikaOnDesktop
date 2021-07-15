@@ -43,8 +43,8 @@ namespace MonikaOnDesktop
                     break;
             }*/
 
-            userName.Text = MonikaSettings.Default.UserName;
-            monikaSize.Value = MonikaSettings.Default.Scaler;
+            if (MonikaSettings.Default.UserName == "{PlayerName}") { userName.Text = ""; } else { userName.Text = MonikaSettings.Default.UserName; }
+             monikaSize.Value = MonikaSettings.Default.Scaler;
             randomIdle.Value = MonikaSettings.Default.idleRandomFrom;
             nightEndText.Text = MonikaSettings.Default.NightEnd.ToString();
             nightStartText.Text = MonikaSettings.Default.NightStart.ToString();

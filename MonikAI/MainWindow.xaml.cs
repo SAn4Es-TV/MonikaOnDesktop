@@ -57,9 +57,17 @@ namespace MonikaOnDesktop
             ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT UserName FROM Win32_ComputerSystem");
             ManagementObjectCollection collection = searcher.Get();
             //playerName = (string)collection.Cast<ManagementBaseObject>().First()["UserName"];
-            playerName = Environment.UserName;
-            //playerName = "Denis Solicen";
-            this.setFace("a");
+            
+            if (String.IsNullOrEmpty(MonikaSettings.Default.UserName))
+            {
+                playerName = Environment.UserName;
+            }
+            else
+            {
+                playerName = MonikaSettings.Default.UserName;
+            }
+                //playerName = "Denis Solicen";
+                this.setFace("a");
 
             this.IsHitTestVisible = false;
             //var primaryMonitorArea = Screen.PrimaryScreen.Bounds;
@@ -306,7 +314,6 @@ namespace MonikaOnDesktop
             string[] dialogs = mainFile.Split(new string[] { "\n=\n" }, StringSplitOptions.RemoveEmptyEntries);
             Expression[][] hiDialogs = new Expression[dialogs.Length][];
 
-            Debug.WriteLine(dialogs[0].Substring(2).ToString());
             for (int a = 0; a < dialogs.Length; a++)
             {
                 string[] express = dialogs[a].Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
@@ -396,7 +403,7 @@ namespace MonikaOnDesktop
             Random rnd = new Random();
             int dialogNum = rnd.Next(idleDialogs.Length);
 
-            _ = Say(idleDialogs[0]);
+            _ = Say(idleDialogs[dialogNum]);
             
         }
         public void readProgsTxt(string process)
