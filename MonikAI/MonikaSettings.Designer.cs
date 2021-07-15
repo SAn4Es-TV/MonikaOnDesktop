@@ -133,13 +133,49 @@ namespace MonikaOnDesktop {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
         public int Scaler {
             get {
                 return ((int)(this["Scaler"]));
             }
             set {
                 this["Scaler"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("120")]
+        public int idleRandomFrom {
+            get {
+                return ((int)(this["idleRandomFrom"]));
+            }
+            set {
+                this["idleRandomFrom"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("300")]
+        public int idleRandomTo {
+            get {
+                return ((int)(this["idleRandomTo"]));
+            }
+            set {
+                this["idleRandomTo"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool screenNum {
+            get {
+                return ((bool)(this["screenNum"]));
+            }
+            set {
+                this["screenNum"] = value;
             }
         }
     }

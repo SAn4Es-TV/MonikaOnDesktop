@@ -18,6 +18,7 @@ using System.Threading;
 using System.IO;
 using System.Diagnostics;
 using System.Reflection;
+using System.Windows.Forms;
 
 namespace MonikaOnDesktop
 {
@@ -40,14 +41,33 @@ namespace MonikaOnDesktop
         string goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/goodbye.txt";     // Goodbye
 
         public static bool IsNight => MonikaSettings.Default.DarkMode != "Day" &&
-                                      (MonikaSettings.Default.DarkMode == "Night" || DateTime.Now.Hour > 20 ||
-                                       DateTime.Now.Hour < 7);
+                                      (MonikaSettings.Default.DarkMode == "Night" || DateTime.Now.Hour > (MonikaSettings.Default.NightStart - 1) ||
+                                       DateTime.Now.Hour < (MonikaSettings.Default.NightEnd + 1));
         private bool applicationRunning = true;
         public bool isSpeaking;
+
+        private double scaleBaseWidth,
+            scaleBaseHeight,
+            scaleBaseFacePictureWidth,
+            scaleBaseFacePictureHeight,
+            scaleBaseTextPictureWidth,
+            scaleBaseTextPictureHeight,
+            scaleBaseTextBoxWidth,
+            scaleBaseTextBoxHeight,
+            scaleBaseTextBoxFontSize;
+
+        private bool initializedScales;
+        private float dpiScale = 1.0f;
+
+        private Thickness basePictureThickness, baseTextThickness;
+
+        private Settings settingsWindow;
         public MainWindow()
         {
             InitializeComponent();
 
+            this.settingsWindow = new Settings(this);
+            MonikaSettings.Default.Reload();
             ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT UserName FROM Win32_ComputerSystem");
             ManagementObjectCollection collection = searcher.Get();
             //playerName = (string)collection.Cast<ManagementBaseObject>().First()["UserName"];
@@ -56,17 +76,36 @@ namespace MonikaOnDesktop
             this.setFace("a");
 
             this.IsHitTestVisible = false;
-            var primaryMonitorArea = SystemParameters.WorkArea;
-            Left = primaryMonitorArea.Right - this.Width;
-            Top = primaryMonitorArea.Bottom - this.Height;
+            //var primaryMonitorArea = Screen.PrimaryScreen.Bounds;
+            //Left = primaryMonitorArea.Right - this.Width;
+            //Top = primaryMonitorArea.Bottom - this.Height;
 
             textWindow.Visibility = Visibility.Hidden;
 
             textBlock.Text = "";
+            SetupScale(MonikaSettings.Default.Scaler);
 
         }
+
         private void MenuSettings_Click(object sender, RoutedEventArgs e)
         {
+            this.Dispatcher.Invoke(() =>
+            {
+                if (this.settingsWindow == null || !this.settingsWindow.IsVisible)
+                {
+                    this.settingsWindow = new Settings(this);
+                    if (this.settingsWindow.ShowDialog() == false)
+                    {
+                        SetupScale(MonikaSettings.Default.Scaler);
+                        //GoToSecondaryMonitor();
+                        setFace("a");
+                    }
+                    else
+                    {
+                        setFace("a");
+                    }
+                }
+            });
 
         }
         private void MenuQuit_Click(object sender, RoutedEventArgs e)
@@ -156,7 +195,7 @@ namespace MonikaOnDesktop
                 {
                     Task.Run(() =>
                     {
-                        var nextGialog = DateTime.Now + TimeSpan.FromSeconds(randomDialog.Next(120, 300));
+                        var nextGialog = DateTime.Now + TimeSpan.FromSeconds(randomDialog.Next(MonikaSettings.Default.idleRandomFrom, MonikaSettings.Default.idleRandomTo));
                         while (this.applicationRunning)
                         {
 
@@ -168,7 +207,7 @@ namespace MonikaOnDesktop
                                     readIdleTxt();
                                 }
 
-                                nextGialog = DateTime.Now + TimeSpan.FromSeconds(randomDialog.Next(120, 300));
+                                nextGialog = DateTime.Now + TimeSpan.FromSeconds(randomDialog.Next(MonikaSettings.Default.idleRandomFrom, MonikaSettings.Default.idleRandomTo));
                             }
 
                             Task.Delay(250).Wait();
@@ -177,9 +216,6 @@ namespace MonikaOnDesktop
                 });
             };
             this.BeginAnimation(OpacityProperty, _start);
-            /*
-            Thread mainThread = new Thread(mainLoop);
-            mainThread.Start();*/
         }
         public async Task Say(Expression[] expression)
         {
@@ -201,6 +237,7 @@ namespace MonikaOnDesktop
                           face.Source = new BitmapImage(new Uri("pack://application:,,,/monika/" + ex.Face + ".png"));
                           main.Source = new BitmapImage(new Uri("pack://application:,,,/monika/1.png"));
                       }
+                      Debug.WriteLine(newText);
                       for (int i = 0; i < newText.Length; i++)
                       {
                           this.textBlock.Text += newText[i];
@@ -328,7 +365,7 @@ namespace MonikaOnDesktop
                         new Expression("Я надеюсь, ты занимаешся переводом?", "b"),
                         new Expression("Знаешь, не очень хорошо говорить на английком и русском сразу", "b"),
                         new Expression("К тому же, люди могут и не знать английского", "b"),
-                        new Expression("И это плохо, когда ты говоришь с человеком, который тебя не \nпонимает", "b"),
+                        new Expression("И это плохо, когда ты говоришь с человеком, который тебя не понимает", "b"),
                         new Expression("Я буду очень рада, если ты будешь переводить мод на русский язик", "b")
                     };
             }
@@ -337,7 +374,81 @@ namespace MonikaOnDesktop
             int dialogNum = rnd.Next(idleDialogs.Length);
 
             _ = Say(idleDialogs[dialogNum]);
-            //Debug.WriteLine(dialogs[dialogNum].Substring(2).ToString());
+            
+        }
+        public void SetupScale(int scaler)
+        {
+            switch (scaler)
+            {
+                case 0:
+                    this.Width = 200;
+                    this.Height = 128;
+                    this.main.Margin = new Thickness(25, -15, 25, 0);
+                    this.face.Margin = new Thickness(75.5, 31.5, 80.5, 65.5);
+                    this.textWindow.Margin = new Thickness(12.5, 97.5, 12.5, 5);
+                    this.textBlock.Margin = new Thickness(17.5, 102.5, 17.5, 10);
+                    this.textBlock.FontSize = 5;
+                    break;
+                case 1:
+                    this.Width = 400;
+                    this.Height = 256;
+                    this.main.Margin = new Thickness(50, -30, 50, 0);
+                    this.face.Margin = new Thickness(151, 63, 161, 131);
+                    this.textWindow.Margin = new Thickness(25, 195, 25, 10);
+                    this.textBlock.Margin = new Thickness(35, 205, 35, 20);
+                    this.textBlock.FontSize = 10;
+                    break;
+                case 2:
+                    this.Width = 600;
+                    this.Height = 384;
+                    this.main.Margin = new Thickness(75, -45, 75, 0);
+                    this.face.Margin = new Thickness(226.5, 95.5, 242, 196.5);
+                    this.textWindow.Margin = new Thickness(37.5, 292.5, 37.5, 15);
+                    this.textBlock.Margin = new Thickness(52.5, 307.5, 52.5, 30);
+                    this.textBlock.FontSize = 15;
+                    break;
+                case 3:
+                    this.Width = 800;
+                    this.Height = 512;
+                    this.main.Margin = new Thickness(100, -60, 100, 0);
+                    this.face.Margin = new Thickness(302, 126, 322, 262);
+                    this.textWindow.Margin = new Thickness(50, 390, 50, 20);
+                    this.textBlock.Margin = new Thickness(70, 410, 70, 40);
+                    this.textBlock.FontSize = 20;
+                    break;
+            }
+
+            //var primaryMonitorArea = SystemParameters.WorkArea;
+            //Left = primaryMonitorArea.Right - this.Width;
+            //Top = primaryMonitorArea.Bottom - this.Height;
+            GoToSecondaryMonitor();
+        }
+
+        public void GoToSecondaryMonitor()
+        {
+            Screen screen;
+            if (System.Windows.Forms.Screen.AllScreens.Length != 1)
+            {
+                if (MonikaSettings.Default.screenNum)
+                {
+                    screen = System.Windows.Forms.Screen.AllScreens.FirstOrDefault(s => !s.Primary);
+                }
+                else
+                {
+                    screen = System.Windows.Forms.Screen.AllScreens[0];
+                }
+            }
+            else
+            {
+                screen = System.Windows.Forms.Screen.AllScreens[0];
+            }
+            if (screen == null){
+                return;
+            }
+            
+            var workingArea = screen.WorkingArea;
+            this.Left = workingArea.Right - this.Width;
+            this.Top = workingArea.Bottom - this.Height;
         }
 
     }

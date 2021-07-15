@@ -5,12 +5,23 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MonikaOnDesktop"
         mc:Ignorable="d"
-        Title="Настройки" Height="450" Width="800">
+        Title="Настройки" Height="264" Width="800" ResizeMode="NoResize">
     <Grid>
-        <Button x:Name="save" Content="Сохранить" HorizontalAlignment="Left" Margin="601,404,0,10" Width="92"/>
-        <Button x:Name="close" Content="Закрыть" HorizontalAlignment="Left" Margin="698,404,0,10" Width="92"/>
-        <Slider x:Name="slider" HorizontalAlignment="Left" Margin="168,18,0,0" VerticalAlignment="Top" Width="622"/>
-        <Label x:Name="label" Content="Размер" FontSize="20" HorizontalAlignment="Left" Height="35" Margin="10,10,0,0" VerticalAlignment="Top" Width="153"/>
-
+        <Button x:Name="close" Content="Отмена" HorizontalAlignment="Right" Margin="0,0,107,10" Width="92" Height="20" VerticalAlignment="Bottom" IsCancel="True"/>
+        <Button x:Name="save" Content="Сохранить" HorizontalAlignment="Right" Margin="0,0,10,10" Width="92" Height="20" VerticalAlignment="Bottom" Click="save_Click"/>
+        <Slider x:Name="monikaSize" Margin="0,18,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="622"  Maximum="3" Value="1" Minimum="0" SmallChange="1" LargeChange="1" TickPlacement="None" ValueChanged="monikaSize_ValueChanged"/>
+        <TextBlock x:Name="label" Text="Размер" FontSize="20" HorizontalAlignment="Left" Height="35" Margin="10,10,0,0" VerticalAlignment="Top" Width="153"/>
+        <TextBox x:Name="userName" HorizontalAlignment="Right" Margin="0,50,246,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Width="386" Height="32"/>
+        <TextBlock x:Name="label1" Text="Имя" FontSize="20" HorizontalAlignment="Left" Height="32" Margin="10,50,0,0" VerticalAlignment="Top" Width="153"/>
+        <TextBlock x:Name="label2" Text="Оставьте пустым для имени системы" FontSize="13" HorizontalAlignment="Right" Height="32" Margin="0,50,10,0" VerticalAlignment="Top" Width="231"/>
+        <TextBlock x:Name="label3" Text="Вечер" FontSize="20" HorizontalAlignment="Left" Height="37" Margin="10,87,0,0" VerticalAlignment="Top" Width="153"/>
+        <TextBox x:Name="nightStartText" Text="22" MaxLength="2" VerticalAlignment="Top" VerticalContentAlignment="Center" FontSize="24" Height="37" Margin="168,87,558,0" FontStretch="Normal" MaxLines="1"/>
+        <TextBlock x:Name="label4" Text="Утро" FontSize="20" HorizontalAlignment="Left" Height="37" Margin="247,87,0,0" VerticalAlignment="Top" Width="153"/>
+        <TextBox x:Name="nightEndText" Text="7" MaxLength="2" VerticalAlignment="Top" VerticalContentAlignment="Center" FontSize="24" Height="37" Margin="400,87,326,0" FontStretch="Normal" MaxLines="1"/>
+        <Slider x:Name="randomIdle" Margin="0,138,246,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="370" TickPlacement="None" ValueChanged="randomIdle_ValueChanged" SmallChange="1" Maximum="4" Value="2"/>
+        <TextBlock x:Name="label5" Text="Частота диалогов" FontSize="20" HorizontalAlignment="Left" Height="35" Margin="10,129,0,0" VerticalAlignment="Top" Width="174"/>
+        <TextBlock x:Name="label6" Text="Нормально (120-300 сек)" FontSize="13" HorizontalAlignment="Right" Height="32" Margin="0,129,10,0" VerticalAlignment="Top" Width="231"/>
+        <TextBlock x:Name="label7" Text="Использовать второй монитор" FontSize="20" HorizontalAlignment="Left" Height="35" Margin="10,169,0,0" VerticalAlignment="Top" Width="295"/>
+        <CheckBox x:Name="checkBox" Content="" HorizontalAlignment="Left" Margin="310,178,0,0" VerticalAlignment="Top" Height="17" Checked="checkBox_Checked" Unchecked="checkBox_Unchecked"/>
     </Grid>
 </Window>
