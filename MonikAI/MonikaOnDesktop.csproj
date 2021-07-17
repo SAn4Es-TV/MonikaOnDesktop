@@ -5,10 +5,13 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>ico.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="5a9a580ac2da1161eae7ea2e.png" />
     <None Remove="gui\textbox.png" />
+    <None Remove="ico.ico" />
     <None Remove="monika\1-n.png" />
     <None Remove="monika\1.png" />
     <None Remove="monika\1a-n.png" />
@@ -60,7 +63,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="5a9a580ac2da1161eae7ea2e.png" />
     <Resource Include="gui\textbox.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="ico.ico">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="monika\1-n.png">

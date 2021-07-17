@@ -19,6 +19,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Reflection;
 using System.Windows.Forms;
+using System.Text.RegularExpressions;
 
 namespace MonikaOnDesktop
 {
@@ -44,7 +45,7 @@ namespace MonikaOnDesktop
                                       (MonikaSettings.Default.DarkMode == "Night" || DateTime.Now.Hour > (MonikaSettings.Default.NightStart - 1) ||
                                        DateTime.Now.Hour < (MonikaSettings.Default.NightEnd + 1));
         private bool applicationRunning = true;
-        public bool isSpeaking;
+        public bool isSpeaking = true;
 
 
         private Settings settingsWindow;
@@ -57,7 +58,7 @@ namespace MonikaOnDesktop
             ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT UserName FROM Win32_ComputerSystem");
             ManagementObjectCollection collection = searcher.Get();
             //playerName = (string)collection.Cast<ManagementBaseObject>().First()["UserName"];
-            
+
             if (String.IsNullOrEmpty(MonikaSettings.Default.UserName))
             {
                 playerName = Environment.UserName;
@@ -66,8 +67,8 @@ namespace MonikaOnDesktop
             {
                 playerName = MonikaSettings.Default.UserName;
             }
-                //playerName = "Denis Solicen";
-                this.setFace("a");
+            //playerName = "Denis Solicen";
+            this.setFace("a");
 
             this.IsHitTestVisible = false;
             //var primaryMonitorArea = Screen.PrimaryScreen.Bounds;
@@ -100,18 +101,50 @@ namespace MonikaOnDesktop
         private void stopWatch_EventArrived(object sender, EventArrivedEventArgs e)
         {
             // Check if currently speaking, only blink if not in dialog
-            if (!isSpeaking)
+            if (processList.Contains(e.NewEvent.Properties["ProcessName"].Value.ToString()))
             {
-                //_ = Say(new[] { new Expression("Process stopped:" + e.NewEvent.Properties["ProcessName"].Value, "a") });
+                processList.Remove(e.NewEvent.Properties["ProcessName"].Value.ToString());
+                Debug.WriteLine("Process removed: " + e.NewEvent.Properties["ProcessName"].Value.ToString());
             }
         }
 
+        List<string> processList = new List<string>();
         private void startWatch_EventArrived(object sender, EventArrivedEventArgs e)
         {
             if (!isSpeaking)
             {
-                //_ = Say(new[] { new Expression("Process started:" + e.NewEvent.Properties["ProcessName"].Value, "a") });
-                //readProgsTxt(e.NewEvent.Properties["ProcessName"].Value.ToString());
+                
+                string currentProcess = e.NewEvent.Properties["ProcessName"].Value.ToString(); 
+                Debug.WriteLine("Process run: " + currentProcess);
+                //if (currentProcess == "CompPkgSrv.exe") { currentProcess = "chrome.exe"; }
+                /*
+                List<string> procList = new List<string>();
+                System.Diagnostics.Process[] processes;
+                processes = System.Diagnostics.Process.GetProcesses(); 
+                foreach (System.Diagnostics.Process instance in processes)
+                {
+                    procList.Add(instance.ProcessName);
+                }*/
+                //if (!procList.Contains(currentProcess.Replace(".exe", String.Empty))){
+                    readProgsTxt(currentProcess);
+                //}
+                /*
+
+                foreach (Process a in procList)
+                {
+                    if(a.ProcessName == e.NewEvent.Properties["ProcessName"].Value.ToString().Replace(".exe", String.Empty))
+                    {
+                        readProgsTxt(e.NewEvent.Properties["ProcessName"].Value.ToString());
+                        Debug.WriteLine("Process run: " + e.NewEvent.Properties["ProcessName"].Value.ToString());
+                    }
+                }
+                /*if (!procesList.Contains(e.NewEvent.Properties["ProcessName"].Value.ToString()))
+                {
+                    procesList.Add(e.NewEvent.Properties["ProcessName"].Value.ToString());
+                    //_ = Say(new[] { new Expression("Process started:" + e.NewEvent.Properties["ProcessName"].Value, "a") });
+                    //readProgsTxt("chrome.exe");
+                }*/
+
             }
         }
 
@@ -229,8 +262,8 @@ namespace MonikaOnDesktop
 
                             if (DateTime.Now >= nextGialog)
                             {
-                                    // Check if currently speaking, only blink if not in dialog
-                                    if (!isSpeaking)
+                                // Check if currently speaking, only blink if not in dialog
+                                if (!isSpeaking)
                                 {
                                     readIdleTxt();
                                 }
@@ -404,31 +437,205 @@ namespace MonikaOnDesktop
             int dialogNum = rnd.Next(idleDialogs.Length);
 
             _ = Say(idleDialogs[dialogNum]);
-            
-        }
-        public void readProgsTxt(string process)
-        {
-            string mf = File.ReadAllText(progsDialogPath);
-            string mainFile = mf.Replace("\r", String.Empty);
-            string[] dialogs = mainFile.Split(new string[] { "\r\n=\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-            Expression[][] hiDialogs = new Expression[dialogs.Length][];
 
-            Debug.WriteLine(dialogs[0].Substring(2).ToString());
-            for (int a = 0; a < dialogs.Length; a++)
+        }
+        public void readProgsTxt(string proc)
+        {
+            string sPath = progsDialogPath;
+            string[] lines;
+            List<string> list = new List<string>();
+            Random rnd = new Random();
+
+            using (StreamReader sr = new StreamReader(sPath))
             {
-                string[] express = dialogs[a].Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-                Expression[] hiDialog = new Expression[express.Length];
-                for (int b = 1; b < express.Length; b++)
-                {
-                    hiDialog[b] = new Expression(express[b].Substring(2), (express[b])[0].ToString());
-                }
-                hiDialogs[a] = hiDialog;
+                lines = sr.ReadToEnd().Split('\n');
             }
 
-            Random rnd = new Random();
-            int dialogNum = rnd.Next(hiDialogs.Length);
+            //Вечный цикл...
+            //while (true)
+            //{
+                Debug.WriteLine("Имя процесса: " + proc);
 
-            _ = Say(hiDialogs[dialogNum]);
+                //Смотрим все процессы в файле и сравниваем с нашим
+                //Если такой процесс нашелся, то выбираем все его диалоги и фразы в List<>
+                var proccesses = lines.Select((v, i) => new { i, v }).Where(t => t.v.StartsWith("["));
+                foreach (var s in proccesses)
+                {
+                    if (s.v.Trim(new char[] { '[', ']', '\r' }) == proc)
+                    {
+                        var dialogs = lines.Skip(s.i + 1).TakeWhile(x => !x.StartsWith("["));
+
+                        foreach (var v in dialogs)
+                        {
+                            if (v == "\r") continue; //Здесь избавляемся от той проблемы с пустой строкой, в посте выше.
+                            list.Add(v);
+                        }
+                        break;
+                    }
+                }
+
+
+                //Ищем индексы вхождений строк диалогов (начинаются с "<")
+                var dialIdx = list.Select((v, i) => new { i, v }).Where(t => t.v.StartsWith("<"));
+                List<int> idx = new List<int>();
+
+                //Добавляем эти индексы в список, из которого будем брать случайный элемент (диалог)
+                foreach (var s in dialIdx)
+                    idx.Add(s.i);
+
+                //ГПСЧ
+                int rx = rnd.Next(0, idx.Count);
+
+            //Если список пуст -> уходим на второй круг... (т.е. такого процесса нет)
+            //if (list.Count == 0) continue;
+
+            if (list.Count != 0)
+            {
+                Debug.WriteLine("<----------Вывод случайного диалога---------->");
+
+                //Печатаем диалог
+                var Dialog = list.Skip(idx[rx]).Take(1).Select(s => s).ToArray();
+                Debug.WriteLine(Dialog[0]);
+
+                //Печатаем фразы к нему
+                List<string> Phrases = list.Skip(idx[rx] + 1).TakeWhile(x => !x.StartsWith("<")).ToList();
+                Expression[] progDialog = new Expression[Phrases.Count];
+                for (int i = 0; i < Phrases.Count; i++)
+                {
+                    Debug.WriteLine(Phrases[i]);
+                    progDialog[i] = new Expression(Phrases[i].Substring(2), (Phrases[i])[0].ToString());
+                }
+                _ = Say(progDialog);
+            }
+                //Моем полы
+                list.Clear();
+                #region
+                /*
+                //Список объектов класса Dialogs
+                //Сюда будут залетать все диалоги со своими фразами для конкретного процесса
+                List<Dialogs> lst = new List<Dialogs>();
+
+                //while (true)
+                //{
+                    Console.Write("Proccess name: ");
+
+                    using (StreamReader sr = new StreamReader(sPath))
+                    {
+                        string lineBefore;
+
+                        //Начинаем читать файл...
+                        while ((lineBefore = sr.ReadLine()) != null)
+                        {
+
+                            string line = lineBefore.Replace("\r", String.Empty);
+                            //Если начало строки начинается с '[', значит это имя процесса
+                            if (line.StartsWith("["))
+                            {
+                                //Читаем имя процесса из файла
+                                //Если имя процесса из файла совпало с текущим процессом...
+                                if (line.Trim(new char[] { '[', ']' }) == proc)
+                                {
+                                    //Читаем следующую строку
+                                    line = sr.ReadLine();
+
+                                    do
+                                    {
+                                        //Если это диалог (а мы ожидаем именно его:)
+                                        if (line.StartsWith("<"))
+                                        {
+                                            //Создаем новый экземпляр класса Dialogs
+                                            Dialogs dl = new Dialogs
+                                            {
+                                                //Извлекаем диалог - обрезаем символы <> и вставляем в поле Dialog
+                                                Dialog = line.Trim(new char[] { '<', '>' })
+                                            };
+
+                                            do
+                                            {
+                                                //Считываем следующую строку (фразы диалога)
+                                                line = sr.ReadLine();
+
+                                                //Если конец файла, начало нового диалога или другой процесс - выходим
+                                                if (
+
+                                                    line == null
+                                                    || line.StartsWith("<")
+                                                    || line.StartsWith("[")
+
+                                                    ) { break; }
+
+                                                //Добавляем фразы с список фраз текущего экземпляра класса
+                                                dl.Phrases.Add(line);
+
+                                            }
+                                            //Читаем до посинения
+                                            while (true);
+
+                                            //Добавляем класс в список классов Dialogs
+                                            lst.Add(dl);
+                                        }
+
+                                        //Если конец файла - выходим
+                                        if (line == null) { break; }
+                                    }
+
+                                    //Читаем пока не закончатся диалоги текущего процесса
+                                    while (!line.StartsWith("["));
+                                }
+                            }
+                        }
+                    }
+
+                //}
+
+                //Вывод всех диалогов текущего процесса с фразами
+                //Для отладки... (удалить)
+                for (int i = 0; i < lst.Count; i++)
+                {
+                    Debug.WriteLine("[" + lst[i].Dialog + "]");
+
+                    for (int j = 0; j < lst[i].Phrases.Count; j++)
+                    {
+                        Debug.WriteLine("-->" + lst[i].Phrases[j]);
+                    }
+                }
+
+
+                Debug.WriteLine("\n------Выборка случайного диалога------\n");
+
+                Random rnd = new Random();
+                int n = rnd.Next(0, lst.Count);
+                Expression[] progDialog = new Expression[lst[n].Phrases.Count];
+
+                //Выводим диалог
+                Debug.WriteLine("[" + lst[n].Dialog + "]");
+
+                //Выводим список фраз к нему
+                for (int i = 0; i < lst[n].Phrases.Count; i++)
+                {
+                    Debug.WriteLine("--> " + lst[n].Phrases[i]);
+                    if (!String.IsNullOrEmpty(lst[n].Phrases[i]))
+                    {
+                        progDialog[i] = new Expression(lst[n].Phrases[i].Substring(2), (lst[n].Phrases[i])[0].ToString());
+                    }
+                }
+
+                Debug.WriteLine("\n");
+
+
+                //Чистим список классов Dialogs
+                lst.Clear();
+                _ = Say(progDialog);
+                */
+                #endregion
+            //}
+        }
+        public void consoleWrite(string text)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                console.Text += text + "\n";
+            });
         }
         public void SetupScale(int scaler)
         {
@@ -495,14 +702,17 @@ namespace MonikaOnDesktop
             {
                 screen = System.Windows.Forms.Screen.AllScreens[0];
             }
-            if (screen == null){
+            if (screen == null)
+            {
                 return;
             }
-            
+
             var workingArea = screen.WorkingArea;
             this.Left = workingArea.Right - this.Width;
             this.Top = workingArea.Bottom - this.Height;
         }
 
     }
+
+
 }

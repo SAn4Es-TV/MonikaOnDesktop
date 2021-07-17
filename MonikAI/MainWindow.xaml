@@ -10,7 +10,7 @@
         Topmost="True" HorizontalAlignment="Right" VerticalAlignment="Bottom"
         IsHitTestVisible="False"
         Loaded="Window_Loaded"
-        Closed="Window_Closed"
+        Closed="Window_Closed" Icon="/5a9a580ac2da1161eae7ea2e.png"
         >
     <Window.Background>
         <SolidColorBrush Opacity="0.0" Color="White" />
@@ -20,10 +20,11 @@
         <Image x:Name="face" Margin="302,126,322,262" Stretch="Fill" Source="/monika/b.png" IsHitTestVisible="False" />
         <Image x:Name="textWindow" Margin="50,390,50,20" Stretch="Fill" Source="pack://application:,,,/gui/textbox.png" IsHitTestVisible="False" Visibility="Hidden"/>
         <TextBlock x:Name="textBlock" Margin="70,410,70,40" Text="Тестовый текст" Foreground="White" IsHitTestVisible="False" TextWrapping="Wrap"/>
+        <TextBlock Visibility="Hidden" x:Name="console" FontSize="10" Text="Тестовый текст" Background="#A0000000" Foreground="White" IsHitTestVisible="False" TextWrapping="Wrap"/>
 
         <tb:TaskbarIcon x:Name="myNotifyIcon"
                     Visibility="Visible"
-                    IconSource="pack://application:,,,/monika/1a.ico"
+                    IconSource="pack://application:,,,/ico.ico"
                     MenuActivation="LeftOrRightClick"
                     PopupActivation="DoubleClick">
             <tb:TaskbarIcon.ContextMenu>
