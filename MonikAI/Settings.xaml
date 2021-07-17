@@ -21,7 +21,9 @@
         <Slider x:Name="randomIdle" Margin="0,138,246,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="370" TickPlacement="None" ValueChanged="randomIdle_ValueChanged" SmallChange="1" Maximum="4" Value="2"/>
         <TextBlock x:Name="label5" Text="Частота диалогов" FontSize="20" HorizontalAlignment="Left" Height="35" Margin="10,129,0,0" VerticalAlignment="Top" Width="174"/>
         <TextBlock x:Name="label6" Text="Нормально (120-300 сек)" FontSize="13" HorizontalAlignment="Right" Height="32" Margin="0,129,10,0" VerticalAlignment="Top" Width="231"/>
-        <TextBlock x:Name="label7" Text="Использовать второй монитор" FontSize="20" HorizontalAlignment="Left" Height="35" Margin="10,169,0,0" VerticalAlignment="Top" Width="295"/>
-        <CheckBox x:Name="checkBox" Content="" HorizontalAlignment="Left" Margin="310,178,0,0" VerticalAlignment="Top" Height="17" Checked="checkBox_Checked" Unchecked="checkBox_Unchecked"/>
+        <TextBlock x:Name="label7" Text="Использовать второй монитор" FontSize="20" HorizontalAlignment="Left" Height="35" Margin="10,196,0,0" VerticalAlignment="Top" Width="295"/>
+        <CheckBox x:Name="checkBox" Content="" HorizontalAlignment="Left" Margin="310,205,0,0" VerticalAlignment="Top" Height="17" Checked="checkBox_Checked" Unchecked="checkBox_Unchecked"/>
+        <TextBlock x:Name="label8" Text="Запуск вместе с системой" FontSize="20" HorizontalAlignment="Left" Height="35" Margin="10,161,0,0" VerticalAlignment="Top" Width="295"/>
+        <CheckBox x:Name="checkBox1" Content="" HorizontalAlignment="Left" Margin="310,168,0,0" VerticalAlignment="Top" Height="17"/>
     </Grid>
 </Window>

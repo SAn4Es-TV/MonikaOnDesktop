@@ -48,6 +48,7 @@ namespace MonikaOnDesktop
             randomIdle.Value = MonikaSettings.Default.idleRandomFrom;
             nightEndText.Text = MonikaSettings.Default.NightEnd.ToString();
             nightStartText.Text = MonikaSettings.Default.NightStart.ToString();
+            checkBox1.IsChecked = MonikaSettings.Default.AutoStart;
             checkBox.IsChecked = MonikaSettings.Default.screenNum;
             if (System.Windows.Forms.Screen.AllScreens.Length == 1)
             {
@@ -64,6 +65,7 @@ namespace MonikaOnDesktop
             MonikaSettings.Default.NightStart = int.Parse(nightStartText.Text);
             MonikaSettings.Default.idleRandomFrom = (int)randomIdle.Value;
             MonikaSettings.Default.screenNum = (bool)checkBox.IsChecked;
+            MonikaSettings.Default.AutoStart = (bool)checkBox1.IsChecked;
             switch (randomIdle.Value)
             {
                 case 0:

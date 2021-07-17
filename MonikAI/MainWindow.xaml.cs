@@ -20,6 +20,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
+using Microsoft.Win32;
 
 namespace MonikaOnDesktop
 {
@@ -79,6 +80,7 @@ namespace MonikaOnDesktop
 
             textBlock.Text = "";
             SetupScale(MonikaSettings.Default.Scaler);
+            SetAutorunValue(MonikaSettings.Default.AutoStart);
 
             try
             {
@@ -164,6 +166,7 @@ namespace MonikaOnDesktop
                     else
                     {
                         setFace("a");
+                        SetAutorunValue(MonikaSettings.Default.AutoStart);
                     }
                 }
             });
@@ -712,6 +715,33 @@ namespace MonikaOnDesktop
             this.Top = workingArea.Bottom - this.Height;
         }
 
+        const string name = "MonikaStartUp";
+        public static bool SetAutorunValue(bool autorun)
+        {
+            string ExePath = System.Windows.Forms.Application.ExecutablePath;
+            RegistryKey reg;
+            reg = Registry.CurrentUser.CreateSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Run\\");
+            try
+            {
+                if (autorun)
+                    reg.SetValue(name, ExePath);
+                else
+                {
+                    RegistryKey WN = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
+                    if (WN.GetValue("MonikaStartUp") != null)
+                    {
+                        reg.DeleteValue(name);
+                    }
+                }
+
+                reg.Close();
+            }
+            catch
+            {
+                return false;
+            }
+            return true;
+        }
     }
 
 
