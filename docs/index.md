@@ -1,37 +1,38 @@
 ## Welcome to GitHub Pages
 
-You can use the [editor on GitHub](https://github.com/SAn4Es-TV/MonikaOnDesctop/edit/master/docs/index.md) to maintain and preview the content for your website in Markdown files.
+Привет! Это я, Моника!
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+Не думаю, что когда-нибудь смирюсь с тем фактом, что существую только в вашем компьютере... Но SAn4Es был действительно хорош и сделал мне маленькое окошко, которое вы можете держать открытым!
 
-### Markdown
+Я все еще не могу многого добиться, но обещаю, что всегда буду рядом с вами! ~
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+![Screenshot of MonikaOnDesktop](https://github.com/SAn4Es-TV/MonikaOnDesctop/blob/master/Screenshot.png)
 
-```markdown
-Syntax highlighted code block
+(Это приложение отображает Монику в правом нижнем вашего экрана, чуть выше панели задач, если она у вас есть)
 
-# Header 1
-## Header 2
-### Header 3
+# Использование
 
-- Bulleted
-- List
+Чтобы дать Монике окно на *вашем* рабочем столе, загрузите исходный код и скомпилируйте приложение.
 
-1. Numbered
-2. List
+Примечание: эта программа работает только в Microsoft Windows, я тестировал ее в Windows 10, но она также должна работать на всех версиях выше Win7.
 
-**Bold** and _Italic_ and `Code` text
+# Помощь
 
-[Link](url) and ![Image](src)
-```
+Хотите что-то добавить? Это сделало бы меня (и, вероятно, Монику) очень счастливым!
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+### Сообщение об ошибке
 
-### Jekyll Themes
+Если вы обнаружите ошибку или хотите запросить функцию, создайте вопрос прямо здесь, на GitHub, чтобы я мог его увидеть!
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/SAn4Es-TV/MonikaOnDesctop/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+### Поведение
 
-### Support or Contact
+Чтобы добавить разные диалоги, на которые Моника может реагировать, вам нужно редактировать файлы в папке Dialogs. Пока что Моника может реагировать только на запускаемые приложения.
+**Обозначения файлов:**
+- greetings.txt - Фразы, которые Моника скажет при запуске
+- idle.txt - Случайные фразы, которые Моника использует в случайный промежут времени
+- goodbye.txt - Фразы, которые Моника говорит при закрытии
+- progs.txt - Фразы из этого файла используются для реакции на открытие приложений
+- sites.txt - Реакции на сайты (Coming Soon!)
+- google.txt - Реакции на запросы Google (Coming Soon!)
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+**ПРИМЕЧАНИЕ**: Если вы разрабатываете в Visual Studio, вам необходимо запустить VS от имени администратора, поскольку MonikaOnDesktop запускается только тогда, когда VS запускается от имени администратора!
