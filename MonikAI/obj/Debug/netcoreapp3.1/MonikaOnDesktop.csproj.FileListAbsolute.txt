@@ -14,7 +14,6 @@ C:\Users\Санёк\source\MonikAI\MonikAI\bin\Debug\netcoreapp3.1\runtimes\win\
 C:\Users\Санёк\source\MonikAI\MonikAI\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp2.0\System.Security.AccessControl.dll
 C:\Users\Санёк\source\MonikAI\MonikAI\bin\Debug\netcoreapp3.1\runtimes\unix\lib\netcoreapp2.1\System.Security.Principal.Windows.dll
 C:\Users\Санёк\source\MonikAI\MonikAI\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp2.1\System.Security.Principal.Windows.dll
-C:\Users\Санёк\source\MonikAI\MonikAI\obj\Debug\netcoreapp3.1\MonikaOnDesktop.csprojAssemblyReference.cache
 C:\Users\Санёк\source\MonikAI\MonikAI\obj\Debug\netcoreapp3.1\MainWindow.g.cs
 C:\Users\Санёк\source\MonikAI\MonikAI\obj\Debug\netcoreapp3.1\App.g.cs
 C:\Users\Санёк\source\MonikAI\MonikAI\obj\Debug\netcoreapp3.1\MonikaOnDesktop_MarkupCompile.cache
@@ -31,3 +30,4 @@ C:\Users\Санёк\source\MonikAI\MonikAI\obj\Debug\netcoreapp3.1\MonikaOnDeskt
 C:\Users\Санёк\source\MonikAI\MonikAI\bin\Debug\netcoreapp3.1\Hardcodet.NotifyIcon.Wpf.dll
 C:\Users\Санёк\source\MonikAI\MonikAI\obj\Debug\netcoreapp3.1\Settings.g.cs
 C:\Users\Санёк\source\MonikAI\MonikAI\obj\Debug\netcoreapp3.1\Settings.baml
+C:\Users\Санёк\source\MonikAI\MonikAI\obj\Debug\netcoreapp3.1\MonikaOnDesktop.csprojAssemblyReference.cache

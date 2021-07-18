@@ -35,6 +35,8 @@ namespace MonikaOnDesktop
 
         public int delay = 0;
 
+        public string ExePath = AppDomain.CurrentDomain.BaseDirectory + "MonikaOnDesktop.exe"; // EXE path
+
         string greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/greetings.txt"; // Greetings
         string idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/idle.txt";           // Idle
         string progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/progs.txt";         // Programs
@@ -167,6 +169,15 @@ namespace MonikaOnDesktop
                     {
                         setFace("a");
                         SetAutorunValue(MonikaSettings.Default.AutoStart);
+                        Debug.WriteLine("Settings saved!");
+                        Debug.WriteLine("AutoStart --> " + MonikaSettings.Default.AutoStart);
+                        Debug.WriteLine("DarkMode --> " + MonikaSettings.Default.DarkMode);
+                        Debug.WriteLine("idleRandom --> " + MonikaSettings.Default.idleRandom);
+                        Debug.WriteLine("NightEnd --> " + MonikaSettings.Default.NightEnd);
+                        Debug.WriteLine("NightStart --> " + MonikaSettings.Default.NightStart);
+                        Debug.WriteLine("UserName --> " + MonikaSettings.Default.UserName);
+                        Debug.WriteLine("Scaler --> " + MonikaSettings.Default.Scaler);
+                        Debug.WriteLine("screenNum --> " + MonikaSettings.Default.screenNum);
                     }
                 }
             });
@@ -716,9 +727,9 @@ namespace MonikaOnDesktop
         }
 
         const string name = "MonikaStartUp";
-        public static bool SetAutorunValue(bool autorun)
+        public bool SetAutorunValue(bool autorun)
         {
-            string ExePath = System.Windows.Forms.Application.ExecutablePath;
+            //string ExePath = System.Windows.Forms.Application.ExecutablePath;
             RegistryKey reg;
             reg = Registry.CurrentUser.CreateSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Run\\");
             try
@@ -742,6 +753,7 @@ namespace MonikaOnDesktop
             }
             return true;
         }
+
     }
 
 

@@ -45,7 +45,7 @@ namespace MonikaOnDesktop
 
             if (MonikaSettings.Default.UserName == "{PlayerName}") { userName.Text = ""; } else { userName.Text = MonikaSettings.Default.UserName; }
              monikaSize.Value = MonikaSettings.Default.Scaler;
-            randomIdle.Value = MonikaSettings.Default.idleRandomFrom;
+            randomIdle.Value = MonikaSettings.Default.idleRandom;
             nightEndText.Text = MonikaSettings.Default.NightEnd.ToString();
             nightStartText.Text = MonikaSettings.Default.NightStart.ToString();
             checkBox1.IsChecked = MonikaSettings.Default.AutoStart;
@@ -63,7 +63,7 @@ namespace MonikaOnDesktop
             MonikaSettings.Default.Scaler = (int)monikaSize.Value;
             MonikaSettings.Default.NightEnd = int.Parse(nightEndText.Text);
             MonikaSettings.Default.NightStart = int.Parse(nightStartText.Text);
-            MonikaSettings.Default.idleRandomFrom = (int)randomIdle.Value;
+            MonikaSettings.Default.idleRandom = (int)randomIdle.Value;
             MonikaSettings.Default.screenNum = (bool)checkBox.IsChecked;
             MonikaSettings.Default.AutoStart = (bool)checkBox1.IsChecked;
             switch (randomIdle.Value)

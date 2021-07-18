@@ -190,5 +190,17 @@ namespace MonikaOnDesktop {
                 this["AutoStart"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
+        public int idleRandom {
+            get {
+                return ((int)(this["idleRandom"]));
+            }
+            set {
+                this["idleRandom"] = value;
+            }
+        }
     }
 }

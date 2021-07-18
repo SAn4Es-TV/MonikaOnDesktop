@@ -21,7 +21,6 @@
         <Image x:Name="textWindow" Margin="50,390,50,20" Stretch="Fill" Source="pack://application:,,,/gui/textbox.png" IsHitTestVisible="False" Visibility="Hidden"/>
         <TextBlock x:Name="textBlock" Margin="70,410,70,40" Text="Тестовый текст" Foreground="White" IsHitTestVisible="False" TextWrapping="Wrap"/>
         <TextBlock Visibility="Hidden" x:Name="console" FontSize="10" Text="Тестовый текст" Background="#A0000000" Foreground="White" IsHitTestVisible="False" TextWrapping="Wrap"/>
-
         <tb:TaskbarIcon x:Name="myNotifyIcon"
                     Visibility="Visible"
                     IconSource="pack://application:,,,/ico.ico"
