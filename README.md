@@ -6,7 +6,7 @@
 
 Я все еще не могу многого добиться, но обещаю, что всегда буду рядом с вами! ~
 
-https://github.com/SAn4Es-TV/MonikaOnDesctop/blob/master/Screenshot.png
+![Screenshot of MonikaOnDesktop](https://github.com/SAn4Es-TV/MonikaOnDesctop/blob/master/Screenshot.png)
 
 (Это приложение отображает Монику в правом нижнем вашего экрана, чуть выше панели задач, если она у вас есть)
 
