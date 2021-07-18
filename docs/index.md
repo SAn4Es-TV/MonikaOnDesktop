@@ -1,4 +1,3 @@
-## Welcome to GitHub Pages
 
 Привет! Это я, Моника!
 
