@@ -1,0 +1,23 @@
+{
+
+    "manifest_version": 2,
+    "name": "MonikaOnDesktop",
+    "version": "1.0",
+
+    "icons": {
+        "96": "ico.png"
+    },
+  
+    "background": {
+        "scripts": [
+            "browser-polyfill.min.js",
+            "mod.js"
+        ]
+    },
+
+    "permissions": [
+        "*://localhost/*",
+        "tabs"
+      ]
+  
+  }

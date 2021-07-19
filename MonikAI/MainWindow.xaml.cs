@@ -21,6 +21,7 @@ using System.Reflection;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
+using System.Net;
 
 namespace MonikaOnDesktop
 {
@@ -52,6 +53,10 @@ namespace MonikaOnDesktop
 
 
         private Settings settingsWindow;
+
+        //private static HttpListener _listener;
+        public int lastDialog;
+        public int lastLastDialog;
         public MainWindow()
         {
             InitializeComponent();
@@ -117,9 +122,8 @@ namespace MonikaOnDesktop
         {
             if (!isSpeaking)
             {
-                
-                string currentProcess = e.NewEvent.Properties["ProcessName"].Value.ToString(); 
-                Debug.WriteLine("Process run: " + currentProcess);
+
+                string currentProcess = e.NewEvent.Properties["ProcessName"].Value.ToString();
                 //if (currentProcess == "CompPkgSrv.exe") { currentProcess = "chrome.exe"; }
                 /*
                 List<string> procList = new List<string>();
@@ -130,7 +134,7 @@ namespace MonikaOnDesktop
                     procList.Add(instance.ProcessName);
                 }*/
                 //if (!procList.Contains(currentProcess.Replace(".exe", String.Empty))){
-                    readProgsTxt(currentProcess);
+                readProgsTxt(currentProcess);
                 //}
                 /*
 
@@ -184,15 +188,11 @@ namespace MonikaOnDesktop
 
         }
         private void MenuQuit_Click(object sender, RoutedEventArgs e)
-        {/*
-            readByeTxt();
-            Task.Delay(delay).Wait();
-            isSpeaking = false;
+        {
             if (!isSpeaking)
-            {*/
-            MonikaOnDesktop.MonikaSettings.Default.isColdShutdown = false;
-            System.Windows.Application.Current.Shutdown();
-            //}
+            {
+                readByeTxt();
+            }
         }
         public void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -317,7 +317,7 @@ namespace MonikaOnDesktop
                       {
                           this.textBlock.Text += newText[i];
                           if (newText[i].ToString() == ".") { await Task.Delay(500); }//set 500 if you need uncoment this line |
-                          else if (newText[i] == ',') { await Task.Delay(50); }                                   //           |
+                          //else if (newText[i] == ',') { await Task.Delay(50); }                                 //           |
                           else { await Task.Delay(30); }                                                          //           |
                                                                                                                   //           |
                       }                                                                                           //           |
@@ -379,14 +379,15 @@ namespace MonikaOnDesktop
         }
         public void readByeTxt()
         {
-            string mainFile = File.ReadAllText(goodbyeDialogPath);
-            string[] dialogs = mainFile.Split(new string[] { "\r\n=\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            string mf = File.ReadAllText(goodbyeDialogPath);
+            string mainFile = mf.Replace("\r", String.Empty);
+            string[] dialogs = mainFile.Split(new string[] { "\n=\n" }, StringSplitOptions.RemoveEmptyEntries);
             Expression[][] byeDialogs = new Expression[dialogs.Length][];
 
             Debug.WriteLine(dialogs[0].Substring(2).ToString());
             for (int a = 0; a < dialogs.Length; a++)
             {
-                string[] express = dialogs[a].Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                string[] express = dialogs[a].Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
                 Expression[] byeDialog = new Expression[express.Length];
                 for (int b = 0; b < express.Length; b++)
                 {
@@ -398,7 +399,24 @@ namespace MonikaOnDesktop
             Random rnd = new Random();
             int dialogNum = rnd.Next(byeDialogs.Length);
 
+            Debug.WriteLine(dialogs[dialogNum].Length + "|" + dialogs[dialogNum]);
+
+            Debug.Write("Говорим");
             _ = Say(byeDialogs[dialogNum]);
+            string[] expres = dialogs[dialogNum].Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            int i = 0;
+            Task.Factory.StartNew(new Action(() =>
+            {
+                Thread.Sleep((dialogs[dialogNum].Length * 30) + (expres.Length * 700) + 700); // sleep
+                i++;
+                Debug.Write(i);
+                if (i == 1)
+                {
+                    Debug.Write("Выходим");
+                    MonikaOnDesktop.MonikaSettings.Default.isColdShutdown = false;
+                    Environment.Exit(0);
+                }
+            }));
         }
         public void readIdleTxt()
         {
@@ -449,6 +467,18 @@ namespace MonikaOnDesktop
 
             Random rnd = new Random();
             int dialogNum = rnd.Next(idleDialogs.Length);
+            //Debug.WriteLine("Позапрошлый номер диалога: " + lastLastDialog);
+            Debug.WriteLine("Прошлый номер диалога: " + lastDialog);
+            Debug.WriteLine("Рандомный номер диалога: " + dialogNum);
+            //while (dialogNum == lastDialog && dialogNum == lastLastDialog)
+            while (dialogNum == lastDialog) // жоский костыль, без которого показываются повторные диалоги
+            {
+                Debug.WriteLine("Номер диалога совпадает с старым, подбираю новый");
+                dialogNum = rnd.Next(idleDialogs.Length);
+            }
+            //lastLastDialog = lastDialog;
+            lastDialog = dialogNum;
+            Debug.WriteLine("Диалог не совпадает с старым, показываю: " + lastDialog);
 
             _ = Say(idleDialogs[dialogNum]);
 
@@ -468,37 +498,37 @@ namespace MonikaOnDesktop
             //Вечный цикл...
             //while (true)
             //{
-                Debug.WriteLine("Имя процесса: " + proc);
+            Debug.WriteLine("Запущен процесс: " + proc);
 
-                //Смотрим все процессы в файле и сравниваем с нашим
-                //Если такой процесс нашелся, то выбираем все его диалоги и фразы в List<>
-                var proccesses = lines.Select((v, i) => new { i, v }).Where(t => t.v.StartsWith("["));
-                foreach (var s in proccesses)
+            //Смотрим все процессы в файле и сравниваем с нашим
+            //Если такой процесс нашелся, то выбираем все его диалоги и фразы в List<>
+            var proccesses = lines.Select((v, i) => new { i, v }).Where(t => t.v.StartsWith("["));
+            foreach (var s in proccesses)
+            {
+                if (s.v.Trim(new char[] { '[', ']', '\r' }) == proc)
                 {
-                    if (s.v.Trim(new char[] { '[', ']', '\r' }) == proc)
+                    var dialogs = lines.Skip(s.i + 1).TakeWhile(x => !x.StartsWith("["));
+
+                    foreach (var v in dialogs)
                     {
-                        var dialogs = lines.Skip(s.i + 1).TakeWhile(x => !x.StartsWith("["));
-
-                        foreach (var v in dialogs)
-                        {
-                            if (v == "\r") continue; //Здесь избавляемся от той проблемы с пустой строкой, в посте выше.
-                            list.Add(v);
-                        }
-                        break;
+                        if (v == "\r") continue; //Здесь избавляемся от той проблемы с пустой строкой, в посте выше.
+                        list.Add(v);
                     }
+                    break;
                 }
+            }
 
 
-                //Ищем индексы вхождений строк диалогов (начинаются с "<")
-                var dialIdx = list.Select((v, i) => new { i, v }).Where(t => t.v.StartsWith("<"));
-                List<int> idx = new List<int>();
+            //Ищем индексы вхождений строк диалогов (начинаются с "<")
+            var dialIdx = list.Select((v, i) => new { i, v }).Where(t => t.v.StartsWith("<"));
+            List<int> idx = new List<int>();
 
-                //Добавляем эти индексы в список, из которого будем брать случайный элемент (диалог)
-                foreach (var s in dialIdx)
-                    idx.Add(s.i);
+            //Добавляем эти индексы в список, из которого будем брать случайный элемент (диалог)
+            foreach (var s in dialIdx)
+                idx.Add(s.i);
 
-                //ГПСЧ
-                int rx = rnd.Next(0, idx.Count);
+            //ГПСЧ
+            int rx = rnd.Next(0, idx.Count);
 
             //Если список пуст -> уходим на второй круг... (т.е. такого процесса нет)
             //if (list.Count == 0) continue;
@@ -521,127 +551,127 @@ namespace MonikaOnDesktop
                 }
                 _ = Say(progDialog);
             }
-                //Моем полы
-                list.Clear();
-                #region
-                /*
-                //Список объектов класса Dialogs
-                //Сюда будут залетать все диалоги со своими фразами для конкретного процесса
-                List<Dialogs> lst = new List<Dialogs>();
+            //Моем полы
+            list.Clear();
+            #region
+            /*
+            //Список объектов класса Dialogs
+            //Сюда будут залетать все диалоги со своими фразами для конкретного процесса
+            List<Dialogs> lst = new List<Dialogs>();
 
-                //while (true)
-                //{
-                    Console.Write("Proccess name: ");
+            //while (true)
+            //{
+                Console.Write("Proccess name: ");
 
-                    using (StreamReader sr = new StreamReader(sPath))
+                using (StreamReader sr = new StreamReader(sPath))
+                {
+                    string lineBefore;
+
+                    //Начинаем читать файл...
+                    while ((lineBefore = sr.ReadLine()) != null)
                     {
-                        string lineBefore;
 
-                        //Начинаем читать файл...
-                        while ((lineBefore = sr.ReadLine()) != null)
+                        string line = lineBefore.Replace("\r", String.Empty);
+                        //Если начало строки начинается с '[', значит это имя процесса
+                        if (line.StartsWith("["))
                         {
-
-                            string line = lineBefore.Replace("\r", String.Empty);
-                            //Если начало строки начинается с '[', значит это имя процесса
-                            if (line.StartsWith("["))
+                            //Читаем имя процесса из файла
+                            //Если имя процесса из файла совпало с текущим процессом...
+                            if (line.Trim(new char[] { '[', ']' }) == proc)
                             {
-                                //Читаем имя процесса из файла
-                                //Если имя процесса из файла совпало с текущим процессом...
-                                if (line.Trim(new char[] { '[', ']' }) == proc)
+                                //Читаем следующую строку
+                                line = sr.ReadLine();
+
+                                do
                                 {
-                                    //Читаем следующую строку
-                                    line = sr.ReadLine();
-
-                                    do
+                                    //Если это диалог (а мы ожидаем именно его:)
+                                    if (line.StartsWith("<"))
                                     {
-                                        //Если это диалог (а мы ожидаем именно его:)
-                                        if (line.StartsWith("<"))
+                                        //Создаем новый экземпляр класса Dialogs
+                                        Dialogs dl = new Dialogs
                                         {
-                                            //Создаем новый экземпляр класса Dialogs
-                                            Dialogs dl = new Dialogs
-                                            {
-                                                //Извлекаем диалог - обрезаем символы <> и вставляем в поле Dialog
-                                                Dialog = line.Trim(new char[] { '<', '>' })
-                                            };
+                                            //Извлекаем диалог - обрезаем символы <> и вставляем в поле Dialog
+                                            Dialog = line.Trim(new char[] { '<', '>' })
+                                        };
 
-                                            do
-                                            {
-                                                //Считываем следующую строку (фразы диалога)
-                                                line = sr.ReadLine();
+                                        do
+                                        {
+                                            //Считываем следующую строку (фразы диалога)
+                                            line = sr.ReadLine();
 
-                                                //Если конец файла, начало нового диалога или другой процесс - выходим
-                                                if (
+                                            //Если конец файла, начало нового диалога или другой процесс - выходим
+                                            if (
 
-                                                    line == null
-                                                    || line.StartsWith("<")
-                                                    || line.StartsWith("[")
+                                                line == null
+                                                || line.StartsWith("<")
+                                                || line.StartsWith("[")
 
-                                                    ) { break; }
+                                                ) { break; }
 
-                                                //Добавляем фразы с список фраз текущего экземпляра класса
-                                                dl.Phrases.Add(line);
+                                            //Добавляем фразы с список фраз текущего экземпляра класса
+                                            dl.Phrases.Add(line);
 
-                                            }
-                                            //Читаем до посинения
-                                            while (true);
-
-                                            //Добавляем класс в список классов Dialogs
-                                            lst.Add(dl);
                                         }
+                                        //Читаем до посинения
+                                        while (true);
 
-                                        //Если конец файла - выходим
-                                        if (line == null) { break; }
+                                        //Добавляем класс в список классов Dialogs
+                                        lst.Add(dl);
                                     }
 
-                                    //Читаем пока не закончатся диалоги текущего процесса
-                                    while (!line.StartsWith("["));
+                                    //Если конец файла - выходим
+                                    if (line == null) { break; }
                                 }
+
+                                //Читаем пока не закончатся диалоги текущего процесса
+                                while (!line.StartsWith("["));
                             }
                         }
                     }
-
-                //}
-
-                //Вывод всех диалогов текущего процесса с фразами
-                //Для отладки... (удалить)
-                for (int i = 0; i < lst.Count; i++)
-                {
-                    Debug.WriteLine("[" + lst[i].Dialog + "]");
-
-                    for (int j = 0; j < lst[i].Phrases.Count; j++)
-                    {
-                        Debug.WriteLine("-->" + lst[i].Phrases[j]);
-                    }
                 }
 
+            //}
 
-                Debug.WriteLine("\n------Выборка случайного диалога------\n");
+            //Вывод всех диалогов текущего процесса с фразами
+            //Для отладки... (удалить)
+            for (int i = 0; i < lst.Count; i++)
+            {
+                Debug.WriteLine("[" + lst[i].Dialog + "]");
 
-                Random rnd = new Random();
-                int n = rnd.Next(0, lst.Count);
-                Expression[] progDialog = new Expression[lst[n].Phrases.Count];
-
-                //Выводим диалог
-                Debug.WriteLine("[" + lst[n].Dialog + "]");
-
-                //Выводим список фраз к нему
-                for (int i = 0; i < lst[n].Phrases.Count; i++)
+                for (int j = 0; j < lst[i].Phrases.Count; j++)
                 {
-                    Debug.WriteLine("--> " + lst[n].Phrases[i]);
-                    if (!String.IsNullOrEmpty(lst[n].Phrases[i]))
-                    {
-                        progDialog[i] = new Expression(lst[n].Phrases[i].Substring(2), (lst[n].Phrases[i])[0].ToString());
-                    }
+                    Debug.WriteLine("-->" + lst[i].Phrases[j]);
                 }
+            }
 
-                Debug.WriteLine("\n");
+
+            Debug.WriteLine("\n------Выборка случайного диалога------\n");
+
+            Random rnd = new Random();
+            int n = rnd.Next(0, lst.Count);
+            Expression[] progDialog = new Expression[lst[n].Phrases.Count];
+
+            //Выводим диалог
+            Debug.WriteLine("[" + lst[n].Dialog + "]");
+
+            //Выводим список фраз к нему
+            for (int i = 0; i < lst[n].Phrases.Count; i++)
+            {
+                Debug.WriteLine("--> " + lst[n].Phrases[i]);
+                if (!String.IsNullOrEmpty(lst[n].Phrases[i]))
+                {
+                    progDialog[i] = new Expression(lst[n].Phrases[i].Substring(2), (lst[n].Phrases[i])[0].ToString());
+                }
+            }
+
+            Debug.WriteLine("\n");
 
 
-                //Чистим список классов Dialogs
-                lst.Clear();
-                _ = Say(progDialog);
-                */
-                #endregion
+            //Чистим список классов Dialogs
+            lst.Clear();
+            _ = Say(progDialog);
+            */
+            #endregion
             //}
         }
         public void consoleWrite(string text)
