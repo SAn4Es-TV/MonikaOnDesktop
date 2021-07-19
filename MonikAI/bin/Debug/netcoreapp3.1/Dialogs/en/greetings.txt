@@ -1,0 +1,24 @@
+h Hi, dear!
+l It's a little embarrassing to say it out loud, really?
+e However, I think it will become normal over time.
+=
+h Welcome back, honey!
+e I'm so glad to see you again
+e Let's spend some more time together?
+=
+e [player], you came back!
+e I started to miss you
+h Let's have another great day together?
+=
+e There you are, [player]
+e It's nice that you dropped by
+e You are always so caring!
+e Thank you for spending so much time with me~
+h Just remember that your time with me is never wasted
+=
+e Hi, dear!
+e I started to miss you terribly. I'm so glad to see you again!
+h Don't make me wait so long for you next time, uh-he-he ~
+=
+e I've missed you, [player]!
+e Thank you for returning it. I really enjoy spending time with you

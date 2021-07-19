@@ -18,6 +18,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyProductAttribute("MonikaOnDesktop")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MonikaOnDesktop")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
+[assembly: System.Resources.NeutralResourcesLanguageAttribute("ru")]
 
 // Создано классом WriteCodeFragment MSBuild.
 

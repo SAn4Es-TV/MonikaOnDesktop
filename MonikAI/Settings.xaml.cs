@@ -106,19 +106,19 @@ namespace MonikaOnDesktop
                 switch (randomIdle.Value)
                 {
                     case 0:
-                        t.Text = "Очень редко(4-10 мин)";
+                        t.Text = (string)this.TryFindResource("s_labelDP1"); //"Очень редко(4-10 мин)";
                         break;
                     case 1:
-                        t.Text = "Редко(3-8 мин)";
+                        t.Text = (string)this.TryFindResource("s_labelDP2"); //"Редко(3-8 мин)";
                         break;
                     case 2:
-                        t.Text = "Нормально(2-5 мин)";
+                        t.Text = (string)this.TryFindResource("s_labelDP3"); //"Нормально(2-5 мин)";
                         break;
                     case 3:
-                        t.Text = "Часто(1-3 мин)";
+                        t.Text = (string)this.TryFindResource("s_labelDP4"); //"Часто(1-3 мин)";
                         break;
                     case 4:
-                        t.Text = "Очень часто(30 сек - 2 мин)";
+                        t.Text = (string)this.TryFindResource("s_labelDP5"); //"Очень часто(30 сек - 2 мин)";
                         break;
                 }
             }

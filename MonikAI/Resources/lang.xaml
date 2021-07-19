@@ -1,0 +1,25 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:v="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Settings window -->
+    <v:String x:Key="s_labelSize">Размер</v:String>
+    <v:String x:Key="s_labelName">Имя</v:String>
+    <v:String x:Key="s_labelNameSub">Оставьте пустым для имени системы</v:String>
+    <v:String x:Key="s_labelEvening">Вечер</v:String>
+    <v:String x:Key="s_labelMorning">Утро</v:String>
+    <v:String x:Key="s_labelDP">Частота диалогов</v:String>
+    <v:String x:Key="s_labelDP1">Очень редко (4-10 мин)</v:String>
+    <v:String x:Key="s_labelDP2">Редко (3-8 мин)</v:String>
+    <v:String x:Key="s_labelDP3">Нормально (2-5 мин)</v:String>
+    <v:String x:Key="s_labelDP4">Часто (1-3 мин)</v:String>
+    <v:String x:Key="s_labelDP5">Очень часто (30 сек - 2 мин)</v:String>
+    <v:String x:Key="s_labelAs">Запуск вместе с системой</v:String>
+    <v:String x:Key="s_labelUseMon">Использовать второй монитор</v:String>
+    <v:String x:Key="s_labelCancel">Отмена</v:String>
+    <v:String x:Key="s_labelSave">Сохранить</v:String>
+
+    <v:String x:Key="s_labelExit">Выход</v:String>
+    <v:String x:Key="s_labelSettings">Настройки</v:String>
+
+</ResourceDictionary>

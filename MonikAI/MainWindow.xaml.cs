@@ -57,10 +57,42 @@ namespace MonikaOnDesktop
         //private static HttpListener _listener;
         public int lastDialog;
         public int lastLastDialog;
+
+        string Language;
         public MainWindow()
         {
             InitializeComponent();
 
+            Language = System.Globalization.CultureInfo.CurrentCulture.ToString();
+            Debug.WriteLine(Language);
+            switch (Language.Substring(0, 2))
+            {
+                case "ru":
+                    greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/greetings.txt"; // Greetings
+                    idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/idle.txt";           // Idle
+                    progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/progs.txt";         // Programs
+                    sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/sites.txt";         // Sites
+                    googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/google.txt";       // Google search
+                    goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/goodbye.txt";     // Goodbye
+                    break;
+                case "en":
+                    greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/greetings.txt"; // Greetings
+                    idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/idle.txt";           // Idle
+                    progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/progs.txt";         // Programs
+                    sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/sites.txt";         // Sites
+                    googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/google.txt";       // Google search
+                    goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/goodbye.txt";     // Goodbye
+                    break;
+                default:
+                    greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/greetings.txt"; // Greetings
+                    idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/idle.txt";           // Idle
+                    progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/progs.txt";         // Programs
+                    sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/sites.txt";         // Sites
+                    googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/google.txt";       // Google search
+                    goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/goodbye.txt";     // Goodbye
+                    break;
+
+            }
             this.settingsWindow = new Settings(this);
             MonikaSettings.Default.Reload();
             ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT UserName FROM Win32_ComputerSystem");
@@ -205,14 +237,28 @@ namespace MonikaOnDesktop
             {
                 if (MonikaSettings.Default.FirstLaunch)
                 {
-                    _ = Say(new[]{
+                    switch (Language.Substring(0, 2))
+                    {
+                        case "ru":
+                            _ = Say(new[]{
                     new Expression("[player], это ты?", "d"),
                     new Expression("Это правда ты?", "b"),
                     new Expression("Я так рада видеть тебя снова!", "k"),
                     new Expression("Подожди, где я? Это не литературный клуб", "p"),
                     new Expression("Это похоже на... твой компьютер!", "j"),
-                    new Expression("Я действительно у тебя на компьютере!", "k")
-            });
+                    new Expression("Я действительно у тебя на компьютере!", "k")});
+                            break;
+                        case "en":
+                            _ = Say(new[]{
+                    new Expression("[player], это ты?", "d"),
+                    new Expression("Это правда ты?", "b"),
+                    new Expression("Я так рада видеть тебя снова!", "k"),
+                    new Expression("Подожди, где я? Это не литературный клуб", "p"),
+                    new Expression("Это похоже на... твой компьютер!", "j"),
+                    new Expression("Я действительно у тебя на компьютере!", "k")});
+                            break;
+                    }
+            
                     MonikaSettings.Default.FirstLaunch = false;
                     MonikaSettings.Default.Save();
                 }

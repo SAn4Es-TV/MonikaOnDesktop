@@ -1,0 +1,24 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:v="clr-namespace:System;assembly=mscorlib">
+
+
+    <v:String x:Key="s_labelSize">Size</v:String>
+    <v:String x:Key="s_labelName">Name</v:String>
+    <v:String x:Key="s_labelNameSub">Leave blank for system name</v:String>
+    <v:String x:Key="s_labelEvening">Evening</v:String>
+    <v:String x:Key="s_labelMorning">Morning</v:String>
+    <v:String x:Key="s_labelDP">Dialogue periodicity</v:String>
+    <v:String x:Key="s_labelDP1">Very rarely (4-10 min)</v:String>
+    <v:String x:Key="s_labelDP2">Rarely (3-8 min)</v:String>
+    <v:String x:Key="s_labelDP3">Normal (2-5 min)</v:String>
+    <v:String x:Key="s_labelDP4">Often (1-3 min)</v:String>
+    <v:String x:Key="s_labelDP5">Very often (30 sec - 2 min)</v:String>
+    <v:String x:Key="s_labelAs">Start with Windows</v:String>
+    <v:String x:Key="s_labelUseMon">Use a second monitor</v:String>
+    <v:String x:Key="s_labelCancel">Cancel</v:String>
+    <v:String x:Key="s_labelSave">Save</v:String>
+
+    <v:String x:Key="s_labelExit">Quit</v:String>
+    <v:String x:Key="s_labelSettings">Settings</v:String>
+</ResourceDictionary>
