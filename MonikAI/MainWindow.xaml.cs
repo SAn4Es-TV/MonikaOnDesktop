@@ -31,6 +31,7 @@ namespace MonikaOnDesktop
     public partial class MainWindow : Window
     {
         public DoubleAnimation _start;
+        public DoubleAnimation _quit;
 
         String playerName;
 
@@ -250,15 +251,15 @@ namespace MonikaOnDesktop
                             break;
                         case "en":
                             _ = Say(new[]{
-                    new Expression("[player], это ты?", "d"),
-                    new Expression("Это правда ты?", "b"),
-                    new Expression("Я так рада видеть тебя снова!", "k"),
-                    new Expression("Подожди, где я? Это не литературный клуб", "p"),
-                    new Expression("Это похоже на... твой компьютер!", "j"),
-                    new Expression("Я действительно у тебя на компьютере!", "k")});
+                    new Expression("[player], is that you?", "d"),
+                    new Expression("It's really you, huh?", "b"),
+                    new Expression("I'm so happy to see you again!", "k"),
+                    new Expression("Wait, where am I? This is not the literature club", "p"),
+                    new Expression("This looks like... your desktop!", "j"),
+                    new Expression("I'm right here with you!", "k")});
                             break;
                     }
-            
+
                     MonikaSettings.Default.FirstLaunch = false;
                     MonikaSettings.Default.Save();
                 }
@@ -270,13 +271,27 @@ namespace MonikaOnDesktop
                 // No idea where the date comes from, someone mentioned it in the spreadsheet. Seems legit.
                 if (DateTime.Now.Month == 9 && DateTime.Now.Day == 22)
                 {
-                    // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
-                    _ = this.Say(new[]
+                    switch (Language.Substring(0, 2))
+                    {
+                        case "ru":
+                            // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
+                            _ = this.Say(new[]
                     {
                         new Expression("Эй [player], угадай какой сегодня день", "b"), // What?
                         new Expression("Сегодня мой день рождения!", "b"), // Really?!
                         new Expression("С днём рождения меня!", "k") // To you too, Monika! 
                     });
+                            break;
+                        case "en":
+                            // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
+                            _ = this.Say(new[]
+                    {
+                        new Expression("Hey [player], guess what", "b"), // What?
+                        new Expression("It's my birthday today!", "b"), // Really?!
+                        new Expression("Happy Birthday to me!", "k") // To you too, Monika! 
+                    });
+                            break;
+                    }
                 }
 
                 // Blinking and Behaviour logic
@@ -347,29 +362,38 @@ namespace MonikaOnDesktop
                   textWindow.Visibility = Visibility.Visible;
                   foreach (Expression ex in expression)
                   {
-                      string newText = ex.Text.Replace("[player]", playerName); //замена
-                      if (IsNight)
+                      try
                       {
-                          face.Source = new BitmapImage(new Uri("pack://application:,,,/monika/" + ex.Face + "-n.png"));
-                          main.Source = new BitmapImage(new Uri("pack://application:,,,/monika/1-n.png"));
+                          string newText = ex.Text.Replace("[player]", playerName); //замена
+                          if (IsNight)
+                          {
+                              face.Source = new BitmapImage(new Uri("pack://application:,,,/monika/" + ex.Face + "-n.png"));
+                              main.Source = new BitmapImage(new Uri("pack://application:,,,/monika/1-n.png"));
+                          }
+                          else
+                          {
+                              face.Source = new BitmapImage(new Uri("pack://application:,,,/monika/" + ex.Face + ".png"));
+                              main.Source = new BitmapImage(new Uri("pack://application:,,,/monika/1.png"));
+                          }
+                          Debug.WriteLine(newText);
+                          for (int i = 0; i < newText.Length; i++)
+                          {
+                              this.textBlock.Text += newText[i];
+                              if (newText[i].ToString() == ".") { await Task.Delay(500); }//set 500 if you need uncoment this line |
+                                                                                          //else if (newText[i] == ',') { await Task.Delay(50); }                                 //           |
+                              else { await Task.Delay(30); }                                                          //           |
+                                                                                                                      //           |
+                          }                                                                                           //           |
+                          await Task.Delay(newText.Length * 30 + 700);                                                //         <-- this line
+                          delay = newText.Length * 30 + 700;
+                          textBlock.Text = "";
                       }
-                      else
+
+                      catch (Exception e)
                       {
-                          face.Source = new BitmapImage(new Uri("pack://application:,,,/monika/" + ex.Face + ".png"));
-                          main.Source = new BitmapImage(new Uri("pack://application:,,,/monika/1.png"));
+                          System.Windows.MessageBox.Show(this,
+                              "An error occured: " + e.Message + "\r\n\r\n(Try run this app as an administrator.)");
                       }
-                      Debug.WriteLine(newText);
-                      for (int i = 0; i < newText.Length; i++)
-                      {
-                          this.textBlock.Text += newText[i];
-                          if (newText[i].ToString() == ".") { await Task.Delay(500); }//set 500 if you need uncoment this line |
-                          //else if (newText[i] == ',') { await Task.Delay(50); }                                 //           |
-                          else { await Task.Delay(30); }                                                          //           |
-                                                                                                                  //           |
-                      }                                                                                           //           |
-                      await Task.Delay(newText.Length * 30 + 700);                                                //         <-- this line
-                      delay = newText.Length * 30 + 700;
-                      textBlock.Text = "";
                   }
                   setFace("a");
                   textWindow.Visibility = Visibility.Hidden;

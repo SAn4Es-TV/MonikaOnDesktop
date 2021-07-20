@@ -33,5 +33,5 @@ C:\Users\Санёк\source\MonikAI\MonikAI\obj\Debug\netcoreapp3.1\Settings.baml
 C:\Users\Санёк\source\MonikAI\MonikAI\obj\Debug\netcoreapp3.1\MonikaOnDesktop.csprojAssemblyReference.cache
 C:\Users\Санёк\source\MonikAI\MonikAI\obj\Debug\netcoreapp3.1\GeneratedInternalTypeHelper.g.cs
 C:\Users\Санёк\source\MonikAI\MonikAI\obj\Debug\netcoreapp3.1\App.baml
-C:\Users\Санёк\source\MonikAI\MonikAI\obj\Debug\netcoreapp3.1\Resources\lang.en-US.baml
 C:\Users\Санёк\source\MonikAI\MonikAI\obj\Debug\netcoreapp3.1\Resources\lang.baml
+C:\Users\Санёк\source\MonikAI\MonikAI\obj\Debug\netcoreapp3.1\Resources\lang.en.baml

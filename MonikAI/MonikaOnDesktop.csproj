@@ -222,7 +222,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="Resources\lang.en-US.xaml">
+    <Page Update="Resources\lang.en.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
