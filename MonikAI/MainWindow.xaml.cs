@@ -258,6 +258,15 @@ namespace MonikaOnDesktop
                     new Expression("This looks like... your desktop!", "j"),
                     new Expression("I'm right here with you!", "k")});
                             break;
+                        default:
+                            _ = Say(new[]{
+                    new Expression("[player], is that you?", "d"),
+                    new Expression("It's really you, huh?", "b"),
+                    new Expression("I'm so happy to see you again!", "k"),
+                    new Expression("Wait, where am I? This is not the literature club", "p"),
+                    new Expression("This looks like... your desktop!", "j"),
+                    new Expression("I'm right here with you!", "k")});
+                            break;
                     }
 
                     MonikaSettings.Default.FirstLaunch = false;
@@ -283,6 +292,15 @@ namespace MonikaOnDesktop
                     });
                             break;
                         case "en":
+                            // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
+                            _ = this.Say(new[]
+                    {
+                        new Expression("Hey [player], guess what", "b"), // What?
+                        new Expression("It's my birthday today!", "b"), // Really?!
+                        new Expression("Happy Birthday to me!", "k") // To you too, Monika! 
+                    });
+                            break;
+                        default:
                             // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
                             _ = this.Say(new[]
                     {
@@ -357,6 +375,14 @@ namespace MonikaOnDesktop
         {
             isSpeaking = true;
 
+            if (String.IsNullOrEmpty(MonikaSettings.Default.UserName) || MonikaSettings.Default.UserName == "{PlayerName}")
+            {
+                playerName = Environment.UserName;
+            }
+            else
+            {
+                playerName = MonikaSettings.Default.UserName;
+            }
             _ = this.Dispatcher.Invoke(async () =>
               {
                   textWindow.Visibility = Visibility.Visible;
@@ -364,7 +390,7 @@ namespace MonikaOnDesktop
                   {
                       try
                       {
-                          string newText = ex.Text.Replace("[player]", playerName); //замена
+                          string newText = ex.Text.Replace("[player]", playerName).Replace("{PlayerName}", playerName); //замена
                           if (IsNight)
                           {
                               face.Source = new BitmapImage(new Uri("pack://application:,,,/monika/" + ex.Face + "-n.png"));
