@@ -65,6 +65,8 @@ namespace MonikaOnDesktop
 
         string Language;
 
+        private const string GOOGLE_REGEX = ".*\\.?google\\..{2,3}.*q\\=(.*?)($|&)";
+
         public MainWindow()
         {
             InitializeComponent();
@@ -332,9 +334,21 @@ namespace MonikaOnDesktop
                 {
                     Task.Run(async () =>
                     {
+                        HttpListener listener = new HttpListener();
+                        // установка адресов прослушки
+                        listener.Prefixes.Add("http://localhost:2005/");
+                        listener.Start();
+                        //Console.WriteLine("Ожидание подключений...");
                         var nextBlink = DateTime.Now + TimeSpan.FromSeconds(random.Next(7, 50));
                         while (this.applicationRunning)
                         {
+                            // метод GetContext блокирует текущий поток, ожидая получение запроса 
+                            HttpListenerContext context = listener.GetContext();
+                            HttpListenerRequest request = context.Request;
+                            string query = context.Request.QueryString["myurl"];
+                            // получаем объект ответа
+                            //Debug.WriteLine(query);
+                            readSitesTxt(formatURL(query));
                             if (DateTime.Now >= nextBlink)
                             {
                                 // Check if currently speaking, only blink if not in dialog
@@ -666,6 +680,97 @@ namespace MonikaOnDesktop
             //Моем полы
             list.Clear();
         }
+        public void readSitesTxt(string site)
+        {
+            string sPath = sitesDialogPath;
+            string[] lines;
+            List<string> list = new List<string>();
+            Random rnd = new Random();
+
+            using (StreamReader sr = new StreamReader(sPath))
+            {
+                lines = sr.ReadToEnd().Split('\n');
+            }
+
+            //Вечный цикл...
+            //while (true)
+            //{
+            Debug.WriteLine("Открыт сайт: " + site);
+
+            //Смотрим все процессы в файле и сравниваем с нашим
+            //Если такой процесс нашелся, то выбираем все его диалоги и фразы в List<>
+            var proccesses = lines.Select((v, i) => new { i, v }).Where(t => t.v.StartsWith("["));
+            foreach (var s in proccesses)
+            {
+                var a = s.v.Trim(new char[] { '[', ']', '\r' });
+                string[] b = a.Split("|");
+                foreach (var c in b)
+                {
+                    string d = c.ToLower().Trim().TrimEnd('/');
+                    if (d.StartsWith("http://"))
+                    {
+                        d = d.Substring(7);
+                    }
+
+                    if (d.StartsWith("https://"))
+                    {
+                        d = d.Substring(8);
+                    }
+
+                    if (d.StartsWith("www."))
+                    {
+                        d = d.Substring(4);
+                    }
+                    if (d == site)
+                    {
+                        var dialogs = lines.Skip(s.i + 1).TakeWhile(x => !x.StartsWith("["));
+
+                        foreach (var v in dialogs)
+                        {
+                            if (v == "\r") continue; //Здесь избавляемся от той проблемы с пустой строкой, в посте выше.
+                            list.Add(v);
+                        }
+                        break;
+                    }
+                }
+            }
+
+
+            //Ищем индексы вхождений строк диалогов (начинаются с "<")
+            var dialIdx = list.Select((v, i) => new { i, v }).Where(t => t.v.StartsWith("<"));
+            List<int> idx = new List<int>();
+
+            //Добавляем эти индексы в список, из которого будем брать случайный элемент (диалог)
+            foreach (var s in dialIdx)
+                idx.Add(s.i);
+
+            //ГПСЧ
+            int rx = rnd.Next(0, idx.Count);
+
+            //Если список пуст -> уходим на второй круг... (т.е. такого процесса нет)
+            //if (list.Count == 0) continue;
+
+            if (list.Count != 0)
+            {
+                Debug.WriteLine("<----------Вывод случайного диалога---------->");
+
+                //Печатаем диалог
+                var Dialog = list.Skip(idx[rx]).Take(1).Select(s => s).ToArray();
+                Debug.WriteLine(Dialog[0]);
+
+                //Печатаем фразы к нему
+                List<string> Phrases = list.Skip(idx[rx] + 1).TakeWhile(x => !x.StartsWith("<")).ToList();
+                Expression[] siteDialog = new Expression[Phrases.Count];
+                for (int i = 0; i < Phrases.Count; i++)
+                {
+                    Debug.WriteLine(Phrases[i]);
+                    siteDialog[i] = new Expression(Phrases[i].Substring(2), (Phrases[i])[0].ToString());
+                }
+                _ = Say(siteDialog);
+            }
+            //Моем полы
+            list.Clear();
+        }
         public void consoleWrite(string text)
         {
             this.Dispatcher.Invoke(() =>
@@ -775,9 +880,27 @@ namespace MonikaOnDesktop
             }
             return true;
         }
+        public string formatURL(string url)
+        {
+            string newUrl = url.ToLower().Trim().TrimEnd('/');
+            if (newUrl.StartsWith("http://"))
+            {
+                newUrl = newUrl.Substring(7);
+            }
+
+            if (newUrl.StartsWith("https://"))
+            {
+                newUrl = newUrl.Substring(8);
+            }
+
+            if (newUrl.StartsWith("www."))
+            {
+                newUrl = newUrl.Substring(4);
+            }
+            return newUrl;
+        }
 
         public static List<CultureInfo> m_Languages = new List<CultureInfo>();
-
         public static List<CultureInfo> Languages
         {
             get
@@ -785,10 +908,8 @@ namespace MonikaOnDesktop
                 return m_Languages;
             }
         }
-
         //Евент для оповещения всех окон приложения
         public static event EventHandler LanguageChanged;
-
         public static CultureInfo Lang
         {
             get
@@ -835,7 +956,6 @@ namespace MonikaOnDesktop
                 LanguageChanged(System.Windows.Application.Current, new EventArgs());
             }
         }
-
         private void App_LanguageChanged(Object sender, EventArgs e)
         {
             //MonikaSettings.Default.Language = Lang;

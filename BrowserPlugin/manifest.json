@@ -6,6 +6,9 @@
     "icons": {
         "96": "ico.png"
     },
+    "permissions": [
+        "tabs"
+    ],
     "content_scripts": [
         {
             "matches": [
