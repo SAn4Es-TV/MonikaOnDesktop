@@ -22,6 +22,9 @@ using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 using System.Net;
+using System.Windows.Automation;
+using Lyre;
+using System.Globalization;
 
 namespace MonikaOnDesktop
 {
@@ -30,6 +33,7 @@ namespace MonikaOnDesktop
     /// </summary>
     public partial class MainWindow : Window
     {
+
         public DoubleAnimation _start;
         public DoubleAnimation _quit;
 
@@ -60,42 +64,26 @@ namespace MonikaOnDesktop
         public int lastLastDialog;
 
         string Language;
+
         public MainWindow()
         {
             InitializeComponent();
 
-            Language = System.Globalization.CultureInfo.CurrentCulture.ToString();
-            Debug.WriteLine(Language);
-            switch (Language.Substring(0, 2))
-            {
-                case "ru":
-                    greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/greetings.txt"; // Greetings
-                    idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/idle.txt";           // Idle
-                    progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/progs.txt";         // Programs
-                    sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/sites.txt";         // Sites
-                    googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/google.txt";       // Google search
-                    goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/goodbye.txt";     // Goodbye
-                    break;
-                case "en":
-                    greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/greetings.txt"; // Greetings
-                    idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/idle.txt";           // Idle
-                    progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/progs.txt";         // Programs
-                    sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/sites.txt";         // Sites
-                    googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/google.txt";       // Google search
-                    goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/goodbye.txt";     // Goodbye
-                    break;
-                default:
-                    greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/greetings.txt"; // Greetings
-                    idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/idle.txt";           // Idle
-                    progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/progs.txt";         // Programs
-                    sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/sites.txt";         // Sites
-                    googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/google.txt";       // Google search
-                    goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/goodbye.txt";     // Goodbye
-                    break;
 
-            }
+            m_Languages.Clear();
+            m_Languages.Add(new CultureInfo("en-US")); //Нейтральная культура для этого проекта
+            m_Languages.Add(new CultureInfo("ru-RU"));
+
             this.settingsWindow = new Settings(this);
             MonikaSettings.Default.Reload();
+
+            LanguageChanged += App_LanguageChanged;
+            Lang = MonikaSettings.Default.Language;
+
+            Language = MonikaSettings.Default.Language.Parent.ToString();
+            //App.Language = MonikaSettings.Default.Language;
+            Debug.WriteLine(Language);
+            setLanguage(Language);
             ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT UserName FROM Win32_ComputerSystem");
             ManagementObjectCollection collection = searcher.Get();
             //playerName = (string)collection.Cast<ManagementBaseObject>().First()["UserName"];
@@ -156,35 +144,9 @@ namespace MonikaOnDesktop
             if (!isSpeaking)
             {
 
+                Debug.WriteLine("Запущен процесс: " + e.NewEvent.Properties["ProcessName"].Value.ToString());
                 string currentProcess = e.NewEvent.Properties["ProcessName"].Value.ToString();
-                //if (currentProcess == "CompPkgSrv.exe") { currentProcess = "chrome.exe"; }
-                /*
-                List<string> procList = new List<string>();
-                System.Diagnostics.Process[] processes;
-                processes = System.Diagnostics.Process.GetProcesses(); 
-                foreach (System.Diagnostics.Process instance in processes)
-                {
-                    procList.Add(instance.ProcessName);
-                }*/
-                //if (!procList.Contains(currentProcess.Replace(".exe", String.Empty))){
                 readProgsTxt(currentProcess);
-                //}
-                /*
-
-                foreach (Process a in procList)
-                {
-                    if(a.ProcessName == e.NewEvent.Properties["ProcessName"].Value.ToString().Replace(".exe", String.Empty))
-                    {
-                        readProgsTxt(e.NewEvent.Properties["ProcessName"].Value.ToString());
-                        Debug.WriteLine("Process run: " + e.NewEvent.Properties["ProcessName"].Value.ToString());
-                    }
-                }
-                /*if (!procesList.Contains(e.NewEvent.Properties["ProcessName"].Value.ToString()))
-                {
-                    procesList.Add(e.NewEvent.Properties["ProcessName"].Value.ToString());
-                    //_ = Say(new[] { new Expression("Process started:" + e.NewEvent.Properties["ProcessName"].Value, "a") });
-                    //readProgsTxt("chrome.exe");
-                }*/
 
             }
         }
@@ -199,13 +161,20 @@ namespace MonikaOnDesktop
                     if (this.settingsWindow.ShowDialog() == false)
                     {
                         SetupScale(MonikaSettings.Default.Scaler);
+                        Language = MonikaSettings.Default.Language.Parent.ToString();
+                        Lang = MonikaSettings.Default.Language;
+                        setLanguage(Language);
                         //GoToSecondaryMonitor();
                         setFace("a");
                     }
                     else
                     {
+
                         setFace("a");
                         SetAutorunValue(MonikaSettings.Default.AutoStart);
+                        Language = MonikaSettings.Default.Language.Parent.ToString();
+                        Lang = MonikaSettings.Default.Language;
+                        setLanguage(Language);
                         Debug.WriteLine("Settings saved!");
                         Debug.WriteLine("AutoStart --> " + MonikaSettings.Default.AutoStart);
                         Debug.WriteLine("DarkMode --> " + MonikaSettings.Default.DarkMode);
@@ -215,10 +184,52 @@ namespace MonikaOnDesktop
                         Debug.WriteLine("UserName --> " + MonikaSettings.Default.UserName);
                         Debug.WriteLine("Scaler --> " + MonikaSettings.Default.Scaler);
                         Debug.WriteLine("screenNum --> " + MonikaSettings.Default.screenNum);
+                        Debug.WriteLine("Language --> " + MonikaSettings.Default.Language.Parent.ToString());
                     }
                 }
             });
 
+        }
+        public void setLanguage(string lang)
+        {
+            Lang = MonikaSettings.Default.Language;
+            switch (lang)
+            {
+                case "ru":
+                    quitMenu.Header = "Выход";
+                    settingsMenu.Header = "Настройки";
+
+                    greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/greetings.txt"; // Greetings
+                    idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/idle.txt";           // Idle
+                    progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/progs.txt";         // Programs
+                    sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/sites.txt";         // Sites
+                    googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/google.txt";       // Google search
+                    goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/goodbye.txt";     // Goodbye
+                    break;
+                case "en":
+                    quitMenu.Header = "Quit";
+                    settingsMenu.Header = "Settings";
+
+                    greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/greetings.txt"; // Greetings
+                    idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/idle.txt";           // Idle
+                    progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/progs.txt";         // Programs
+                    sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/sites.txt";         // Sites
+                    googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/google.txt";       // Google search
+                    goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/goodbye.txt";     // Goodbye
+                    break;
+                default:
+                    quitMenu.Header = "Quit";
+                    settingsMenu.Header = "Settings";
+
+                    greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/greetings.txt"; // Greetings
+                    idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/idle.txt";           // Idle
+                    progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/progs.txt";         // Programs
+                    sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/sites.txt";         // Sites
+                    googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/google.txt";       // Google search
+                    goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/goodbye.txt";     // Goodbye
+                    break;
+
+            }
         }
         private void MenuQuit_Click(object sender, RoutedEventArgs e)
         {
@@ -229,6 +240,7 @@ namespace MonikaOnDesktop
         }
         public void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            Lang = MonikaSettings.Default.Language;
             _start = new DoubleAnimation();
             _start.From = 0;
             _start.To = 1;
@@ -312,18 +324,18 @@ namespace MonikaOnDesktop
                     }
                 }
 
+
                 // Blinking and Behaviour logic
                 var eyesOpen = "a";
                 var eyesClosed = "j";
                 var random = new Random();
                 this.Dispatcher.Invoke(() =>
                 {
-                    Task.Run(() =>
+                    Task.Run(async () =>
                     {
                         var nextBlink = DateTime.Now + TimeSpan.FromSeconds(random.Next(7, 50));
                         while (this.applicationRunning)
                         {
-
                             if (DateTime.Now >= nextBlink)
                             {
                                 // Check if currently speaking, only blink if not in dialog
@@ -649,126 +661,6 @@ namespace MonikaOnDesktop
             }
             //Моем полы
             list.Clear();
-            #region
-            /*
-            //Список объектов класса Dialogs
-            //Сюда будут залетать все диалоги со своими фразами для конкретного процесса
-            List<Dialogs> lst = new List<Dialogs>();
-
-            //while (true)
-            //{
-                Console.Write("Proccess name: ");
-
-                using (StreamReader sr = new StreamReader(sPath))
-                {
-                    string lineBefore;
-
-                    //Начинаем читать файл...
-                    while ((lineBefore = sr.ReadLine()) != null)
-                    {
-
-                        string line = lineBefore.Replace("\r", String.Empty);
-                        //Если начало строки начинается с '[', значит это имя процесса
-                        if (line.StartsWith("["))
-                        {
-                            //Читаем имя процесса из файла
-                            //Если имя процесса из файла совпало с текущим процессом...
-                            if (line.Trim(new char[] { '[', ']' }) == proc)
-                            {
-                                //Читаем следующую строку
-                                line = sr.ReadLine();
-
-                                do
-                                {
-                                    //Если это диалог (а мы ожидаем именно его:)
-                                    if (line.StartsWith("<"))
-                                    {
-                                        //Создаем новый экземпляр класса Dialogs
-                                        Dialogs dl = new Dialogs
-                                        {
-                                            //Извлекаем диалог - обрезаем символы <> и вставляем в поле Dialog
-                                            Dialog = line.Trim(new char[] { '<', '>' })
-                                        };
-
-                                        do
-                                        {
-                                            //Считываем следующую строку (фразы диалога)
-                                            line = sr.ReadLine();
-
-                                            //Если конец файла, начало нового диалога или другой процесс - выходим
-                                            if (
-
-                                                line == null
-                                                || line.StartsWith("<")
-                                                || line.StartsWith("[")
-
-                                                ) { break; }
-
-                                            //Добавляем фразы с список фраз текущего экземпляра класса
-                                            dl.Phrases.Add(line);
-
-                                        }
-                                        //Читаем до посинения
-                                        while (true);
-
-                                        //Добавляем класс в список классов Dialogs
-                                        lst.Add(dl);
-                                    }
-
-                                    //Если конец файла - выходим
-                                    if (line == null) { break; }
-                                }
-
-                                //Читаем пока не закончатся диалоги текущего процесса
-                                while (!line.StartsWith("["));
-                            }
-                        }
-                    }
-                }
-
-            //}
-
-            //Вывод всех диалогов текущего процесса с фразами
-            //Для отладки... (удалить)
-            for (int i = 0; i < lst.Count; i++)
-            {
-                Debug.WriteLine("[" + lst[i].Dialog + "]");
-
-                for (int j = 0; j < lst[i].Phrases.Count; j++)
-                {
-                    Debug.WriteLine("-->" + lst[i].Phrases[j]);
-                }
-            }
-
-
-            Debug.WriteLine("\n------Выборка случайного диалога------\n");
-
-            Random rnd = new Random();
-            int n = rnd.Next(0, lst.Count);
-            Expression[] progDialog = new Expression[lst[n].Phrases.Count];
-
-            //Выводим диалог
-            Debug.WriteLine("[" + lst[n].Dialog + "]");
-
-            //Выводим список фраз к нему
-            for (int i = 0; i < lst[n].Phrases.Count; i++)
-            {
-                Debug.WriteLine("--> " + lst[n].Phrases[i]);
-                if (!String.IsNullOrEmpty(lst[n].Phrases[i]))
-                {
-                    progDialog[i] = new Expression(lst[n].Phrases[i].Substring(2), (lst[n].Phrases[i])[0].ToString());
-                }
-            }
-
-            Debug.WriteLine("\n");
-
-
-            //Чистим список классов Dialogs
-            lst.Clear();
-            _ = Say(progDialog);
-            */
-            #endregion
-            //}
         }
         public void consoleWrite(string text)
         {
@@ -880,6 +772,71 @@ namespace MonikaOnDesktop
             return true;
         }
 
+        public static List<CultureInfo> m_Languages = new List<CultureInfo>();
+
+        public static List<CultureInfo> Languages
+        {
+            get
+            {
+                return m_Languages;
+            }
+        }
+
+        //Евент для оповещения всех окон приложения
+        public static event EventHandler LanguageChanged;
+
+        public static CultureInfo Lang
+        {
+            get
+            {
+                return System.Threading.Thread.CurrentThread.CurrentUICulture;
+            }
+            set
+            {
+                if (value == null) throw new ArgumentNullException("value");
+                if (value == System.Threading.Thread.CurrentThread.CurrentUICulture) return;
+
+                //1. Меняем язык приложения:
+                System.Threading.Thread.CurrentThread.CurrentUICulture = value;
+
+                //2. Создаём ResourceDictionary для новой культуры
+                ResourceDictionary dict = new ResourceDictionary();
+                Debug.WriteLine("Установлен язык: " + value.Name);
+                switch (value.Name)
+                {
+                    case "ru-RU":
+                        dict.Source = new Uri(String.Format("/Resources/lang.{0}.xaml", value.Name), UriKind.Relative);
+                        break;
+                    default:
+                        dict.Source = new Uri("/Resources/lang.xaml", UriKind.Relative);
+                        break;
+                }
+
+                //3. Находим старую ResourceDictionary и удаляем его и добавляем новую ResourceDictionary
+                ResourceDictionary oldDict = (from d in System.Windows.Application.Current.Resources.MergedDictionaries
+                                              where d.Source != null && d.Source.OriginalString.StartsWith("/Resources/lang.")
+                                              select d).FirstOrDefault();
+                if (oldDict != null)
+                {
+                    int ind = System.Windows.Application.Current.Resources.MergedDictionaries.IndexOf(oldDict);
+                    System.Windows.Application.Current.Resources.MergedDictionaries.Remove(oldDict);
+                    System.Windows.Application.Current.Resources.MergedDictionaries.Insert(ind, dict);
+                }
+                else
+                {
+                    System.Windows.Application.Current.Resources.MergedDictionaries.Add(dict);
+                }
+
+                //4. Вызываем евент для оповещения всех окон.
+                LanguageChanged(System.Windows.Application.Current, new EventArgs());
+            }
+        }
+
+        private void App_LanguageChanged(Object sender, EventArgs e)
+        {
+            //MonikaSettings.Default.Language = Lang;
+            //MonikaSettings.Default.Save();
+        }
     }
 
 

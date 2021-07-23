@@ -1,8 +1,4 @@
-chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-    if (changeInfo.url) {
-        var http = new XMLHttpRequest();
-        http.open("POST", "http:/localhost:9812/", true);
-        http.send(changeInfo.url);
-		console.log(changeInfo.url);
-    }
-});
+$.post("http://localhost:8080/catch", { name: "John", time: "2pm" },
+    function(data) { 
+        alert(data);
+    });

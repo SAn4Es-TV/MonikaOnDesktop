@@ -13,11 +13,6 @@
             "browser-polyfill.min.js",
             "mod.js"
         ]
-    },
-
-    "permissions": [
-        "*://localhost/*",
-        "tabs"
-      ]
+    }
   
   }

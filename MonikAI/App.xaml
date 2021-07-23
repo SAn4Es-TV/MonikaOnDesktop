@@ -1,8 +1,9 @@
-﻿<Application x:Class="MonikAI.App"
+﻿<Application x:Class="MonikaOnDesktop.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:MonikAI"
-             StartupUri="MainWindow.xaml">
+             xmlns:local="clr-namespace:MonikaOnDesktop"
+             StartupUri="MainWindow.xaml"
+             >
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

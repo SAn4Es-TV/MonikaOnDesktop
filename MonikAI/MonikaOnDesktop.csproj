@@ -61,7 +61,10 @@
 
   <ItemGroup>
     <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.1.0" />
+    <PackageReference Include="Lyre" Version="1.0.10" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.7" />
     <PackageReference Include="System.Management" Version="5.0.0" />
+    <PackageReference Include="uHttpSharp" Version="0.1.6.22" />
   </ItemGroup>
 
   <ItemGroup>
@@ -222,7 +225,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="Resources\lang.en.xaml">
+    <Page Update="Resources\lang.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>

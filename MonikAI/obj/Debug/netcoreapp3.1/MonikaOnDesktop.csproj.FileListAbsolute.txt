@@ -34,4 +34,10 @@ C:\Users\Санёк\source\MonikAI\MonikAI\obj\Debug\netcoreapp3.1\MonikaOnDeskt
 C:\Users\Санёк\source\MonikAI\MonikAI\obj\Debug\netcoreapp3.1\GeneratedInternalTypeHelper.g.cs
 C:\Users\Санёк\source\MonikAI\MonikAI\obj\Debug\netcoreapp3.1\App.baml
 C:\Users\Санёк\source\MonikAI\MonikAI\obj\Debug\netcoreapp3.1\Resources\lang.baml
-C:\Users\Санёк\source\MonikAI\MonikAI\obj\Debug\netcoreapp3.1\Resources\lang.en.baml
+C:\Users\Санёк\source\MonikAI\MonikAI\bin\Debug\netcoreapp3.1\System.Net.Http.Formatting.dll
+C:\Users\Санёк\source\MonikAI\MonikAI\bin\Debug\netcoreapp3.1\System.Web.Http.dll
+C:\Users\Санёк\source\MonikAI\MonikAI\bin\Debug\netcoreapp3.1\Newtonsoft.Json.dll
+C:\Users\Санёк\source\MonikAI\MonikAI\bin\Debug\netcoreapp3.1\Newtonsoft.Json.Bson.dll
+C:\Users\Санёк\source\MonikAI\MonikAI\bin\Debug\netcoreapp3.1\uhttpsharp.dll
+C:\Users\Санёк\source\MonikAI\MonikAI\bin\Debug\netcoreapp3.1\Lyre.dll
+C:\Users\Санёк\source\MonikAI\MonikAI\obj\Debug\netcoreapp3.1\Resources\lang.ru-RU.baml

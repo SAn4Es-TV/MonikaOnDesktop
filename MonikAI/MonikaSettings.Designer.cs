@@ -49,10 +49,10 @@ namespace MonikaOnDesktop {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string Language {
+        [global::System.Configuration.DefaultSettingValueAttribute("en-US")]
+        public global::System.Globalization.CultureInfo Language {
             get {
-                return ((string)(this["Language"]));
+                return ((global::System.Globalization.CultureInfo)(this["Language"]));
             }
             set {
                 this["Language"] = value;

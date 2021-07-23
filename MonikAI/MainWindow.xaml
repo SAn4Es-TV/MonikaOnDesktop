@@ -37,9 +37,9 @@
                     PopupActivation="DoubleClick">
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="{DynamicResource s_labelSettings}" Click="MenuSettings_Click"/>
+                    <MenuItem x:Name="settingsMenu" Header="{DynamicResource s_labelSettings}" Click="MenuSettings_Click"/>
                     <Separator/>
-                    <MenuItem Header="{DynamicResource s_labelExit}" Click="MenuQuit_Click"/>
+                    <MenuItem x:Name="quitMenu" Header="{DynamicResource s_labelExit}" Click="MenuQuit_Click"/>
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>
         </tb:TaskbarIcon>

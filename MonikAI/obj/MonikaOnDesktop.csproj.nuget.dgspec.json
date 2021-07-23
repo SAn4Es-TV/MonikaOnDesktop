@@ -44,9 +44,21 @@
               "target": "Package",
               "version": "[1.1.0, )"
             },
+            "Lyre": {
+              "target": "Package",
+              "version": "[1.0.10, )"
+            },
+            "Microsoft.AspNet.WebApi.Core": {
+              "target": "Package",
+              "version": "[5.2.7, )"
+            },
             "System.Management": {
               "target": "Package",
               "version": "[5.0.0, )"
+            },
+            "uHttpSharp": {
+              "target": "Package",
+              "version": "[0.1.6.22, )"
             }
           },
           "imports": [

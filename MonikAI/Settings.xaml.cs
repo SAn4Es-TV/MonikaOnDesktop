@@ -1,5 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,25 +27,55 @@ namespace MonikaOnDesktop
         {
             this.mainWindow = mainWindow;
             InitializeComponent();
-            t = label6;/*
-            switch (randomIdle.Value)
+
+            MainWindow.LanguageChanged += LanguageChanged;
+            CultureInfo currLang = MonikaSettings.Default.Language;
+
+            //Заполняем меню смены языка:
+            comboBox.Items.Clear();
+            DataContext = this;
+
+            //cbItems = new ObservableCollection<ComboBoxItem>();
+            Debug.WriteLine(MainWindow.m_Languages.Count);
+            Debug.WriteLine("Current Language: " + currLang);
+            foreach (var lang in MainWindow.m_Languages)
             {
-                case 0:
-                    label6.Text = "Очень редко(4-10 мин)";
-                    break;
-                case 1:
-                    label6.Text = "Редко(3-8 мин)";
-                    break;
-                case 2:
-                    label6.Text = "Нормально(2-5 мин)";
-                    break;
-                case 3:
-                    label6.Text = "Часто(1-3 мин)";
-                    break;
-                case 4:
-                    label6.Text = "Очень часто(30 сек - 2 мин)";
-                    break;
-            }*/
+                ComboBoxItem menuLang = new ComboBoxItem();
+                menuLang.Content = lang.DisplayName;
+                menuLang.Tag = lang;
+                menuLang.Selected += ChangeLanguageClick;
+                Debug.WriteLine("Languages: " + lang);
+                //comboBox.Items.Add(menuLang);
+                comboBox.Items.Add(menuLang);
+                if (lang.DisplayName == currLang.DisplayName) {
+                    Debug.WriteLine(lang + "=" + currLang); 
+                    //comboBox.Text = lang.DisplayName;
+                    comboBox.SelectedItem = menuLang;
+                } else { 
+                    Debug.WriteLine(lang + "!=" + currLang);
+                }
+
+                Debug.WriteLine(menuLang.IsSelected.ToString());
+                
+            }
+            /*
+            for (int item = 0; item < comboBox.Items.Count; item++)
+            {
+                if(((ComboBoxItem)comboBox.Items[item]).Content.ToString() == currLang.DisplayName)
+                {
+                    Debug.WriteLine(((ComboBoxItem)comboBox.Items[0]).Content);
+                    comboBox.SelectedItem = ((ComboBoxItem)comboBox.Items[0]);
+                    comboBox.Text = ((ComboBoxItem)comboBox.Items[0]).Content.ToString();
+                }
+            }
+            string tagToSelect = MonikaSettings.Default.Language.DisplayName; 
+            var selectedItem = comboBox.Items
+            .Cast<ComboBoxItem>()
+            .Where(e => e.Content == tagToSelect)
+            .FirstOrDefault();
+            comboBox.SelectedItem = selectedItem;
+*/
+            t = label6;
 
             if (MonikaSettings.Default.UserName == "{PlayerName}") { userName.Text = ""; } else { userName.Text = MonikaSettings.Default.UserName; }
              monikaSize.Value = MonikaSettings.Default.Scaler;
@@ -59,6 +93,7 @@ namespace MonikaOnDesktop
 
         private void save_Click(object sender, RoutedEventArgs e)
         {
+            MonikaSettings.Default.Language = MainWindow.Lang;
             MonikaSettings.Default.UserName = userName.Text;
             MonikaSettings.Default.Scaler = (int)monikaSize.Value;
             MonikaSettings.Default.NightEnd = int.Parse(nightEndText.Text);
@@ -93,12 +128,10 @@ namespace MonikaOnDesktop
             this.DialogResult = true;
             this.Close();
         }
-
         private void close_Click(object sender, RoutedEventArgs e)
         {            
             this.Close();
         }
-
         private void randomIdle_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (label6 != null)
@@ -123,13 +156,11 @@ namespace MonikaOnDesktop
                 }
             }
         }
-
         private void monikaSize_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             this.mainWindow.SetupScale((int)monikaSize.Value);
             //this.mainWindow.GoToSecondaryMonitor();
         }
-
         private void checkBox_Checked(object sender, RoutedEventArgs e)
         {
             MonikaSettings.Default.screenNum = true;
@@ -138,7 +169,6 @@ namespace MonikaOnDesktop
             this.mainWindow.SetupScale((int)monikaSize.Value);
             //this.mainWindow.GoToSecondaryMonitor();
         }
-
         private void checkBox_Unchecked(object sender, RoutedEventArgs e)
         {
             MonikaSettings.Default.screenNum = false;
@@ -146,6 +176,40 @@ namespace MonikaOnDesktop
             MonikaSettings.Default.Save();
             this.mainWindow.SetupScale((int)monikaSize.Value);
             //this.mainWindow.GoToSecondaryMonitor();
+        }
+        private void comboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
+        private void LanguageChanged(Object sender, EventArgs e)
+        {
+            CultureInfo currLang = MainWindow.Lang;
+
+            //Отмечаем нужный пункт смены языка как выбранный язык
+            foreach (ComboBoxItem i in comboBox.Items)
+            {
+                CultureInfo ci = i.Tag as CultureInfo;
+                //i.IsSelected = ci != null && ci.Equals(currLang);
+                if (ci != null && ci.Equals(currLang))
+                {
+                    comboBox.SelectedItem = i;
+                }
+            }
+        }
+
+        private void ChangeLanguageClick(Object sender, EventArgs e)
+        {
+            ComboBoxItem mi = sender as ComboBoxItem;
+            if (mi != null)
+            {
+                CultureInfo lang = mi.Tag as CultureInfo;
+                if (lang != null)
+                {
+                    MainWindow.Lang = lang;
+                }
+            }
+
         }
     }
 }

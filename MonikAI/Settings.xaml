@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MonikaOnDesktop"
         mc:Ignorable="d"
-        Title="Настройки" Height="264" Width="800" ResizeMode="NoResize">
+        Title="Настройки" Height="305" Width="800" ResizeMode="NoResize">
     <Grid>
         <Button x:Name="close" Content="{DynamicResource s_labelCancel}" HorizontalAlignment="Right" Margin="0,0,107,10" Width="92" Height="20" VerticalAlignment="Bottom" IsCancel="True"/>
         <Button x:Name="save" Content="{DynamicResource s_labelSave}" HorizontalAlignment="Right" Margin="0,0,10,10" Width="92" Height="20" VerticalAlignment="Bottom" Click="save_Click"/>
@@ -18,12 +18,14 @@
         <TextBox x:Name="nightStartText" Text="22" MaxLength="2" VerticalAlignment="Top" VerticalContentAlignment="Center" FontSize="24" Height="37" Margin="168,87,558,0" FontStretch="Normal" MaxLines="1"/>
         <TextBlock x:Name="label4" Text="{DynamicResource s_labelMorning}" FontSize="20" HorizontalAlignment="Left" Height="37" Margin="247,87,0,0" VerticalAlignment="Top" Width="153"/>
         <TextBox x:Name="nightEndText" Text="7" MaxLength="2" VerticalAlignment="Top" VerticalContentAlignment="Center" FontSize="24" Height="37" Margin="400,87,326,0" FontStretch="Normal" MaxLines="1"/>
-        <Slider x:Name="randomIdle" Margin="0,138,246,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="370" TickPlacement="None" ValueChanged="randomIdle_ValueChanged" SmallChange="1" Maximum="4" Value="2"/>
-        <TextBlock x:Name="label5" Text="{DynamicResource s_labelDP}" FontSize="20" HorizontalAlignment="Left" Height="35" Margin="10,129,0,0" VerticalAlignment="Top" Width="174"/>
+        <Slider x:Name="randomIdle" Margin="0,138,246,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="361" TickPlacement="None" ValueChanged="randomIdle_ValueChanged" SmallChange="1" Maximum="4" Value="2"/>
+        <TextBlock x:Name="label5" Text="{DynamicResource s_labelDP}" FontSize="20" HorizontalAlignment="Left" Height="35" Margin="10,129,0,0" VerticalAlignment="Top" Width="179"/>
         <TextBlock x:Name="label6" Text="{DynamicResource s_labelDP3}" FontSize="13" HorizontalAlignment="Right" Height="32" Margin="0,129,10,0" VerticalAlignment="Top" Width="231"/>
         <TextBlock x:Name="label7" Text="{DynamicResource s_labelUseMon}" FontSize="20" HorizontalAlignment="Left" Height="35" Margin="10,196,0,0" VerticalAlignment="Top" Width="295"/>
         <CheckBox x:Name="checkBox" Content="" HorizontalAlignment="Left" Margin="310,205,0,0" VerticalAlignment="Top" Height="17" Checked="checkBox_Checked" Unchecked="checkBox_Unchecked"/>
         <TextBlock x:Name="label8" Text="{DynamicResource s_labelAs}" FontSize="20" HorizontalAlignment="Left" Height="35" Margin="10,161,0,0" VerticalAlignment="Top" Width="295"/>
         <CheckBox x:Name="checkBox1" Content="" HorizontalAlignment="Left" Margin="310,168,0,0" VerticalAlignment="Top" Height="17"/>
+        <TextBlock x:Name="label9" Text="{DynamicResource s_labelLang}" FontSize="20" HorizontalAlignment="Left" Height="35" Margin="10,231,0,0" VerticalAlignment="Top" Width="295"/>
+        <ComboBox x:Name="comboBox" HorizontalAlignment="Left" Margin="310,238,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="comboBox_SelectionChanged"/>
     </Grid>
 </Window>
