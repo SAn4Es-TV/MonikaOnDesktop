@@ -147,7 +147,6 @@ namespace MonikaOnDesktop
                 Debug.WriteLine("Запущен процесс: " + e.NewEvent.Properties["ProcessName"].Value.ToString());
                 string currentProcess = e.NewEvent.Properties["ProcessName"].Value.ToString();
                 readProgsTxt(currentProcess);
-
             }
         }
 
@@ -613,16 +612,21 @@ namespace MonikaOnDesktop
             var proccesses = lines.Select((v, i) => new { i, v }).Where(t => t.v.StartsWith("["));
             foreach (var s in proccesses)
             {
-                if (s.v.Trim(new char[] { '[', ']', '\r' }) == proc)
+                var a = s.v.Trim(new char[] { '[', ']', '\r' });
+                string[] b = a.Split("|");
+                foreach (var c in b)
                 {
-                    var dialogs = lines.Skip(s.i + 1).TakeWhile(x => !x.StartsWith("["));
-
-                    foreach (var v in dialogs)
+                    if (c == proc)
                     {
-                        if (v == "\r") continue; //Здесь избавляемся от той проблемы с пустой строкой, в посте выше.
-                        list.Add(v);
+                        var dialogs = lines.Skip(s.i + 1).TakeWhile(x => !x.StartsWith("["));
+
+                        foreach (var v in dialogs)
+                        {
+                            if (v == "\r") continue; //Здесь избавляемся от той проблемы с пустой строкой, в посте выше.
+                            list.Add(v);
+                        }
+                        break;
                     }
-                    break;
                 }
             }
 

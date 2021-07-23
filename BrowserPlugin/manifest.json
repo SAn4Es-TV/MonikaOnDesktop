@@ -3,16 +3,18 @@
     "manifest_version": 2,
     "name": "MonikaOnDesktop",
     "version": "1.0",
-
     "icons": {
         "96": "ico.png"
     },
-  
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": ["jquery-3.6.0.min.js", "mod.js"]
+        }
+    ],
     "background": {
-        "scripts": [
-            "browser-polyfill.min.js",
-            "mod.js"
-        ]
+        "scripts": ["background.js"]
     }
-  
-  }
+}
