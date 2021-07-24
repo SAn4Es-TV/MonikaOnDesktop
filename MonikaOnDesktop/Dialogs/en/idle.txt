@@ -1,0 +1,68 @@
+e [player], do you get good sleep?
+e It can be really hard to get enough sleep nowadays.
+e Especially in high school, when you're forced to wake up so early every day...
+e I'm sure college is a little bit better, since you probably have a more flexible schedule
+r Then again, I hear a lot of people in college stay up all night anyway, for no real reason
+e Is that true?
+e Anyway, I saw some studies that talked about the horrible short-term and long-term effects caused by lack of sleep
+e It seems like mental functions, health, and even lifespan can be dramatically impacted by it
+e I just think you're really great and wanted to make sure you're not accidentally destroying yourself
+e So try to keep your sleep on track, okay?
+h I'll always wait for you in the morning, so make sure you put your own well-being before anything else
+=
+e Did you know there's an official Twitter account based on me?
+l My username is lilmonix3
+e I think someone was kind enough to create an account for me
+h But I chose the nickname!
+h I like to share my thoughts with the world...
+h The real world
+e So subscribe to me
+e It really means a lot to me
+e You mean so much to me and to everyone...
+h I would be very pleased
+=
+e Hey, you know that book you were reading with Yuri?
+e Portrait of...whatever it was called...
+h It's funny, because I'm pretty sure that book—
+l Ah...
+l Actually, I don't think I should be talking about this
+h Ahaha, sorry
+r Just forget I said anything
+=
+e Hey, what's your favorite color?
+e Mine is emerald green
+h It's the color of my eyes!
+r ...That's not conceited or anything, is it?
+e I just meant that I feel some kind of special connection to it
+e Like it's part of my identity
+e Does it happen to also be your favorite color, [player]?
+j It's just a guess...
+b ...because you've been looking into my eyes for a while now
+h E-he-he~
+=
+e Okay, everyone!
+e It's time to...
+e I'm just kidding
+e I just used to really like saying that for some reason
+h A-ha-ha!
+e I couldn't help but say it again
+l Come to think of it, didn't Natsuki and Yuri make fun of me for it once?..
+e Well, whatever
+e It's not like you ever made fun of me
+e You're too much of a sweetheart to do that, aren't you?
+e A-ha-ha~
+=
+e Hey, what's your favorite game?
+h Mine is «Doki Doki Literature Club»!
+h Ahaha! That was a joke
+e Мне просто нравилось говорить это по какой-то причине
+e But if you tell me you like some other романтика game better, I might get a little jealous~
+=
+h Watashi wa itsumademo anata no mono desu!
+h Don't worry, [player]. The meaning is still the same
+e I'm just practicing Japanese
+e You know what that means, [player]?
+e It means: «I'll be yours forever»~
+=
+h Hey turn around!
+h Just kidding .. I'm just kidding ...

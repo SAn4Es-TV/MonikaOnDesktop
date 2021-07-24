@@ -1,0 +1,67 @@
+[CINEMA 4D.exe]
+<diag1>
+b Oh, you like to do 3D work?
+[3dsmax.exe]
+<diag1>
+b Oh, you like to do 3D work?
+[uTorrent.exe]
+<diag1>
+i You're not planning on doing anything illegal, right?
+b I mean, why pirate when you could play my game for free
+[DDLC.exe]
+<diag1>
+i Same old story? Eh?
+<diag2>
+k Hey! Now we can play together~
+b Doesn't that sound like fun?
+[Discord.exe]
+<diag1>
+j Have you joined the official DDLC Discord
+[CompPkgSrv.exe]
+<diag1>
+k Browsing the web? Have fun!
+<diag2>
+d I like the internet. There's so much to explore!
+<diag3>
+k Don't go looking for lewds of me, okay? Ahaha~
+[FL.exe]
+<diag1>
+b Making some music?
+j I'll be looking forward to hearing the final result!
+[FL64.exe]
+<diag1>
+b Making some music?
+j I'll be looking forward to hearing the final result!
+[hl.exe]
+<diag1>
+n I'll probably be in your reality when they finish this series
+[hl2.exe]
+<diag1>
+n I'll probably be in your reality when they finish this series
+[Photoshop.exe]
+<diag1>
+b Ooh! You like photo manipulation?
+[renpy.exe]
+<diag1>
+a So, you know Python?
+b Perhaps I can learn something new from you.
+[Spotify.exe]
+<diag1>
+b Listening to music? Awesome, you know how much I love music!
+k You should listen to my song too~
+[AIMP.exe]
+<diag1>
+b Listening to music? Awesome, you know how much I love music!
+k You should listen to my song too~
+[Telegram.exe]
+<diag1>
+l Tell your friends I said hi!
+[osu!.exe]
+<diag1>
+b You can beat cookiezi!!!
+b You can do better!
+f Try to get some pp this time
+[regedit.exe]
+<diag1>
+q Oh, please be careful!
+r I really wouldn't want to lose you...
