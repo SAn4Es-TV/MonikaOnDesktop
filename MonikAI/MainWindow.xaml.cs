@@ -25,6 +25,7 @@ using System.Net;
 using System.Windows.Automation;
 using Lyre;
 using System.Globalization;
+using System.Web;
 
 namespace MonikaOnDesktop
 {
@@ -48,6 +49,7 @@ namespace MonikaOnDesktop
         string progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/progs.txt";         // Programs
         string sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/sites.txt";         // Sites
         string googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/google.txt";       // Google search
+        string youtubeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/youtube.txt";     // Youtube search
         string goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/goodbye.txt";     // Goodbye
 
         public static bool IsNight => MonikaSettings.Default.DarkMode != "Day" &&
@@ -65,7 +67,10 @@ namespace MonikaOnDesktop
 
         string Language;
 
+        //google.com/search?q=hi
+        //youtube.com/results?search_query=hi
         private const string GOOGLE_REGEX = ".*\\.?google\\..{2,3}.*q\\=(.*?)($|&)";
+        private const string YOUTUBE_REGEX = ".*\\.?youtube\\..{2,3}.*y\\=(.*?)($|&)";
 
         public MainWindow()
         {
@@ -132,23 +137,20 @@ namespace MonikaOnDesktop
 
         private void stopWatch_EventArrived(object sender, EventArrivedEventArgs e)
         {
-            // Check if currently speaking, only blink if not in dialog
-            if (processList.Contains(e.NewEvent.Properties["ProcessName"].Value.ToString()))
-            {
-                processList.Remove(e.NewEvent.Properties["ProcessName"].Value.ToString());
-                Debug.WriteLine("Process removed: " + e.NewEvent.Properties["ProcessName"].Value.ToString());
-            }
+            Debug.WriteLine("Process removed: " + e.NewEvent.Properties["ProcessName"].Value.ToString());
         }
-
-        List<string> processList = new List<string>();
+        public string lastProcess;
         private void startWatch_EventArrived(object sender, EventArrivedEventArgs e)
         {
             if (!isSpeaking)
             {
-
                 Debug.WriteLine("Запущен процесс: " + e.NewEvent.Properties["ProcessName"].Value.ToString());
                 string currentProcess = e.NewEvent.Properties["ProcessName"].Value.ToString();
-                readProgsTxt(currentProcess);
+                if (currentProcess != lastProcess)
+                {
+                    readProgsTxt(currentProcess);
+                    lastProcess = currentProcess;
+                }
             }
         }
 
@@ -205,6 +207,7 @@ namespace MonikaOnDesktop
                     progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/progs.txt";         // Programs
                     sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/sites.txt";         // Sites
                     googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/google.txt";       // Google search
+                    youtubeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/youtube.txt";     // Youtube search
                     goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/goodbye.txt";     // Goodbye
                     break;
                 case "en":
@@ -216,6 +219,7 @@ namespace MonikaOnDesktop
                     progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/progs.txt";         // Programs
                     sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/sites.txt";         // Sites
                     googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/google.txt";       // Google search
+                    youtubeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/youtube.txt";     // Youtube search
                     goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/goodbye.txt";     // Goodbye
                     break;
                 default:
@@ -227,6 +231,7 @@ namespace MonikaOnDesktop
                     progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/progs.txt";         // Programs
                     sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/sites.txt";         // Sites
                     googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/google.txt";       // Google search
+                    youtubeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/youtube.txt";     // Youtube search
                     goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/goodbye.txt";     // Goodbye
                     break;
 
@@ -349,6 +354,8 @@ namespace MonikaOnDesktop
                             // получаем объект ответа
                             //Debug.WriteLine(query);
                             readSitesTxt(formatURL(query));
+                            readGoogleTxt(formatURL(query));
+                            readYoutubeTxt(formatURL(query));
                             if (DateTime.Now >= nextBlink)
                             {
                                 // Check if currently speaking, only blink if not in dialog
@@ -764,6 +771,206 @@ namespace MonikaOnDesktop
                 for (int i = 0; i < Phrases.Count; i++)
                 {
                     Debug.WriteLine(Phrases[i]);
+                    siteDialog[i] = new Expression(Phrases[i].Substring(2), (Phrases[i])[0].ToString());
+                }
+                _ = Say(siteDialog);
+            }
+            //Моем полы
+            list.Clear();
+        }
+        public void readGoogleTxt(string site)
+        {
+            string sPath = googleDialogPath;
+            string[] lines;
+            List<string> list = new List<string>();
+            Random rnd = new Random();
+
+            using (StreamReader sr = new StreamReader(sPath))
+            {
+                lines = sr.ReadToEnd().Split('\n');
+            }
+
+            //Вечный цикл...
+            //while (true)
+            //{
+            Debug.WriteLine("Открыт сайт: " + site);
+            var googleMatchDeb = Regex.Match(site, GOOGLE_REGEX, RegexOptions.Compiled);
+            var searchDeb = HttpUtility.UrlDecode(googleMatchDeb.Groups[1].ToString()).Trim();
+            Debug.WriteLine("Извлекаю запрос: " + searchDeb.ToLower().Trim());
+
+            //Смотрим все процессы в файле и сравниваем с нашим
+            //Если такой процесс нашелся, то выбираем все его диалоги и фразы в List<>
+            var proccesses = lines.Select((v, i) => new { i, v }).Where(t => t.v.StartsWith("["));
+            foreach (var s in proccesses)
+            {
+                var a = s.v.Trim(new char[] { '[', ']', '\r' });
+                string[] b = a.Split("|");
+                foreach (var c in b)
+                {
+                    string d = c.ToLower().Trim().TrimEnd('/');
+                    if (d.StartsWith("http://"))
+                    {
+                        d = d.Substring(7);
+                    }
+
+                    if (d.StartsWith("https://"))
+                    {
+                        d = d.Substring(8);
+                    }
+
+                    if (d.StartsWith("www."))
+                    {
+                        d = d.Substring(4);
+                    }
+
+                    var googleMatch = Regex.Match(site, GOOGLE_REGEX, RegexOptions.Compiled);
+                    if (googleMatch.Success)
+                    {
+                        var search = HttpUtility.UrlDecode(googleMatch.Groups[1].ToString()).Trim();
+                        if (d == search.ToLower().Trim())
+                        {
+                            var dialogs = lines.Skip(s.i + 1).TakeWhile(x => !x.StartsWith("["));
+
+                            foreach (var v in dialogs)
+                            {
+                                if (v == "\r") continue; //Здесь избавляемся от той проблемы с пустой строкой, в посте выше.
+                                list.Add(v);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+
+
+            //Ищем индексы вхождений строк диалогов (начинаются с "<")
+            var dialIdx = list.Select((v, i) => new { i, v }).Where(t => t.v.StartsWith("<"));
+            List<int> idx = new List<int>();
+
+            //Добавляем эти индексы в список, из которого будем брать случайный элемент (диалог)
+            foreach (var s in dialIdx)
+                idx.Add(s.i);
+
+            //ГПСЧ
+            int rx = rnd.Next(0, idx.Count);
+
+            //Если список пуст -> уходим на второй круг... (т.е. такого процесса нет)
+            //if (list.Count == 0) continue;
+
+            if (list.Count != 0)
+            {
+                Debug.WriteLine("<----------Вывод случайного диалога---------->");
+
+                //Печатаем диалог
+                var Dialog = list.Skip(idx[rx]).Take(1).Select(s => s).ToArray();
+                Debug.WriteLine(Dialog[0]);
+
+                //Печатаем фразы к нему
+                List<string> Phrases = list.Skip(idx[rx] + 1).TakeWhile(x => !x.StartsWith("<")).ToList();
+                Expression[] siteDialog = new Expression[Phrases.Count];
+                for (int i = 0; i < Phrases.Count; i++)
+                {
+                    Debug.WriteLine(Phrases[i]);
+                    siteDialog[i] = new Expression(Phrases[i].Substring(2), (Phrases[i])[0].ToString());
+                }
+                _ = Say(siteDialog);
+            }
+            //Моем полы
+            list.Clear();
+        }
+        public void readYoutubeTxt(string site)
+        {
+            string sPath = youtubeDialogPath;
+            string[] lines;
+            List<string> list = new List<string>();
+            Random rnd = new Random();
+
+            using (StreamReader sr = new StreamReader(sPath))
+            {
+                lines = sr.ReadToEnd().Split('\n');
+            }
+
+            //Вечный цикл...
+            //while (true)
+            //{
+            Debug.WriteLine("Открыт сайт: " + site);
+            var googleMatchDeb = Regex.Match(site, YOUTUBE_REGEX, RegexOptions.Compiled);
+            var searchDeb = HttpUtility.UrlDecode(googleMatchDeb.Groups[1].ToString()).Trim();
+            Debug.WriteLine("Извлекаю запрос: " + searchDeb.ToLower().Trim());
+
+            //Смотрим все процессы в файле и сравниваем с нашим
+            //Если такой процесс нашелся, то выбираем все его диалоги и фразы в List<>
+            var proccesses = lines.Select((v, i) => new { i, v }).Where(t => t.v.StartsWith("["));
+            foreach (var s in proccesses)
+            {
+                var a = s.v.Trim(new char[] { '[', ']', '\r' });
+                string[] b = a.Split("|");
+                foreach (var c in b)
+                {
+                    string d = c.ToLower().Trim().TrimEnd('/');
+                    if (d.StartsWith("http://"))
+                    {
+                        d = d.Substring(7);
+                    }
+
+                    if (d.StartsWith("https://"))
+                    {
+                        d = d.Substring(8);
+                    }
+
+                    if (d.StartsWith("www."))
+                    {
+                        d = d.Substring(4);
+                    }
+
+                    var ytMatch = Regex.Match(site, YOUTUBE_REGEX, RegexOptions.Compiled);
+                    if (ytMatch.Success)
+                    {
+                        var search = HttpUtility.UrlDecode(ytMatch.Groups[1].ToString()).Trim();
+                        if (d == search.ToLower().Trim())
+                        {
+                            var dialogs = lines.Skip(s.i + 1).TakeWhile(x => !x.StartsWith("["));
+
+                            foreach (var v in dialogs)
+                            {
+                                if (v == "\r") continue; //Здесь избавляемся от той проблемы с пустой строкой, в посте выше.
+                                list.Add(v);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+
+
+            //Ищем индексы вхождений строк диалогов (начинаются с "<")
+            var dialIdx = list.Select((v, i) => new { i, v }).Where(t => t.v.StartsWith("<"));
+            List<int> idx = new List<int>();
+
+            //Добавляем эти индексы в список, из которого будем брать случайный элемент (диалог)
+            foreach (var s in dialIdx)
+                idx.Add(s.i);
+
+            //ГПСЧ
+            int rx = rnd.Next(0, idx.Count);
+
+            //Если список пуст -> уходим на второй круг... (т.е. такого процесса нет)
+            //if (list.Count == 0) continue;
+
+            if (list.Count != 0)
+            {
+                Debug.WriteLine("<----------Вывод случайного диалога---------->");
+
+                //Печатаем диалог
+                var Dialog = list.Skip(idx[rx]).Take(1).Select(s => s).ToArray();
+                Debug.WriteLine(Dialog[0]);
+
+                //Печатаем фразы к нему
+                List<string> Phrases = list.Skip(idx[rx] + 1).TakeWhile(x => !x.StartsWith("<")).ToList();
+                Expression[] siteDialog = new Expression[Phrases.Count];
+                for (int i = 0; i < Phrases.Count; i++)
+                {
+                    //Debug.WriteLine(Phrases[i]);
                     siteDialog[i] = new Expression(Phrases[i].Substring(2), (Phrases[i])[0].ToString());
                 }
                 _ = Say(siteDialog);
