@@ -512,7 +512,6 @@ namespace MonikaOnDesktop
             string[] dialogs = mainFile.Split(new string[] { "\n=\n" }, StringSplitOptions.RemoveEmptyEntries);
             Expression[][] byeDialogs = new Expression[dialogs.Length][];
 
-            Debug.WriteLine(dialogs[0].Substring(2).ToString());
             for (int a = 0; a < dialogs.Length; a++)
             {
                 string[] express = dialogs[a].Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
@@ -527,17 +526,30 @@ namespace MonikaOnDesktop
             Random rnd = new Random();
             int dialogNum = rnd.Next(byeDialogs.Length);
 
-            Debug.WriteLine(dialogs[dialogNum].Length + "|" + dialogs[dialogNum]);
 
-            Debug.Write("Говорим");
-            _ = Say(byeDialogs[dialogNum]);
             string[] expres = dialogs[dialogNum].Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
             int i = 0;
             Task.Factory.StartNew(new Action(() =>
             {
-                Thread.Sleep((dialogs[dialogNum].Length * 30) + (expres.Length * 700) + 700); // sleep
+            Debug.Write("Говорим");
+            _ = Say(byeDialogs[dialogNum]);
+                int delay = 0;
+                foreach(char s in dialogs[dialogNum])
+                {
+                    switch (s)
+                    {
+                        case '.':
+                            delay += 600;
+                            break;
+                        default:
+                            delay += 50;
+                            break;
+                    }
+                }
+                delay = delay + (expres.Length * 800) + 1000;
+                Debug.WriteLine(dialogs[dialogNum][0] + "|" + expres.Length + "|" + delay);
+                Thread.Sleep(delay); // sleep
                 i++;
-                Debug.Write(i);
                 if (i == 1)
                 {
                     Debug.Write("Выходим");
