@@ -12,6 +12,8 @@
   <ItemGroup>
     <None Remove="5a9a580ac2da1161eae7ea2e.png" />
     <None Remove="comic.ttf" />
+    <None Remove="gui\choice_hover_background.png" />
+    <None Remove="gui\choice_idle_background.png" />
     <None Remove="gui\textbox.png" />
     <None Remove="ico.ico" />
     <None Remove="monika\1-n.png" />
@@ -70,6 +72,12 @@
   <ItemGroup>
     <Resource Include="5a9a580ac2da1161eae7ea2e.png" />
     <Resource Include="comic.ttf">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="gui\choice_hover_background.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="gui\choice_idle_background.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="gui\textbox.png">

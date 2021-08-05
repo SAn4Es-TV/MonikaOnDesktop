@@ -8,28 +8,73 @@
         Title="MainWindow" Height="512" Width="800" ShowInTaskbar="False" WindowState="Normal" WindowStyle="None"
         AllowsTransparency="True" FontSize="20"
         Topmost="True" HorizontalAlignment="Right" VerticalAlignment="Bottom"
-        IsHitTestVisible="False"
         Loaded="Window_Loaded"
         Closed="Window_Closed" Icon="/5a9a580ac2da1161eae7ea2e.png"
         >
     <Window.Resources>
         <SolidColorBrush x:Key="mainColor" Color="White" />
         <SolidColorBrush x:Key="outlineColor" Color="Black" />
+        <Style TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                            <Grid>
+                                <Rectangle x:Name="background"
+                                   Fill="{TemplateBinding Background}"/>
+                                <ContentPresenter
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="background" Property="Opacity" Value="1"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="False">
+                                <Setter TargetName="background" Property="Opacity" Value="1"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <ImageBrush ImageSource="pack://application:,,,/gui/choice_idle_background.png"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <ImageBrush ImageSource="pack://application:,,,/gui/choice_hover_background.png"/>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
     <Window.Background>
         <SolidColorBrush Opacity="0.0" Color="White" />
     </Window.Background>
-    <Grid HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Top" IsHitTestVisible="False">
+    <Grid HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Top" IsHitTestVisible="True">
         
-        <Image x:Name="main" Margin="100,-60,100,0" Source="pack://application:,,,/monika/1.png" StretchDirection="Both" Stretch="Uniform" IsHitTestVisible="False"  />
-        <Image x:Name="face" Margin="302,126,322,262" Stretch="Fill" Source="/monika/b.png" IsHitTestVisible="False" />
-        <Image x:Name="textWindow" Margin="50,390,50,20" Stretch="Fill" Source="pack://application:,,,/gui/textbox.png" IsHitTestVisible="False" Visibility="Hidden"/>
+        <Image x:Name="main" Margin="100,-60,100,0" Source="pack://application:,,,/monika/1.png" StretchDirection="Both" Stretch="Uniform"/>
+        <Image x:Name="face" Margin="302,126,322,262" Stretch="Fill" Source="/monika/b.png"/>
+        <Image x:Name="textWindow" Margin="50,390,50,20" Stretch="Fill" Source="pack://application:,,,/gui/textbox.png" Visibility="Hidden"/>
         <local:OutlinedTextBlock x:Name="textBlock" FontFamily="Comic Sans MS" Margin="70,410,70,40" Text="Тестовый текст" TextWrapping="Wrap" StrokeThickness="1.5" Stroke="{StaticResource outlineColor}" Fill="{StaticResource mainColor}">
             <!--<TextBlock.Effect>
                 <DropShadowEffect ShadowDepth="0" BlurRadius="0" Opacity="1" Color="Black"/>
             </TextBlock.Effect>-->
         </local:OutlinedTextBlock>
-        <TextBlock Visibility="Hidden" x:Name="console" FontSize="10" Text="Тестовый текст" Background="#A0000000" Foreground="White" IsHitTestVisible="False" TextWrapping="Wrap"/>
+        <!-- <StackPanel Width="500" Height="400" Name="ButtonsPanel" Background="#00000000" Orientation="Horizontal" SnapsToDevicePixels="True">-->
+        <Grid x:Name="ButtonsGrid" Width="500" Height="400">
+                <Grid.RowDefinitions>
+                </Grid.RowDefinitions>
+                <!-- Put buttons here. -->
+            </Grid>
+    <!-- </StackPanel>-->
         <tb:TaskbarIcon x:Name="myNotifyIcon"
                     Visibility="Visible"
                     IconSource="pack://application:,,,/ico.ico"
@@ -44,4 +89,5 @@
             </tb:TaskbarIcon.ContextMenu>
         </tb:TaskbarIcon>
     </Grid>
+    
 </Window>

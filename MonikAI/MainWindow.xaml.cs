@@ -18,7 +18,6 @@ using System.Threading;
 using System.IO;
 using System.Diagnostics;
 using System.Reflection;
-using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 using System.Net;
@@ -26,6 +25,8 @@ using System.Windows.Automation;
 using Lyre;
 using System.Globalization;
 using System.Web;
+using System.Xml;
+using MonikaOnDesktop.Models;
 
 namespace MonikaOnDesktop
 {
@@ -72,6 +73,7 @@ namespace MonikaOnDesktop
         private const string GOOGLE_REGEX = ".*\\.?google\\..{2,3}.*q\\=(.*?)($|&)";
         private const string YOUTUBE_REGEX = ".*\\.?youtube\\..{2,3}.*y\\=(.*?)($|&)";
 
+        private EventWaitHandle wh = new AutoResetEvent(false);
         public MainWindow()
         {
             InitializeComponent();
@@ -106,7 +108,7 @@ namespace MonikaOnDesktop
             //playerName = "Denis Solicen";
             this.setFace("a");
 
-            this.IsHitTestVisible = false;
+            //this.IsHitTestVisible = false;
             //var primaryMonitorArea = Screen.PrimaryScreen.Bounds;
             //Left = primaryMonitorArea.Right - this.Width;
             //Top = primaryMonitorArea.Bottom - this.Height;
@@ -144,11 +146,12 @@ namespace MonikaOnDesktop
         {
             if (!isSpeaking)
             {
-                Debug.WriteLine("Запущен процесс: " + e.NewEvent.Properties["ProcessName"].Value.ToString());
+                //consoleWrite("Запущен процесс: " + e.NewEvent.Properties["ProcessName"].Value.ToString(), true);
                 string currentProcess = e.NewEvent.Properties["ProcessName"].Value.ToString();
                 if (currentProcess != lastProcess)
                 {
-                    readProgsTxt(currentProcess);
+                    //readProgsTxt(currentProcess);
+                    readLongXml(currentProcess, progsDialogPath, 0);
                     lastProcess = currentProcess;
                 }
             }
@@ -178,16 +181,16 @@ namespace MonikaOnDesktop
                         Language = MonikaSettings.Default.Language.Parent.ToString();
                         Lang = MonikaSettings.Default.Language;
                         setLanguage(Language);
-                        Debug.WriteLine("Settings saved!");
-                        Debug.WriteLine("AutoStart --> " + MonikaSettings.Default.AutoStart);
-                        Debug.WriteLine("DarkMode --> " + MonikaSettings.Default.DarkMode);
-                        Debug.WriteLine("idleRandom --> " + MonikaSettings.Default.idleRandom);
-                        Debug.WriteLine("NightEnd --> " + MonikaSettings.Default.NightEnd);
-                        Debug.WriteLine("NightStart --> " + MonikaSettings.Default.NightStart);
-                        Debug.WriteLine("UserName --> " + MonikaSettings.Default.UserName);
-                        Debug.WriteLine("Scaler --> " + MonikaSettings.Default.Scaler);
-                        Debug.WriteLine("screenNum --> " + MonikaSettings.Default.screenNum);
-                        Debug.WriteLine("Language --> " + MonikaSettings.Default.Language.Parent.ToString());
+                        consoleWrite("Settings saved!", true);
+                        consoleWrite("AutoStart --> " + MonikaSettings.Default.AutoStart, false);
+                        consoleWrite("DarkMode --> " + MonikaSettings.Default.DarkMode, false);
+                        consoleWrite("idleRandom --> " + MonikaSettings.Default.idleRandom, false);
+                        consoleWrite("NightEnd --> " + MonikaSettings.Default.NightEnd, false);
+                        consoleWrite("NightStart --> " + MonikaSettings.Default.NightStart, false);
+                        consoleWrite("UserName --> " + MonikaSettings.Default.UserName, false);
+                        consoleWrite("Scaler --> " + MonikaSettings.Default.Scaler, false);
+                        consoleWrite("screenNum --> " + MonikaSettings.Default.screenNum, false);
+                        consoleWrite("Language --> " + MonikaSettings.Default.Language.Parent.ToString(), false);
                     }
                 }
             });
@@ -241,7 +244,7 @@ namespace MonikaOnDesktop
         {
             if (!isSpeaking)
             {
-                readByeTxt();
+                //readByeTxt();
             }
         }
         public void Window_Loaded(object sender, RoutedEventArgs e)
@@ -292,7 +295,8 @@ namespace MonikaOnDesktop
                 }
                 else
                 {
-                    readGreetingsTxt();
+                    readXml(greetingsDialogPath);
+                    //readIdleXml();
                 }
 
                 // No idea where the date comes from, someone mentioned it in the spreadsheet. Seems legit.
@@ -353,14 +357,17 @@ namespace MonikaOnDesktop
                             string query = context.Request.QueryString["myurl"];
                             // получаем объект ответа
                             //Debug.WriteLine(query);
-                            readSitesTxt(formatURL(query));
-                            readGoogleTxt(formatURL(query));
-                            readYoutubeTxt(formatURL(query));
+                            //readSitesTxt(formatURL(query));
+                            Debug.WriteLine(formatURL(query));
+                            readLongXml(formatURL(query), sitesDialogPath, 1);
+                            readLongXml(formatURL(query), googleDialogPath, 2);
+                            readLongXml(formatURL(query), youtubeDialogPath, 3);
                             if (DateTime.Now >= nextBlink)
                             {
                                 // Check if currently speaking, only blink if not in dialog
                                 if (!isSpeaking)
                                 {
+                                    consoleWrite("Моргнули", true);
                                     this.setFace(eyesClosed);
                                     Debug.WriteLine("eyesClosed");
                                     Task.Delay(200).Wait();
@@ -390,7 +397,7 @@ namespace MonikaOnDesktop
                                 // Check if currently speaking, only blink if not in dialog
                                 if (!isSpeaking)
                                 {
-                                    readIdleTxt();
+                                    readXml(idleDialogPath);
                                 }
 
                                 nextGialog = DateTime.Now + TimeSpan.FromSeconds(randomDialog.Next(MonikaSettings.Default.idleRandomFrom, MonikaSettings.Default.idleRandomTo));
@@ -417,7 +424,7 @@ namespace MonikaOnDesktop
             }
             _ = this.Dispatcher.Invoke(async () =>
               {
-                  textWindow.Visibility = Visibility.Visible;
+                  //textWindow.Visibility = Visibility.Visible;
                   foreach (Expression ex in expression)
                   {
                       try
@@ -433,16 +440,16 @@ namespace MonikaOnDesktop
                               face.Source = new BitmapImage(new Uri("pack://application:,,,/monika/" + ex.Face + ".png"));
                               main.Source = new BitmapImage(new Uri("pack://application:,,,/monika/1.png"));
                           }
-                          Debug.WriteLine(newText);
+                          consoleWrite(newText, true);
                           for (int i = 0; i < newText.Length; i++)
                           {
                               this.textBlock.Text += newText[i];
-                              if (newText[i].ToString() == ".") { await Task.Delay(500); }//set 500 if you need uncoment this line |
-                                                                                          //else if (newText[i] == ',') { await Task.Delay(50); }                                 //           |
-                              else { await Task.Delay(30); }                                                          //           |
-                                                                                                                      //           |
-                          }                                                                                           //           |
-                          await Task.Delay(newText.Length * 30 + 700);                                                //         <-- this line
+                              if (newText[i].ToString() == ".") { await Task.Delay(500); }
+                                                                                                                       
+                              else { await Task.Delay(30); }                                                          
+                                                                                                                      
+                          }                                                                                           
+                          await Task.Delay(newText.Length * 30 + 700);                      
                           delay = newText.Length * 30 + 700;
                           textBlock.Text = "";
                       }
@@ -454,10 +461,85 @@ namespace MonikaOnDesktop
                       }
                   }
                   setFace("a");
-                  textWindow.Visibility = Visibility.Hidden;
+                  //textWindow.Visibility = Visibility.Hidden;
                   isSpeaking = false;
               });
 
+        }
+        Expression[][] exe;
+        public void Menu(string question, string[] q, Expression[][] a)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                textBlock.Text = "";
+                textBlock.Text = question;
+                ButtonsGrid.RowDefinitions.Clear();
+                this.ButtonsGrid.Children.Clear();
+                for (int i = 0; i < q.Length; i++)
+            {
+                RowDefinition row = new RowDefinition();
+                ButtonsGrid.RowDefinitions.Add(row);
+                var text = new OutlinedTextBlock
+                {
+                    Text = q[i],
+                    FontFamily = new FontFamily("Comic Sans MS"),
+                    TextWrapping = TextWrapping.Wrap,
+                    StrokeThickness = 1.5,
+                    Stroke = new SolidColorBrush(Color.FromArgb(255, 0, 0, 0)),
+                    Fill = new SolidColorBrush(Color.FromArgb(255, 255, 255, 255))
+                };
+                var button = new Button
+                {
+                    Name = "butt" + i,
+                    Content = text,
+                    Width = 350,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Center
+                };
+                button.Click += Button_Click;
+
+                Grid.SetRow(button, i);
+                this.ButtonsGrid.Children.Add(button);
+            }
+            exe = a;
+            });
+
+        }
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Button butt = (sender as Button);
+            int num = int.Parse(butt.Name.Substring(4));
+            Debug.WriteLine("Clicked " + num);
+            this.Dispatcher.Invoke(() => {
+                textBlock.Text = "";
+                ButtonsGrid.RowDefinitions.Clear();
+                this.ButtonsGrid.Children.Clear();
+            });
+            //exList.Add(exe[num]);
+            Task.Factory.StartNew(new Action(() =>
+                {
+                    foreach (Expression expression in exe[num])
+                    {
+                        foreach (char s in expression.Text)
+                        {
+                            switch (s)
+                            {
+                                case '.':
+                                    //delay += 500;
+                                    break;
+                                default:
+                                    delay += 30;
+                                    break;
+                            }
+                        }
+                        delay = delay + 700;
+                        _ = Say(new[] { expression });
+                    Thread.Sleep(delay); // sleep
+                    }
+                    System.Threading.Thread doW = new System.Threading.Thread(sayIdle);
+                    doW.IsBackground = true;
+                    doW.Start();
+                }));
         }
         public void setFace(string faceName)
         {
@@ -482,7 +564,7 @@ namespace MonikaOnDesktop
         {
             this.applicationRunning = false;
         }
-        public void readGreetingsTxt()
+        /*public void readGreetingsTxt()
         {
             string mf = File.ReadAllText(greetingsDialogPath);
             string mainFile = mf.Replace("\r", String.Empty);
@@ -531,7 +613,7 @@ namespace MonikaOnDesktop
             int i = 0;
             Task.Factory.StartNew(new Action(() =>
             {
-            Debug.Write("Говорим");
+                consoleWrite("Говорим", true);
             _ = Say(byeDialogs[dialogNum]);
                 int delay = 0;
                 foreach(char s in dialogs[dialogNum])
@@ -552,7 +634,7 @@ namespace MonikaOnDesktop
                 i++;
                 if (i == 1)
                 {
-                    Debug.Write("Выходим");
+                    consoleWrite("Выходим", true);
                     MonikaOnDesktop.MonikaSettings.Default.isColdShutdown = false;
                     Environment.Exit(0);
                 }
@@ -608,17 +690,17 @@ namespace MonikaOnDesktop
             Random rnd = new Random();
             int dialogNum = rnd.Next(idleDialogs.Length);
             //Debug.WriteLine("Позапрошлый номер диалога: " + lastLastDialog);
-            Debug.WriteLine("Прошлый номер диалога: " + lastDialog);
-            Debug.WriteLine("Рандомный номер диалога: " + dialogNum);
+            consoleWrite("Прошлый номер диалога: " + lastDialog, true);
+            consoleWrite("Рандомный номер диалога: " + dialogNum, true);
             //while (dialogNum == lastDialog && dialogNum == lastLastDialog)
             while (dialogNum == lastDialog) // жоский костыль, без которого показываются повторные диалоги
             {
-                Debug.WriteLine("Номер диалога совпадает с старым, подбираю новый");
+                consoleWrite("Номер диалога совпадает с старым, подбираю новый", true);
                 dialogNum = rnd.Next(idleDialogs.Length);
             }
             //lastLastDialog = lastDialog;
             lastDialog = dialogNum;
-            Debug.WriteLine("Диалог не совпадает с старым, показываю: " + lastDialog);
+            consoleWrite("Диалог не совпадает с старым, показываю: " + lastDialog, true);
 
             _ = Say(idleDialogs[dialogNum]);
 
@@ -638,7 +720,7 @@ namespace MonikaOnDesktop
             //Вечный цикл...
             //while (true)
             //{
-            Debug.WriteLine("Запущен процесс: " + proc);
+            consoleWrite("Запущен процесс: " + proc, true);
 
             //Смотрим все процессы в файле и сравниваем с нашим
             //Если такой процесс нашелся, то выбираем все его диалоги и фразы в List<>
@@ -680,11 +762,11 @@ namespace MonikaOnDesktop
 
             if (list.Count != 0)
             {
-                Debug.WriteLine("<----------Вывод случайного диалога---------->");
+                consoleWrite("<----------Вывод случайного диалога---------->", false);
 
                 //Печатаем диалог
                 var Dialog = list.Skip(idx[rx]).Take(1).Select(s => s).ToArray();
-                Debug.WriteLine(Dialog[0]);
+                consoleWrite(Dialog[0], true);
 
                 //Печатаем фразы к нему
                 List<string> Phrases = list.Skip(idx[rx] + 1).TakeWhile(x => !x.StartsWith("<")).ToList();
@@ -714,7 +796,7 @@ namespace MonikaOnDesktop
             //Вечный цикл...
             //while (true)
             //{
-            Debug.WriteLine("Открыт сайт: " + site);
+            consoleWrite("Открыт сайт: " + site, true);
 
             //Смотрим все процессы в файле и сравниваем с нашим
             //Если такой процесс нашелся, то выбираем все его диалоги и фразы в List<>
@@ -771,11 +853,11 @@ namespace MonikaOnDesktop
 
             if (list.Count != 0)
             {
-                Debug.WriteLine("<----------Вывод случайного диалога---------->");
+                consoleWrite("<----------Вывод случайного диалога---------->", false);
 
                 //Печатаем диалог
                 var Dialog = list.Skip(idx[rx]).Take(1).Select(s => s).ToArray();
-                Debug.WriteLine(Dialog[0]);
+                consoleWrite(Dialog[0], true);
 
                 //Печатаем фразы к нему
                 List<string> Phrases = list.Skip(idx[rx] + 1).TakeWhile(x => !x.StartsWith("<")).ToList();
@@ -805,10 +887,10 @@ namespace MonikaOnDesktop
             //Вечный цикл...
             //while (true)
             //{
-            Debug.WriteLine("Открыт сайт: " + site);
+            consoleWrite("Открыт сайт: " + site, true);
             var googleMatchDeb = Regex.Match(site, GOOGLE_REGEX, RegexOptions.Compiled);
             var searchDeb = HttpUtility.UrlDecode(googleMatchDeb.Groups[1].ToString()).Trim();
-            Debug.WriteLine("Извлекаю запрос: " + searchDeb.ToLower().Trim());
+            consoleWrite("Извлекаю запрос: " + searchDeb.ToLower().Trim(), true);
 
             //Смотрим все процессы в файле и сравниваем с нашим
             //Если такой процесс нашелся, то выбираем все его диалоги и фразы в List<>
@@ -871,18 +953,18 @@ namespace MonikaOnDesktop
 
             if (list.Count != 0)
             {
-                Debug.WriteLine("<----------Вывод случайного диалога---------->");
+                consoleWrite("<----------Вывод случайного диалога---------->", false);
 
                 //Печатаем диалог
                 var Dialog = list.Skip(idx[rx]).Take(1).Select(s => s).ToArray();
-                Debug.WriteLine(Dialog[0]);
+                consoleWrite(Dialog[0], true);
 
                 //Печатаем фразы к нему
                 List<string> Phrases = list.Skip(idx[rx] + 1).TakeWhile(x => !x.StartsWith("<")).ToList();
                 Expression[] siteDialog = new Expression[Phrases.Count];
                 for (int i = 0; i < Phrases.Count; i++)
                 {
-                    Debug.WriteLine(Phrases[i]);
+                    //consoleWrite(Phrases[i], false);
                     siteDialog[i] = new Expression(Phrases[i].Substring(2), (Phrases[i])[0].ToString());
                 }
                 _ = Say(siteDialog);
@@ -905,10 +987,10 @@ namespace MonikaOnDesktop
             //Вечный цикл...
             //while (true)
             //{
-            Debug.WriteLine("Открыт сайт: " + site);
+            consoleWrite("Открыт сайт: " + site, true);
             var googleMatchDeb = Regex.Match(site, YOUTUBE_REGEX, RegexOptions.Compiled);
             var searchDeb = HttpUtility.UrlDecode(googleMatchDeb.Groups[1].ToString()).Trim();
-            Debug.WriteLine("Извлекаю запрос: " + searchDeb.ToLower().Trim());
+            consoleWrite("Извлекаю запрос: " + searchDeb.ToLower().Trim(), true);
 
             //Смотрим все процессы в файле и сравниваем с нашим
             //Если такой процесс нашелся, то выбираем все его диалоги и фразы в List<>
@@ -971,11 +1053,12 @@ namespace MonikaOnDesktop
 
             if (list.Count != 0)
             {
-                Debug.WriteLine("<----------Вывод случайного диалога---------->");
+                consoleWrite("<----------Вывод случайного диалога---------->", false);
+                //Debug.WriteLine("<----------Вывод случайного диалога---------->");
 
                 //Печатаем диалог
                 var Dialog = list.Skip(idx[rx]).Take(1).Select(s => s).ToArray();
-                Debug.WriteLine(Dialog[0]);
+                consoleWrite(Dialog[0], true);
 
                 //Печатаем фразы к нему
                 List<string> Phrases = list.Skip(idx[rx] + 1).TakeWhile(x => !x.StartsWith("<")).ToList();
@@ -989,12 +1072,375 @@ namespace MonikaOnDesktop
             }
             //Моем полы
             list.Clear();
+        }*/
+
+        List<DialogModel> dm = new List<DialogModel>();
+        int num = 0;
+        #region
+        public void readXml(string sPath)
+        {
+            // string sPath = idleDialogPath;
+            string mainXML = "<Dialogs>\n\t<Dialog>";
+
+            StreamReader f = new StreamReader(sPath);
+            while (!f.EndOfStream)
+            {
+                string m = f.ReadLine();
+                string s = m.Replace("\r", String.Empty);
+                string S = "";
+                if (s.Contains("menu:"))
+                {
+                    S = s.Replace("menu:", "\n\t\t<Menu>");
+                }
+                if (s.Contains("menuend"))
+                {
+                    S = s.Replace("menuend", "\n\t\t\t</Answer>\n\t\t</Menu>");
+                }
+                if (s.Contains("\t\t"))
+                {
+                    //S = s.Insert(0, "\n\t\t\t<answer text = \"") + "\">";
+                    S = s.Replace("\t\t", "\n\t\t\t<Answer text=\"") + "\">";
+                }
+                if (s.Contains("ansend"))
+                {
+                    S = s.Replace("ansend", "\n\t\t\t</Answer>");
+                }
+                if (s.Contains("\t\t\t"))
+                {
+                    S = s.Replace("\t\t\t", "\n\t\t\t\t<Text>") + "</Text>\n\t\t\t</Answer>\n\t\t</Menu>";
+                }
+                if (!s.Contains("\t\t") && !s.Contains("\t\t") && !s.Contains("menuend") && !s.Contains("menu:"))
+                {
+                    S = s.Insert(0, "\n\t\t<Text>") + "</Text>";
+                }
+                mainXML += S;
+            }
+            f.Close();
+
+            mainXML += "\n\t</Dialog>\n</Dialogs>";
+            string mainxml = mainXML.Replace("\n\t\t<Text>=</Text>", "\n\t</Dialog>\n\t<Dialog>");
+            string mainXml = mainxml.Replace("\n\t\t\t</Answer>\n\t\t</Menu>\n\t\t\t\t<Text>", "\n\t\t\t\t<Text>").Replace("\n\t\t\t</Answer>\n\t\t</Menu>\n\t\t\t<Answer", "\n\t\t\t<Answer").Replace("</Text>\n\t\t\t<Answer", "</Text>\n\t\t\t</Answer>\n\t\t\t<Answer");
+
+            #region
+            string s1 = mainXml.Replace("\t", String.Empty);
+            string s2 = s1.Replace("\n", String.Empty);
+            XmlDocument xDoc = new XmlDocument();
+            //string path = testXml;
+            //xDoc.Load(path);
+            xDoc.LoadXml(s2);
+            // получим корневой элемент
+            XmlElement xRoot = xDoc.DocumentElement;
+            // обход всех узлов в корневом элементе
+            List<DialogModel> idm = new List<DialogModel>();
+            foreach (XmlNode xnode in xRoot)
+            {
+                if (xnode.Name == "Dialog")
+                {
+                    //Console.WriteLine("Dialog:");
+                    idm.Add(new DialogModel(xnode));
+                }
+            }
+            dm = idm;
+            Random rnd = new Random();
+            num = rnd.Next(idm.Count);
+            System.Threading.Thread doW = new System.Threading.Thread(sayIdle);
+            doW.IsBackground = true;
+            doW.Start();
+            #endregion
+
         }
-        public void consoleWrite(string text)
+        int dialogNum;
+        public void sayIdle()
+        {
+            this.Dispatcher.Invoke(() =>{textWindow.Visibility = Visibility.Visible;});
+            Debug.WriteLine(dm[num].Node.Name);
+            for (int u = dialogNum; u < dm[num].Node.ChildNodes.Count; u++)
+            {
+                    int delay = 0;
+                    XmlNode childnode = dm[num].Node.ChildNodes[u];
+                        // если узел age
+                        if (childnode.Name == "Menu")
+                        {
+                        string[] q = new string[childnode.ChildNodes.Count];
+                            Expression[][] ex = new Expression[childnode.ChildNodes.Count][];
+                            for (int i = 0; i < childnode.ChildNodes.Count; i++)
+                            {
+                                XmlNode attr = childnode.ChildNodes[i].Attributes.GetNamedItem("text");
+                                q[i] = attr.Value;
+                                Expression[] ex1 = new Expression[childnode.ChildNodes[i].ChildNodes.Count];
+                                for (int a = 0; a < childnode.ChildNodes[i].ChildNodes.Count; a++)
+                                {
+                                    ex1[a] = new Expression(childnode.ChildNodes[i].ChildNodes[a].InnerText.Substring(2), childnode.ChildNodes[i].ChildNodes[a].InnerText[0].ToString());
+                                }
+                                ex[i] = ex1;
+                            }
+                            Menu(dm[num].Node.ChildNodes[u-1].InnerText.Substring(2), q, ex);
+                            dialogNum = u + 1;
+                    Debug.WriteLine(dialogNum);
+                            break;
+                        }
+                        if (childnode.Name == "Text")
+                        {
+                            //Console.WriteLine(childnode.InnerText);
+                            //exList.Add(new Expression(childnode.InnerText.Substring(2), childnode.InnerText[0].ToString()));
+                            foreach (char s in childnode.InnerText.Substring(2))
+                            {
+                                switch (s)
+                                {
+                                    case '.':
+                                        delay += 500;
+                                        break;
+                                    default:
+                                        delay += 70;
+                                        break;
+                                }
+                            }
+                            delay = delay + 800;
+                            _ = Say(new[] { new Expression(childnode.InnerText.Substring(2), childnode.InnerText[0].ToString()) });
+                        }
+                            Thread.Sleep(delay); // sleep
+                if (u >= dm[num].Node.ChildNodes.Count-1)
+                {
+                    this.Dispatcher.Invoke(() => {
+                        textWindow.Visibility = Visibility.Hidden;
+                    });
+                }
+            }
+        }
+        #endregion
+
+        List<NamedDialogModel> ldm = new List<NamedDialogModel>();
+        public void readLongXml(string Name, string sPath, int type)
+        {
+            #region
+            //string sPath = progsDialogPath;
+            string mainXML = "<Mains>";
+
+            StreamReader f = new StreamReader(sPath);
+            while (!f.EndOfStream)
+            {
+                string m = f.ReadLine();
+                string s = m.Replace("\r", String.Empty);
+                string S = "";
+                if (s.Contains("menu:"))
+                {
+                    S = s.Replace("menu:", "\n\t\t\t<Menu>");
+                }
+                if (s.Contains("menuend"))
+                {
+                    S = s.Replace("menuend", "\n\t\t\t</Menu>");
+                }
+                if (s.Contains("\t\t"))
+                {
+                    //S = s.Insert(0, "\n\t\t\t<answer text = \"") + "\">";
+                    S = s.Replace("\t\t", "\n\t\t\t\t<Answer text=\"") + "\">";
+                }
+                if (s.Contains("ansend"))
+                {
+                    S = s.Replace("ansend", "\n\t\t\t\t</Answer>");
+                }/*
+                if (s.Contains("\t\t<Text>["))
+                {
+                    S = s.Replace("\t\t<Text>[", "\n\t<Process name=\"");
+                    S = s.Replace("]</Text>", "\">");
+                }*/
+                if (s.Contains("\t\t\t") && !s.Contains("["))
+                {
+                    S = s.Replace("\t\t\t", "\n\t\t\t\t\t<Text>") + "</Text>\n\t\t\t\t</Answer>\n\t\t\t</Menu>";
+                }
+                if (!s.Contains("\t\t") && !s.Contains("\t\t") && !s.Contains("menuend") && !s.Contains("menu:"))
+                {
+                    S = s.Insert(0, "\n\t\t\t<Text>") + "</Text>";
+                }
+                mainXML += S;
+            }
+            f.Close();
+
+            mainXML += "\n\t\t</Dialog>\n\t</Main>\n</Mains>";
+            string mainxml = mainXML.Replace("\t\t\t<Text>=</Text>", "\t\t</Dialog>\n\t\t<Dialog>").Replace("\t\t\t<Text>[", "\t\t</Dialog>\n\t</Main>\n\t<Main name=\"").Replace("]</Text>", "\">\n\t\t<Dialog>");
+            string mainXml = mainxml.Replace("<Mains>\n\t\t</Dialog>\n\t</Main>", "<Mains>").Replace("\n\t\t\t\t</Answer>\n\t\t\t</Menu>\n\t\t\t\t\t<Text>", "\n\t\t\t\t\t<Text>").Replace("\n\t\t\t\t</Answer>\n\t\t\t</Menu>\n\t\t\t\t<Answer", "\n\t\t\t\t<Answer").Replace("</Text>\n\t\t\t\t<Answer", "</Text>\n\t\t\t\t</Answer>\n\t\t\t\t<Answer");
+
+            //Console.Write("XML Example:\n" + mainXml);
+            Console.WriteLine("Print dialogues:\n");
+            #endregion
+            #region
+            string s1 = mainXml.Replace("\t", String.Empty);
+            string s2 = s1.Replace("\n", String.Empty);
+            XmlDocument xDoc = new XmlDocument();
+            //string path = testXml;
+            //xDoc.Load(path);
+            xDoc.LoadXml(s2);
+            // получим корневой элемент
+            XmlElement xRoot = xDoc.DocumentElement;
+            string[][] names = new string[xRoot.ChildNodes.Count][];
+            List<NamedDialogModel> Ldm = new List<NamedDialogModel>();
+            // обход всех узлов в корневом элементе
+            foreach (XmlNode xnode in xRoot)
+            {
+                List<DialogModel> dm = new List<DialogModel>();
+                string[] name = xnode.Attributes.GetNamedItem("name").Value.Split("|");
+                if (xnode.Name == "Main")
+                {
+                    foreach (XmlNode progsnode in xnode.ChildNodes)
+                    {
+                        dm.Add(new DialogModel(progsnode));
+                    }
+                }
+                Ldm.Add(new NamedDialogModel(name, dm));
+                //Console.WriteLine(ndm[0].Names[0] + "|" + ndm[0].DM[0].Node.InnerText);
+            }
+            switch (type)
+            {
+                case 0:
+                    foreach (NamedDialogModel NDM in Ldm)
+                    {
+                        if (NDM.Names.Contains(Name))
+                        {
+                            dm = NDM.DM;
+
+                            Random rnd = new Random();
+                            num = rnd.Next(dm.Count);
+                            System.Threading.Thread doW = new System.Threading.Thread(sayIdle);
+                            doW.IsBackground = true;
+                            doW.Start();
+                        }
+                    }
+                    break;
+                case 1:
+                    foreach (NamedDialogModel NDM in Ldm)
+                    {
+                        foreach (string c in NDM.Names)
+                        {
+                            string d = c.ToLower().Trim().TrimEnd('/');
+
+                            //Обновлено определение сайтов на более новое через Regex.Matches - обновление подготовил Денис Солицен
+
+                            if (d.StartsWith("http://"))
+                            {
+                                d = d.Substring(7);
+                            }
+
+                            if (d.StartsWith("https://"))
+                            {
+                                d = d.Substring(8);
+                            }
+
+                            if (d.StartsWith("www."))
+                            {
+                                d = d.Substring(4);
+                            }
+                            if (Name.Contains(d))
+                            {
+                                dm = NDM.DM;
+
+                                Random rnd = new Random();
+                                num = rnd.Next(dm.Count);
+                                System.Threading.Thread doW = new System.Threading.Thread(sayIdle);
+                                doW.IsBackground = true;
+                                doW.Start();
+                            }
+                        }
+                    }
+                    break;
+                case 2:
+                    foreach (NamedDialogModel NDM in Ldm)
+                    {
+                        foreach (string c in NDM.Names)
+                        {
+                            string d = c.ToLower().Trim().TrimEnd('/');
+
+                            //Обновлено определение сайтов на более новое через Regex.Matches - обновление подготовил Денис Солицен
+
+                            if (d.StartsWith("http://"))
+                            {
+                                d = d.Substring(7);
+                            }
+
+                            if (d.StartsWith("https://"))
+                            {
+                                d = d.Substring(8);
+                            }
+
+                            if (d.StartsWith("www."))
+                            {
+                                d = d.Substring(4);
+                            }
+                            var googleMatch = Regex.Match(Name, GOOGLE_REGEX, RegexOptions.Compiled);
+                            if (googleMatch.Success)
+                            {
+                                var search = HttpUtility.UrlDecode(googleMatch.Groups[1].ToString()).Trim();
+                                if (search.ToLower().Trim().Contains(d))
+                                {
+                                    dm = NDM.DM;
+
+                                    Random rnd = new Random();
+                                    num = rnd.Next(dm.Count);
+                                    System.Threading.Thread doW = new System.Threading.Thread(sayIdle);
+                                    doW.IsBackground = true;
+                                    doW.Start();
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 3:
+                    foreach (NamedDialogModel NDM in Ldm)
+                    {
+                        foreach (string c in NDM.Names)
+                        {
+                            string d = c.ToLower().Trim().TrimEnd('/');
+
+                            //Обновлено определение сайтов на более новое через Regex.Matches - обновление подготовил Денис Солицен
+
+                            if (d.StartsWith("http://"))
+                            {
+                                d = d.Substring(7);
+                            }
+
+                            if (d.StartsWith("https://"))
+                            {
+                                d = d.Substring(8);
+                            }
+
+                            if (d.StartsWith("www."))
+                            {
+                                d = d.Substring(4);
+                            }
+                            var youtubeMatch = Regex.Match(Name, YOUTUBE_REGEX, RegexOptions.Compiled);
+                            if (youtubeMatch.Success)
+                            {
+                                var search = HttpUtility.UrlDecode(youtubeMatch.Groups[1].ToString()).Trim();
+                                if (search.ToLower().Trim().Contains(d))
+                                {
+                                    dm = NDM.DM;
+
+                                    Random rnd = new Random();
+                                    num = rnd.Next(dm.Count);
+                                    System.Threading.Thread doW = new System.Threading.Thread(sayIdle);
+                                    doW.IsBackground = true;
+                                    doW.Start();
+                                }
+                            }
+                        }
+                    }
+                    break;
+
+            }
+            #endregion
+
+        }
+        public void consoleWrite(string text, bool time)
         {
             this.Dispatcher.Invoke(() =>
             {
-                console.Text += text + "\n";
+                if (time)
+                {
+                    Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss") + "--> " + text);
+                }
+                else
+                {
+                    Debug.WriteLine(text);
+                }
             });
         }
         public void SetupScale(int scaler)
@@ -1046,7 +1492,7 @@ namespace MonikaOnDesktop
         }
         public void GoToSecondaryMonitor()
         {
-            Screen screen;
+            System.Windows.Forms.Screen screen;
             if (System.Windows.Forms.Screen.AllScreens.Length != 1)
             {
                 if (MonikaSettings.Default.screenNum)
