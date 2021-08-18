@@ -1071,6 +1071,10 @@ namespace MonikaOnDesktop
                 foreach (var c in b)
                 {
                     string d = c.ToLower().Trim().TrimEnd('/');
+                    
+                    //Обновлено определение сайтов на более новое через Regex.Matches - обновление подготовил Денис Солицен
+                    MatchCollection allIp = Regex.Matches(d, site);
+                    
                     if (d.StartsWith("http://"))
                     {
                         d = d.Substring(7);
@@ -1085,10 +1089,11 @@ namespace MonikaOnDesktop
                     {
                         d = d.Substring(4);
                     }
-                    if (d == site)
+                    
+                    //Собственно обновленный метод определения
+                    foreach (Match ip in allIp)
                     {
                         var dialogs = lines.Skip(s.i + 1).TakeWhile(x => !x.StartsWith("["));
-
                         foreach (var v in dialogs)
                         {
                             if (v == "\r") continue; //Здесь избавляемся от той проблемы с пустой строкой, в посте выше.
@@ -1096,6 +1101,8 @@ namespace MonikaOnDesktop
                         }
                         break;
                     }
+                    
+    
                 }
             }
 
