@@ -1,24 +1,74 @@
-h Привет, дорогой!
-l Немного неловко говорить это в слух, правда?
-e Однако, я думаю, что это со временем станет нормальным
-=
-h С возвращением, милый!
-e Я так рада тебя снова видеть
-e Давай проведём ещё немного времени вместе?
-=
-e [player], ты вернулся!
-e Я начала скучать по тебе
-h Давай проведём ещё один прекрасный день вместе?
-=
-e Вот и ты, [player]
-e Приятно, что ты заглянул
-e Ты всегда такой заботливый!
-e Спасибо, что проводишь так много времени со мной~
-h Просто помни, что твоё время со мной никогда не тратится впустую
-=
-e Привет, дорогой!
-e Я ужасно начала по тебе скучать. Я так рада снова тебя видеть!
-h Не заставляй меня так долго тебя ждать в следующий раз, э-хе-хе~
-=
-e Я так скучала по тебе, [player]!
-e Спасибо, что вернуля. Мне очень нравится проводить время с тобой
+[DDLC Theme|DDLC Theme song]
+1sua Wait? we have theme song?
+1hua Thats good!
+[Dio|Dio Brando|Дио|Дио Брандо]
+1gud What did you even find in this guy?
+[Doki-Doki|doki doki|Доки-Доки|доки доки]
+2eua I always wondered why it's called Doki-Doki Literature Club
+7hua There are other names that fit just as well!
+[Half-Life 3]
+2mud All of this... takes time
+[Heavy Rain]
+2mua Shooon!
+[jjba|jojo's bizarre adventures|JoJo no Kimyou na Bouken|ДжоДжо]
+2gup I'm sure Natsuki will appreciate it more than me
+5eub But from what I've seen Jotaro is really cool
+[Monika rule 34|Monika lewds|Monika naked|Monika nudes|Monika porn|Monika hentai]
+1tfo Hey Hey!
+1tks Don't look for it! It's humiliating...
+1gkp ...
+1gkt I think it's okay if it's you...
+1gkd Don't let anyone see it, that's good~
+[Monika DDLC dakimakura|Моника дакимакура]
+1ekc Hm...
+1esb This is... I'm not going to judge you
+[Natsayurika|Натсаюрика]
+1msc I am all the members of the club...
+1gsd ...connected?
+1gsc How does it even work?
+[Natsuki|Нацуки]
+1gsp Are you looking for Natsuki?!
+1rsp I understand her cupcakes were good, but...
+[Places to eat|Места для еды]
+1ssb Take me with you!
+4ssb You can take my file with you
+[One Button Test]
+1esb Do you want to try out the button?
+5esb Here, enjoy
+	menu:
+		Button 1
+			1esa Pressed button 1
+1esb How does it work?
+[Two Button Test]
+1esb Do you want to try out the buttons?
+5esb Here, enjoy
+	menu:
+		Button 1
+			1esa Pressed button 1
+		Button 2
+			1esa Pressed button 2
+1esb How does it work?
+[Three Button Test]
+1esb Do you want to try out the buttons?
+5esb Here, enjoy
+	menu:
+		Button 1
+			1esa Pressed button 1
+		Button 2
+			1esa Pressed button 2
+		Button 3
+			1esa Pressed button 3
+1esb How does it work?
+[Four Button Test]
+1esb Do you want to try out the buttons?
+5esb Here, enjoy
+	menu:
+		Button 1
+			1esa Pressed button 1
+		Button 2
+			1esa Pressed button 2
+		Button 3
+			1esa Pressed button 3
+		Button 4
+			1esa Pressed button 4
+1esb How does it work?
