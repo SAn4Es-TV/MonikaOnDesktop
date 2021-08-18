@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -47,16 +48,19 @@ namespace MonikaOnDesktop
                 Debug.WriteLine("Languages: " + lang);
                 //comboBox.Items.Add(menuLang);
                 comboBox.Items.Add(menuLang);
-                if (lang.DisplayName == currLang.DisplayName) {
-                    Debug.WriteLine(lang + "=" + currLang); 
+                if (lang.DisplayName == currLang.DisplayName)
+                {
+                    Debug.WriteLine(lang + "=" + currLang);
                     //comboBox.Text = lang.DisplayName;
                     comboBox.SelectedItem = menuLang;
-                } else { 
+                }
+                else
+                {
                     Debug.WriteLine(lang + "!=" + currLang);
                 }
 
                 Debug.WriteLine(menuLang.IsSelected.ToString());
-                
+
             }
             /*
             for (int item = 0; item < comboBox.Items.Count; item++)
@@ -78,7 +82,7 @@ namespace MonikaOnDesktop
             t = label6;
 
             if (MonikaSettings.Default.UserName == "{PlayerName}") { userName.Text = ""; } else { userName.Text = MonikaSettings.Default.UserName; }
-             monikaSize.Value = MonikaSettings.Default.Scaler;
+            monikaSize.Value = MonikaSettings.Default.Scaler;
             randomIdle.Value = MonikaSettings.Default.idleRandom;
             nightEndText.Text = MonikaSettings.Default.NightEnd.ToString();
             nightStartText.Text = MonikaSettings.Default.NightStart.ToString();
@@ -125,11 +129,22 @@ namespace MonikaOnDesktop
                     break;
             }
             MonikaSettings.Default.Save();
+            RegistryKey currentUserKey = Registry.CurrentUser;
+            RegistryKey monikaKey = currentUserKey.CreateSubKey("MonikaOnDesktop");
+            monikaKey.SetValue("FirstLaunch", MonikaSettings.Default.FirstLaunch);
+            monikaKey.SetValue("Language", MonikaSettings.Default.Language);
+            monikaKey.SetValue("UserName", MonikaSettings.Default.UserName);
+            monikaKey.SetValue("Scaler", MonikaSettings.Default.Scaler);
+            monikaKey.SetValue("NightEnd", MonikaSettings.Default.NightEnd);
+            monikaKey.SetValue("NightStart", MonikaSettings.Default.NightStart);
+            monikaKey.SetValue("idleRandom", MonikaSettings.Default.idleRandom);
+            monikaKey.SetValue("screenNum", MonikaSettings.Default.screenNum);
+            monikaKey.SetValue("AutoStart", MonikaSettings.Default.AutoStart);
             this.DialogResult = true;
             this.Close();
         }
         private void close_Click(object sender, RoutedEventArgs e)
-        {            
+        {
             this.Close();
         }
         private void randomIdle_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)

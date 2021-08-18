@@ -66,7 +66,7 @@
     <Grid>
         <Button x:Name="close" Content="{DynamicResource s_labelCancel}" HorizontalAlignment="Right" Margin="0,0,107,10" Width="92" Height="20" VerticalAlignment="Bottom" IsCancel="True"/>
         <Button Style="{DynamicResource ButtonStyle1}" x:Name="save" Content="{DynamicResource s_labelSave}" HorizontalAlignment="Right" Margin="0,0,10,10" Width="92" Height="20" VerticalAlignment="Bottom" Click="save_Click"/>
-        <Slider x:Name="monikaSize" Margin="0,18,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="622"  Maximum="3" Value="1" Minimum="0" SmallChange="1" LargeChange="1" TickPlacement="None" ValueChanged="monikaSize_ValueChanged"/>
+        <Slider x:Name="monikaSize" Margin="0,18,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="622"  Maximum="3" Value="1" SmallChange="1" TickPlacement="None" ValueChanged="monikaSize_ValueChanged" Minimum="0"/>
         <TextBlock x:Name="label" Text="{DynamicResource s_labelSize}" FontSize="20" HorizontalAlignment="Left" Height="35" Margin="10,10,0,0" VerticalAlignment="Top" Width="153"/>
         <TextBox x:Name="userName" HorizontalAlignment="Right" Margin="0,50,246,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Width="386" Height="32"/>
         <TextBlock x:Name="label1" Text="{DynamicResource s_labelName}" FontSize="20" HorizontalAlignment="Left" Height="32" Margin="10,50,0,0" VerticalAlignment="Top" Width="153"/>

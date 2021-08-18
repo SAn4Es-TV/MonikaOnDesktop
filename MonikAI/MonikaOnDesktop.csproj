@@ -11,6 +11,141 @@
 
   <ItemGroup>
     <None Remove="5a9a580ac2da1161eae7ea2e.png" />
+    <None Remove="assets\gui\choice_hover_background.png" />
+    <None Remove="assets\gui\choice_idle_background.png" />
+    <None Remove="assets\gui\logo.png" />
+    <None Remove="assets\gui\nice_pic.png" />
+    <None Remove="assets\gui\textbox.png" />
+    <None Remove="assets\monika\body\1-n.png" />
+    <None Remove="assets\monika\body\1.png" />
+    <None Remove="assets\monika\body\2-n.png" />
+    <None Remove="assets\monika\body\2.png" />
+    <None Remove="assets\monika\body\3-n.png" />
+    <None Remove="assets\monika\body\3.png" />
+    <None Remove="assets\monika\body\4-n.png" />
+    <None Remove="assets\monika\body\4.png" />
+    <None Remove="assets\monika\body\5-n.png" />
+    <None Remove="assets\monika\body\5.png" />
+    <None Remove="assets\monika\body\6-n.png" />
+    <None Remove="assets\monika\body\6.png" />
+    <None Remove="assets\monika\body\body-1-n.png" />
+    <None Remove="assets\monika\body\body-1.png" />
+    <None Remove="assets\monika\body\body-5-n.png" />
+    <None Remove="assets\monika\body\body-5.png" />
+    <None Remove="assets\monika\face\brows\5f-n.png" />
+    <None Remove="assets\monika\face\brows\5f.png" />
+    <None Remove="assets\monika\face\brows\5k-n.png" />
+    <None Remove="assets\monika\face\brows\5k.png" />
+    <None Remove="assets\monika\face\brows\5s-n.png" />
+    <None Remove="assets\monika\face\brows\5s.png" />
+    <None Remove="assets\monika\face\brows\5u-n.png" />
+    <None Remove="assets\monika\face\brows\5u.png" />
+    <None Remove="assets\monika\face\brows\f-n.png" />
+    <None Remove="assets\monika\face\brows\f.png" />
+    <None Remove="assets\monika\face\brows\k-n.png" />
+    <None Remove="assets\monika\face\brows\k.png" />
+    <None Remove="assets\monika\face\brows\s-n.png" />
+    <None Remove="assets\monika\face\brows\s.png" />
+    <None Remove="assets\monika\face\brows\t-n.png" />
+    <None Remove="assets\monika\face\brows\t.png" />
+    <None Remove="assets\monika\face\brows\u-n.png" />
+    <None Remove="assets\monika\face\brows\u.png" />
+    <None Remove="assets\monika\face\eyes\5c-n.png" />
+    <None Remove="assets\monika\face\eyes\5c.png" />
+    <None Remove="assets\monika\face\eyes\5d-n.png" />
+    <None Remove="assets\monika\face\eyes\5d.png" />
+    <None Remove="assets\monika\face\eyes\5e-n.png" />
+    <None Remove="assets\monika\face\eyes\5e.png" />
+    <None Remove="assets\monika\face\eyes\5h-n.png" />
+    <None Remove="assets\monika\face\eyes\5h.png" />
+    <None Remove="assets\monika\face\eyes\5l-n.png" />
+    <None Remove="assets\monika\face\eyes\5l.png" />
+    <None Remove="assets\monika\face\eyes\5r-n.png" />
+    <None Remove="assets\monika\face\eyes\5r.png" />
+    <None Remove="assets\monika\face\eyes\5s-n.png" />
+    <None Remove="assets\monika\face\eyes\5s.png" />
+    <None Remove="assets\monika\face\eyes\5t-n.png" />
+    <None Remove="assets\monika\face\eyes\5t.png" />
+    <None Remove="assets\monika\face\eyes\5w-n.png" />
+    <None Remove="assets\monika\face\eyes\5w.png" />
+    <None Remove="assets\monika\face\eyes\c-n.png" />
+    <None Remove="assets\monika\face\eyes\c.png" />
+    <None Remove="assets\monika\face\eyes\d-n.png" />
+    <None Remove="assets\monika\face\eyes\d.png" />
+    <None Remove="assets\monika\face\eyes\e-n.png" />
+    <None Remove="assets\monika\face\eyes\e.png" />
+    <None Remove="assets\monika\face\eyes\h-n.png" />
+    <None Remove="assets\monika\face\eyes\h.png" />
+    <None Remove="assets\monika\face\eyes\k-n.png" />
+    <None Remove="assets\monika\face\eyes\k.png" />
+    <None Remove="assets\monika\face\eyes\l-n.png" />
+    <None Remove="assets\monika\face\eyes\l.png" />
+    <None Remove="assets\monika\face\eyes\n-n.png" />
+    <None Remove="assets\monika\face\eyes\n.png" />
+    <None Remove="assets\monika\face\eyes\r-n.png" />
+    <None Remove="assets\monika\face\eyes\r.png" />
+    <None Remove="assets\monika\face\eyes\s-n.png" />
+    <None Remove="assets\monika\face\eyes\s.png" />
+    <None Remove="assets\monika\face\eyes\t-n.png" />
+    <None Remove="assets\monika\face\eyes\t.png" />
+    <None Remove="assets\monika\face\eyes\w-n.png" />
+    <None Remove="assets\monika\face\eyes\w.png" />
+    <None Remove="assets\monika\face\face-leaning-def-nose-def-n.png" />
+    <None Remove="assets\monika\face\face-leaning-def-nose-def.png" />
+    <None Remove="assets\monika\face\face-nose-def-n.png" />
+    <None Remove="assets\monika\face\face-nose-def.png" />
+    <None Remove="assets\monika\face\mouth\5a-n.png" />
+    <None Remove="assets\monika\face\mouth\5a.png" />
+    <None Remove="assets\monika\face\mouth\5b-n.png" />
+    <None Remove="assets\monika\face\mouth\5b.png" />
+    <None Remove="assets\monika\face\mouth\5c-n.png" />
+    <None Remove="assets\monika\face\mouth\5c.png" />
+    <None Remove="assets\monika\face\mouth\5d-n.png" />
+    <None Remove="assets\monika\face\mouth\5d.png" />
+    <None Remove="assets\monika\face\mouth\5o-n.png" />
+    <None Remove="assets\monika\face\mouth\5o.png" />
+    <None Remove="assets\monika\face\mouth\5p-n.png" />
+    <None Remove="assets\monika\face\mouth\5p.png" />
+    <None Remove="assets\monika\face\mouth\5t-n.png" />
+    <None Remove="assets\monika\face\mouth\5t.png" />
+    <None Remove="assets\monika\face\mouth\5u-n.png" />
+    <None Remove="assets\monika\face\mouth\5u.png" />
+    <None Remove="assets\monika\face\mouth\5w-n.png" />
+    <None Remove="assets\monika\face\mouth\5w.png" />
+    <None Remove="assets\monika\face\mouth\5x-n.png" />
+    <None Remove="assets\monika\face\mouth\5x.png" />
+    <None Remove="assets\monika\face\mouth\a-n.png" />
+    <None Remove="assets\monika\face\mouth\a.png" />
+    <None Remove="assets\monika\face\mouth\b-n.png" />
+    <None Remove="assets\monika\face\mouth\b.png" />
+    <None Remove="assets\monika\face\mouth\c-n.png" />
+    <None Remove="assets\monika\face\mouth\c.png" />
+    <None Remove="assets\monika\face\mouth\d-n.png" />
+    <None Remove="assets\monika\face\mouth\d.png" />
+    <None Remove="assets\monika\face\mouth\o-n.png" />
+    <None Remove="assets\monika\face\mouth\o.png" />
+    <None Remove="assets\monika\face\mouth\p-n.png" />
+    <None Remove="assets\monika\face\mouth\p.png" />
+    <None Remove="assets\monika\face\mouth\t-n.png" />
+    <None Remove="assets\monika\face\mouth\t.png" />
+    <None Remove="assets\monika\face\mouth\u-n.png" />
+    <None Remove="assets\monika\face\mouth\u.png" />
+    <None Remove="assets\monika\face\mouth\w-n.png" />
+    <None Remove="assets\monika\face\mouth\w.png" />
+    <None Remove="assets\monika\face\mouth\x-n.png" />
+    <None Remove="assets\monika\face\mouth\x.png" />
+    <None Remove="assets\monika\hair\hair-def-back-n.png" />
+    <None Remove="assets\monika\hair\hair-def-back.png" />
+    <None Remove="assets\monika\hair\hair-def-front-n.png" />
+    <None Remove="assets\monika\hair\hair-def-front.png" />
+    <None Remove="assets\monika\hair\hair-leaning-def-def-back-n.png" />
+    <None Remove="assets\monika\hair\hair-leaning-def-def-back.png" />
+    <None Remove="assets\monika\hair\hair-leaning-def-def-front-n.png" />
+    <None Remove="assets\monika\hair\hair-leaning-def-def-front.png" />
+    <None Remove="assets\monika\ribbon\acs-ribbon_def-0-n.png" />
+    <None Remove="assets\monika\ribbon\acs-ribbon_def-0.png" />
+    <None Remove="assets\monika\ribbon\acs-ribbon_def-5-n.png" />
+    <None Remove="assets\monika\ribbon\acs-ribbon_def-5.png" />
     <None Remove="comic.ttf" />
     <None Remove="gui\choice_hover_background.png" />
     <None Remove="gui\choice_idle_background.png" />
@@ -71,6 +206,217 @@
 
   <ItemGroup>
     <Resource Include="5a9a580ac2da1161eae7ea2e.png" />
+    <Resource Include="assets\gui\choice_hover_background.png" />
+    <Resource Include="assets\gui\choice_idle_background.png" />
+    <Resource Include="assets\gui\logo.png" />
+    <Resource Include="assets\gui\nice_pic.png" />
+    <Resource Include="assets\gui\textbox.png" />
+    <Resource Include="assets\monika\body\1-n.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\body\1.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\body\2-n.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\body\2.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\body\3-n.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\body\3.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\body\4-n.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\body\4.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\body\5-n.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\body\5.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\body\6-n.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\body\6.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\body\body-1-n.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\body\body-1.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\body\body-5-n.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\body\body-5.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\brows\5f-n.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\brows\5f.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\brows\5k-n.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\brows\5k.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\brows\5s-n.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\brows\5s.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\brows\5u-n.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\brows\5u.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\brows\f-n.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\brows\f.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\brows\k-n.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\brows\k.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\brows\s-n.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\brows\s.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\brows\t-n.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\brows\t.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\brows\u-n.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\brows\u.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\eyes\5c-n.png" />
+    <Resource Include="assets\monika\face\eyes\5c.png" />
+    <Resource Include="assets\monika\face\eyes\5d-n.png" />
+    <Resource Include="assets\monika\face\eyes\5d.png" />
+    <Resource Include="assets\monika\face\eyes\5e-n.png" />
+    <Resource Include="assets\monika\face\eyes\5e.png" />
+    <Resource Include="assets\monika\face\eyes\5h-n.png" />
+    <Resource Include="assets\monika\face\eyes\5h.png" />
+    <Resource Include="assets\monika\face\eyes\5l-n.png" />
+    <Resource Include="assets\monika\face\eyes\5l.png" />
+    <Resource Include="assets\monika\face\eyes\5r-n.png" />
+    <Resource Include="assets\monika\face\eyes\5r.png" />
+    <Resource Include="assets\monika\face\eyes\5s-n.png" />
+    <Resource Include="assets\monika\face\eyes\5s.png" />
+    <Resource Include="assets\monika\face\eyes\5t-n.png" />
+    <Resource Include="assets\monika\face\eyes\5t.png" />
+    <Resource Include="assets\monika\face\eyes\5w-n.png" />
+    <Resource Include="assets\monika\face\eyes\5w.png" />
+    <Resource Include="assets\monika\face\eyes\c-n.png" />
+    <Resource Include="assets\monika\face\eyes\c.png" />
+    <Resource Include="assets\monika\face\eyes\d-n.png" />
+    <Resource Include="assets\monika\face\eyes\d.png" />
+    <Resource Include="assets\monika\face\eyes\e-n.png" />
+    <Resource Include="assets\monika\face\eyes\e.png" />
+    <Resource Include="assets\monika\face\eyes\h-n.png" />
+    <Resource Include="assets\monika\face\eyes\h.png" />
+    <Resource Include="assets\monika\face\eyes\k-n.png" />
+    <Resource Include="assets\monika\face\eyes\k.png" />
+    <Resource Include="assets\monika\face\eyes\l-n.png" />
+    <Resource Include="assets\monika\face\eyes\l.png" />
+    <Resource Include="assets\monika\face\eyes\n-n.png" />
+    <Resource Include="assets\monika\face\eyes\n.png" />
+    <Resource Include="assets\monika\face\eyes\r-n.png" />
+    <Resource Include="assets\monika\face\eyes\r.png" />
+    <Resource Include="assets\monika\face\eyes\s-n.png" />
+    <Resource Include="assets\monika\face\eyes\s.png" />
+    <Resource Include="assets\monika\face\eyes\t-n.png" />
+    <Resource Include="assets\monika\face\eyes\t.png" />
+    <Resource Include="assets\monika\face\eyes\w-n.png" />
+    <Resource Include="assets\monika\face\eyes\w.png" />
+    <Resource Include="assets\monika\face\face-leaning-def-nose-def-n.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\face-leaning-def-nose-def.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\face-nose-def-n.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\face-nose-def.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\mouth\5a-n.png" />
+    <Resource Include="assets\monika\face\mouth\5a.png" />
+    <Resource Include="assets\monika\face\mouth\5b-n.png" />
+    <Resource Include="assets\monika\face\mouth\5b.png" />
+    <Resource Include="assets\monika\face\mouth\5c-n.png" />
+    <Resource Include="assets\monika\face\mouth\5c.png" />
+    <Resource Include="assets\monika\face\mouth\5d-n.png" />
+    <Resource Include="assets\monika\face\mouth\5d.png" />
+    <Resource Include="assets\monika\face\mouth\5o-n.png" />
+    <Resource Include="assets\monika\face\mouth\5o.png" />
+    <Resource Include="assets\monika\face\mouth\5p-n.png" />
+    <Resource Include="assets\monika\face\mouth\5p.png" />
+    <Resource Include="assets\monika\face\mouth\5t-n.png" />
+    <Resource Include="assets\monika\face\mouth\5t.png" />
+    <Resource Include="assets\monika\face\mouth\5u-n.png" />
+    <Resource Include="assets\monika\face\mouth\5u.png" />
+    <Resource Include="assets\monika\face\mouth\5w-n.png" />
+    <Resource Include="assets\monika\face\mouth\5w.png" />
+    <Resource Include="assets\monika\face\mouth\5x-n.png" />
+    <Resource Include="assets\monika\face\mouth\5x.png" />
+    <Resource Include="assets\monika\face\mouth\a-n.png" />
+    <Resource Include="assets\monika\face\mouth\a.png" />
+    <Resource Include="assets\monika\face\mouth\b-n.png" />
+    <Resource Include="assets\monika\face\mouth\b.png" />
+    <Resource Include="assets\monika\face\mouth\c-n.png" />
+    <Resource Include="assets\monika\face\mouth\c.png" />
+    <Resource Include="assets\monika\face\mouth\d-n.png" />
+    <Resource Include="assets\monika\face\mouth\d.png" />
+    <Resource Include="assets\monika\face\mouth\o-n.png" />
+    <Resource Include="assets\monika\face\mouth\o.png" />
+    <Resource Include="assets\monika\face\mouth\p-n.png" />
+    <Resource Include="assets\monika\face\mouth\p.png" />
+    <Resource Include="assets\monika\face\mouth\t-n.png" />
+    <Resource Include="assets\monika\face\mouth\t.png" />
+    <Resource Include="assets\monika\face\mouth\u-n.png" />
+    <Resource Include="assets\monika\face\mouth\u.png" />
+    <Resource Include="assets\monika\face\mouth\w-n.png" />
+    <Resource Include="assets\monika\face\mouth\w.png" />
+    <Resource Include="assets\monika\face\mouth\x-n.png" />
+    <Resource Include="assets\monika\face\mouth\x.png" />
+    <Resource Include="assets\monika\hair\hair-def-back-n.png" />
+    <Resource Include="assets\monika\hair\hair-def-back.png" />
+    <Resource Include="assets\monika\hair\hair-def-front-n.png" />
+    <Resource Include="assets\monika\hair\hair-def-front.png" />
+    <Resource Include="assets\monika\hair\hair-leaning-def-def-back-n.png" />
+    <Resource Include="assets\monika\hair\hair-leaning-def-def-back.png" />
+    <Resource Include="assets\monika\hair\hair-leaning-def-def-front-n.png" />
+    <Resource Include="assets\monika\hair\hair-leaning-def-def-front.png" />
+    <Resource Include="assets\monika\ribbon\acs-ribbon_def-0-n.png" />
+    <Resource Include="assets\monika\ribbon\acs-ribbon_def-0.png" />
+    <Resource Include="assets\monika\ribbon\acs-ribbon_def-5-n.png" />
+    <Resource Include="assets\monika\ribbon\acs-ribbon_def-5.png" />
     <Resource Include="comic.ttf">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>

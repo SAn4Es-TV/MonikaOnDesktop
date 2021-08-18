@@ -41,14 +41,14 @@
             </Setter>
             <Setter Property="Background">
                 <Setter.Value>
-                    <ImageBrush ImageSource="pack://application:,,,/gui/choice_idle_background.png"/>
+                    <ImageBrush ImageSource="pack://application:,,,/assets/gui/choice_idle_background.png"/>
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background">
                         <Setter.Value>
-                            <ImageBrush ImageSource="pack://application:,,,/gui/choice_hover_background.png"/>
+                            <ImageBrush ImageSource="pack://application:,,,/assets/gui/choice_hover_background.png"/>
                         </Setter.Value>
                     </Setter>
                 </Trigger>
@@ -58,23 +58,31 @@
     <Window.Background>
         <SolidColorBrush Opacity="0.0" Color="White" />
     </Window.Background>
+
     <Grid HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Top" IsHitTestVisible="True">
-        
-        <Image x:Name="main" Margin="100,-60,100,0" Source="pack://application:,,,/monika/1.png" StretchDirection="Both" Stretch="Uniform"/>
-        <Image x:Name="face" Margin="302,126,322,262" Stretch="Fill" Source="/monika/b.png"/>
-        <Image x:Name="textWindow" Margin="50,390,50,20" Stretch="Fill" Source="pack://application:,,,/gui/textbox.png" Visibility="Hidden"/>
-        <local:OutlinedTextBlock x:Name="textBlock" FontFamily="Comic Sans MS" Margin="70,410,70,40" Text="Тестовый текст" TextWrapping="Wrap" StrokeThickness="1.5" Stroke="{StaticResource outlineColor}" Fill="{StaticResource mainColor}">
+
+        <Image x:Name="ribbon" Margin="0,-20,0,0" Source="pack://application:,,,/assets/monika/ribbon/acs-ribbon_def-0.png" StretchDirection="Both" Stretch="Uniform"/>
+        <Image x:Name="hairBack" Margin="0,-20,0,0" Source="pack://application:,,,/assets/monika/hair/hair-def-back.png" StretchDirection="Both" Stretch="Uniform"/>
+        <Image x:Name="main" Margin="0,-20,0,0" Source="pack://application:,,,/assets/monika/body/body-1.png" StretchDirection="Both" Stretch="Uniform"/>
+        <Image x:Name="hairFront" Margin="0,-20,0,0" Source="pack://application:,,,/assets/monika/hair/hair-def-front.png" StretchDirection="Both" Stretch="Uniform"/>
+        <Image x:Name="arms" Margin="0,-20,0,0" Source="pack://application:,,,/assets/monika/body/1.png" StretchDirection="Both" Stretch="Uniform"/>
+        <Image x:Name="eyes" Margin="0,-20,0,0" Source="pack://application:,,,/assets/monika/face/eyes/e.png" StretchDirection="Both" Stretch="Uniform"/>
+        <Image x:Name="brow" Margin="0,-20,0,0" Source="pack://application:,,,/assets/monika/face/brows/s.png" StretchDirection="Both" Stretch="Uniform"/>
+        <Image x:Name="mouth" Margin="0,-20,0,0" Source="pack://application:,,,/assets/monika/face/mouth/b.png" StretchDirection="Both" Stretch="Uniform"/>
+        <Image x:Name="nose" Margin="0,-20,0,0" Source="pack://application:,,,/assets/monika/face/face-nose-def.png" StretchDirection="Both" Stretch="Uniform"/>
+        <Image x:Name="textWindow" Margin="50,390,50,20" Stretch="Fill" Source="pack://application:,,,/assets/gui/textbox.png" Visibility="Hidden"/>
+        <local:OutlinedTextBlock x:Name="textBlock" FontFamily="Comic Sans MS" Margin="70,410,70,40" Text="Текстовый текст" TextWrapping="Wrap" StrokeThickness="1.5" Stroke="{StaticResource outlineColor}" Fill="{StaticResource mainColor}">
             <!--<TextBlock.Effect>
                 <DropShadowEffect ShadowDepth="0" BlurRadius="0" Opacity="1" Color="Black"/>
             </TextBlock.Effect>-->
         </local:OutlinedTextBlock>
         <!-- <StackPanel Width="500" Height="400" Name="ButtonsPanel" Background="#00000000" Orientation="Horizontal" SnapsToDevicePixels="True">-->
         <Grid x:Name="ButtonsGrid" Width="500" Height="400">
-                <Grid.RowDefinitions>
-                </Grid.RowDefinitions>
-                <!-- Put buttons here. -->
-            </Grid>
-    <!-- </StackPanel>-->
+            <Grid.RowDefinitions>
+            </Grid.RowDefinitions>
+            <!-- Put buttons here. -->
+        </Grid>
+        <!-- </StackPanel>-->
         <tb:TaskbarIcon x:Name="myNotifyIcon"
                     Visibility="Visible"
                     IconSource="pack://application:,,,/ico.ico"
@@ -89,5 +97,5 @@
             </tb:TaskbarIcon.ContextMenu>
         </tb:TaskbarIcon>
     </Grid>
-    
+
 </Window>
