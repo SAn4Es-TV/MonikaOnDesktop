@@ -501,10 +501,14 @@ namespace MonikaOnDesktop
                             // получаем объект ответа
                             //Debug.WriteLine(query);
                             //readSitesTxt(formatURL(query));
-                            Debug.WriteLine(formatURL(query));
-                            readLongXml(formatURL(query), sitesDialogPath, 1);
-                            readLongXml(formatURL(query), googleDialogPath, 2);
-                            readLongXml(formatURL(query), youtubeDialogPath, 3);
+                            // Check if currently speaking, only blink if not in dialog
+                            if (!isSpeaking)
+                            {
+                                Debug.WriteLine(formatURL(query));
+                                readLongXml(formatURL(query), sitesDialogPath, 1);
+                                readLongXml(formatURL(query), googleDialogPath, 2);
+                                readLongXml(formatURL(query), youtubeDialogPath, 3);
+                            }
                             //readSitesTxt(formatURL(query));
                             //readGoogleTxt(formatURL(query));
                             //readYoutubeTxt(formatURL(query));
