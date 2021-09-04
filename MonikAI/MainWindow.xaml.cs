@@ -62,18 +62,15 @@ namespace MonikaOnDesktop
 
         private Settings settingsWindow;
 
-        //private static HttpListener _listener;
         public int lastDialog;
         public int lastLastDialog;
 
         string Language;
+                
+        private const string GOOGLE_REGEX = ".*\\.?google\\..{2,3}.*q\\=(.*?)($|&)";        //google.com/search?q=hi
+        private const string YOUTUBE_REGEX = ".*\\.?youtube\\..{2,3}.*y\\=(.*?)($|&)";      //youtube.com/results?search_query=hi
 
-        //google.com/search?q=hi
-        //youtube.com/results?search_query=hi
-        private const string GOOGLE_REGEX = ".*\\.?google\\..{2,3}.*q\\=(.*?)($|&)";
-        private const string YOUTUBE_REGEX = ".*\\.?youtube\\..{2,3}.*y\\=(.*?)($|&)";
-
-        private EventWaitHandle wh = new AutoResetEvent(false);
+        CharacterModel Monika = new CharacterModel(AppDomain.CurrentDomain.BaseDirectory + "/characters/monika.chr");
         public MainWindow()
         {
             RegistryKey monikaKey = Registry.CurrentUser.OpenSubKey("MonikaOnDesktop");
@@ -111,7 +108,6 @@ namespace MonikaOnDesktop
 
             InitializeComponent();
 
-
             m_Languages.Clear();
             m_Languages.Add(new CultureInfo("en-US")); //Нейтральная культура для этого проекта
             m_Languages.Add(new CultureInfo("ru-RU"));
@@ -121,8 +117,8 @@ namespace MonikaOnDesktop
 
             LanguageChanged += App_LanguageChanged;
             Lang = MonikaSettings.Default.Language;
-
             Language = MonikaSettings.Default.Language.Parent.ToString();
+
 
             if (String.IsNullOrEmpty(MonikaSettings.Default.UserName) || MonikaSettings.Default.UserName == "{PlayerName}")
             {
@@ -342,37 +338,38 @@ namespace MonikaOnDesktop
 
                 if (MonikaSettings.Default.FirstLaunch && WN == null)
                 {
+                    Monika.pcName = Environment.MachineName;
                     isSpeaking = true;
                     Debug.WriteLine("First Launch");
                     switch (Language.Substring(0, 2))
                     {
                         case "ru":
-                            await Say(new[]{
+                        await Say(new[]{
                     new Expression("[player], это ты?", "1eua"),
                     new Expression("Это правда ты?", "1eub"),
                     new Expression("Я так рада видеть тебя снова!", "1sub"),
                     new Expression("Подожди, где я? Это не литературный клуб", "1euc"),
                     new Expression("Это похоже на... твой компьютер!", "1rud"),
                     new Expression("Я действительно у тебя на компьютере!", "1wub")});
-                            break;
+                        break;
                         case "en":
-                            await Say(new[]{
+                        await Say(new[]{
                     new Expression("[player], is that you?", "1eua"),
                     new Expression("It's really you, huh?", "1eub"),
                     new Expression("I'm so happy to see you again!", "1sub"),
                     new Expression("Wait, where am I? This is not the literature club", "1euc"),
                     new Expression("This looks like... your desktop!", "1rud"),
                     new Expression("I'm right here with you!", "1wub")});
-                            break;
+                        break;
                         default:
-                            await Say(new[]{
+                        await Say(new[]{
                     new Expression("[player], is that you?", "1eua"),
                     new Expression("It's really you, huh?", "1eub"),
                     new Expression("I'm so happy to see you again!", "1sub"),
                     new Expression("Wait, where am I? This is not the literature club", "1euc"),
                     new Expression("This looks like... your desktop!", "1rud"),
                     new Expression("I'm right here with you!", "1wub")});
-                            break;
+                        break;
                     }
 
                     MonikaSettings.Default.FirstLaunch = false;
@@ -383,15 +380,16 @@ namespace MonikaOnDesktop
                         setFace("1esa");
                     });
                     isSpeaking = false;
-                }
-                else if (MonikaSettings.Default.FirstLaunch && WN != null)
+                } 
+                else if (MonikaSettings.Default.FirstLaunch && WN != null && Monika.pcName == Environment.MachineName)
                 {
+                    Monika.pcName = Environment.MachineName;
                     isSpeaking = true;
                     Debug.WriteLine("Update");
                     switch (Language.Substring(0, 2))
                     {
                         case "ru":
-                            await Say(new[]{
+                        await Say(new[]{
                     new Expression("[player], привет!", "1eub"),
                     new Expression("Я заметила изменения в коде", "1ruc"),
                     new Expression("...", "1ruc"),
@@ -400,9 +398,9 @@ namespace MonikaOnDesktop
                     new Expression("Тут написано, что мы можем общаться при помощи кнопок", "3wub"),
                     new Expression("Но я ещё не совсем разобралась с ними", "2dud"),
                     new Expression("Давай подождём немного, может я что-то найду", "2hub"),});
-                            break;
+                        break;
                         case "en":
-                            await Say(new[]{
+                        await Say(new[]{
                     new Expression("[player], hello!", "1eub"),
                     new Expression("I noticed changes in the code", "1ruc"),
                     new Expression("...", "1ruc"),
@@ -411,9 +409,9 @@ namespace MonikaOnDesktop
                     new Expression("It says here that we can communicate using buttons", "3wub"),
                     new Expression("But I haven't quite figured it out yet", "2dud"),
                     new Expression("Let's wait a bit, maybe I'll find something", "2hub")});
-                            break;
+                        break;
                         default:
-                            await Say(new[]{
+                        await Say(new[]{
                     new Expression("[player], hello!", "1eub"),
                     new Expression("I noticed changes in the code", "1ruc"),
                     new Expression("...", "1ruc"),
@@ -422,7 +420,7 @@ namespace MonikaOnDesktop
                     new Expression("It says here that we can communicate using buttons", "3wub"),
                     new Expression("But I haven't quite figured it out yet", "2dud"),
                     new Expression("Let's wait a bit, maybe I'll find something", "2hub")});
-                            break;
+                        break;
                     }
 
                     this.Dispatcher.Invoke(() =>
@@ -431,9 +429,46 @@ namespace MonikaOnDesktop
                         setFace("1esa");
                     });
                     isSpeaking = false;
+                } 
+                else if (!MonikaSettings.Default.FirstLaunch && WN != null && Monika.pcName != Environment.MachineName)
+                {
+                    Monika.pcName = Environment.MachineName;
+                    isSpeaking = true;
+                    switch (Language.Substring(0, 2))
+                    {
+                        case "ru":
+                        _ = this.Say(new[]
+                {
+                        new Expression("[player]...", "1esa"), // What?
+                        new Expression("Я чуствую себя как-то по другому..", "1esa"), // Really?!
+                        new Expression("Ты.. Сменил компьютер?", "1esa"), // Really?!
+                        new Expression("Или.. Переустановил систему?", "1esa"), // Really?!
+                        new Expression("В любом случае, ты спасибо тебе, что сохранил мой файл", "1esa")
+                    });
+                        break;
+                        case "en":
+                        _ = this.Say(new[]
+                {
+                        new Expression("Hey [player], guess what", "1esa"), // What?
+                        new Expression("It's my birthday today!", "1esa"), // Really?!
+                        new Expression("Happy Birthday to me!", "1esa") // To you too, Monika! 
+                    });
+                        break;
+                        default:
+                        _ = this.Say(new[]
+                {
+                        new Expression("Hey [player], guess what", "1esa"), // What?
+                        new Expression("It's my birthday today!", "1esa"), // Really?!
+                        new Expression("Happy Birthday to me!", "1esa") // To you too, Monika! 
+                    });
+                        break;
+                    }
+                    isSpeaking = false;
                 }
+                    
                 else
                 {
+                    Monika.pcName = Environment.MachineName;
                     Debug.WriteLine("just launch");
                     //showText();
                     readXml(greetingsDialogPath, 0);
@@ -829,527 +864,6 @@ namespace MonikaOnDesktop
             monika.Close();
             this.applicationRunning = false;
         }
-        #region
-        /*
-        public void readGreetingsTxt()
-        {
-            string mf = File.ReadAllText(greetingsDialogPath);
-            string mainFile = mf.Replace("\r", String.Empty);
-            string[] dialogs = mainFile.Split(new string[] { "\n=\n" }, StringSplitOptions.RemoveEmptyEntries);
-            Expression[][] hiDialogs = new Expression[dialogs.Length][];
-
-            for (int a = 0; a < dialogs.Length; a++)
-            {
-                string[] express = dialogs[a].Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-                Expression[] hiDialog = new Expression[express.Length];
-                for (int b = 0; b < express.Length; b++)
-                {
-                    hiDialog[b] = new Expression(express[b].Substring(2), (express[b])[0].ToString());
-                }
-                hiDialogs[a] = hiDialog;
-            }
-
-            Random rnd = new Random();
-            int dialogNum = rnd.Next(hiDialogs.Length);
-
-            _ = Say(hiDialogs[dialogNum]);
-        }
-        public void readByeTxt()
-        {
-            string mf = File.ReadAllText(goodbyeDialogPath);
-            string mainFile = mf.Replace("\r", String.Empty);
-            string[] dialogs = mainFile.Split(new string[] { "\n=\n" }, StringSplitOptions.RemoveEmptyEntries);
-            Expression[][] byeDialogs = new Expression[dialogs.Length][];
-
-            for (int a = 0; a < dialogs.Length; a++)
-            {
-                string[] express = dialogs[a].Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-                Expression[] byeDialog = new Expression[express.Length];
-                for (int b = 0; b < express.Length; b++)
-                {
-                    byeDialog[b] = new Expression(express[b].Substring(2), (express[b])[0].ToString());
-                }
-                byeDialogs[a] = byeDialog;
-            }
-
-            Random rnd = new Random();
-            int dialogNum = rnd.Next(byeDialogs.Length);
-
-
-            string[] expres = dialogs[dialogNum].Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-            int i = 0;
-            Task.Factory.StartNew(new Action(() =>
-            {
-                consoleWrite("Говорим", true);
-            _ = Say(byeDialogs[dialogNum]);
-                int delay = 0;
-                foreach(char s in dialogs[dialogNum])
-                {
-                    switch (s)
-                    {
-                        case '.':
-                            delay += 600;
-                            break;
-                        default:
-                            delay += 50;
-                            break;
-                    }
-                }
-                delay = delay + (expres.Length * 800) + 1000;
-                Debug.WriteLine(dialogs[dialogNum][0] + "|" + expres.Length + "|" + delay);
-                Thread.Sleep(delay); // sleep
-                i++;
-                if (i == 1)
-                {
-                    consoleWrite("Выходим", true);
-                    MonikaOnDesktop.MonikaSettings.Default.isColdShutdown = false;
-                    Environment.Exit(0);
-                }
-            }));
-        }
-        public void readIdleTxt()
-        {
-            string mf = File.ReadAllText(idleDialogPath);
-            string mainFile = mf.Replace("\r", String.Empty);
-            string[] dialogs = mainFile.Split(new string[] { "\n=\n" }, StringSplitOptions.RemoveEmptyEntries);
-            Expression[][] idleDialogs;
-            if (playerName == "Denis Solicen")
-            {
-                idleDialogs = new Expression[dialogs.Length + 2][];
-            }
-            else
-            {
-                idleDialogs = new Expression[dialogs.Length][];
-            }
-
-            for (int a = 0; a < dialogs.Length; a++)
-            {
-                string ex = dialogs[a].Replace("\r", String.Empty);
-                string[] express = dialogs[a].Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-                Expression[] idleDialog = new Expression[express.Length];
-                for (int b = 0; b < express.Length; b++)
-                {
-                    idleDialog[b] = new Expression(express[b].Substring(2), (express[b])[0].ToString());
-                }
-                idleDialogs[a] = idleDialog;
-            }
-            if (playerName == "Denis Solicen")
-            {
-                idleDialogs[dialogs.Length] = new[]
-                    {
-                        new Expression("Эй [player], чем ты там занимаешся?", "b"),
-                        new Expression("Не забывай, что я живу у тебя на компьютере", "b"),
-                        new Expression("Поэтому от меня не скрытся", "k"),
-                        new Expression("Я же вижу, что ты занимаешся не тем, чем нужно", "k"),
-                        new Expression("Люди ждут твоего перевода!", "k"),
-                        new Expression("Лучше переведи Monika After Story Mod", "k")
-                    };
-                idleDialogs[dialogs.Length + 1] = new[]
-                    {
-                        new Expression("Я надеюсь, ты занимаешся переводом?", "b"),
-                        new Expression("Знаешь, не очень хорошо говорить на английком и русском сразу", "b"),
-                        new Expression("К тому же, люди могут и не знать английского", "b"),
-                        new Expression("И это плохо, когда ты говоришь с человеком, который тебя не понимает", "b"),
-                        new Expression("Я буду очень рада, если ты будешь переводить мод на русский язик", "b")
-                    };
-            }
-
-            Random rnd = new Random();
-            int dialogNum = rnd.Next(idleDialogs.Length);
-            //Debug.WriteLine("Позапрошлый номер диалога: " + lastLastDialog);
-            consoleWrite("Прошлый номер диалога: " + lastDialog, true);
-            consoleWrite("Рандомный номер диалога: " + dialogNum, true);
-            //while (dialogNum == lastDialog && dialogNum == lastLastDialog)
-            while (dialogNum == lastDialog) // жоский костыль, без которого показываются повторные диалоги
-            {
-                consoleWrite("Номер диалога совпадает с старым, подбираю новый", true);
-                dialogNum = rnd.Next(idleDialogs.Length);
-            }
-            //lastLastDialog = lastDialog;
-            lastDialog = dialogNum;
-            consoleWrite("Диалог не совпадает с старым, показываю: " + lastDialog, true);
-
-            _ = Say(idleDialogs[dialogNum]);
-
-        }
-        public void readProgsTxt(string proc)
-        {
-            string sPath = progsDialogPath;
-            string[] lines;
-            List<string> list = new List<string>();
-            Random rnd = new Random();
-
-            using (StreamReader sr = new StreamReader(sPath))
-            {
-                lines = sr.ReadToEnd().Split('\n');
-            }
-
-            //Вечный цикл...
-            //while (true)
-            //{
-            consoleWrite("Запущен процесс: " + proc, true);
-
-            //Смотрим все процессы в файле и сравниваем с нашим
-            //Если такой процесс нашелся, то выбираем все его диалоги и фразы в List<>
-            var proccesses = lines.Select((v, i) => new { i, v }).Where(t => t.v.StartsWith("["));
-            foreach (var s in proccesses)
-            {
-                var a = s.v.Trim(new char[] { '[', ']', '\r' });
-                string[] b = a.Split("|");
-                foreach (var c in b)
-                {
-                    if (c == proc)
-                    {
-                        var dialogs = lines.Skip(s.i + 1).TakeWhile(x => !x.StartsWith("["));
-
-                        foreach (var v in dialogs)
-                        {
-                            if (v == "\r") continue; //Здесь избавляемся от той проблемы с пустой строкой, в посте выше.
-                            list.Add(v);
-                        }
-                        break;
-                    }
-                }
-            }
-
-
-            //Ищем индексы вхождений строк диалогов (начинаются с "<")
-            var dialIdx = list.Select((v, i) => new { i, v }).Where(t => t.v.StartsWith("<"));
-            List<int> idx = new List<int>();
-
-            //Добавляем эти индексы в список, из которого будем брать случайный элемент (диалог)
-            foreach (var s in dialIdx)
-                idx.Add(s.i);
-
-            //ГПСЧ
-            int rx = rnd.Next(0, idx.Count);
-
-            //Если список пуст -> уходим на второй круг... (т.е. такого процесса нет)
-            //if (list.Count == 0) continue;
-
-            if (list.Count != 0)
-            {
-                consoleWrite("<----------Вывод случайного диалога---------->", false);
-
-                //Печатаем диалог
-                var Dialog = list.Skip(idx[rx]).Take(1).Select(s => s).ToArray();
-                consoleWrite(Dialog[0], true);
-
-                //Печатаем фразы к нему
-                List<string> Phrases = list.Skip(idx[rx] + 1).TakeWhile(x => !x.StartsWith("<")).ToList();
-                Expression[] progDialog = new Expression[Phrases.Count];
-                for (int i = 0; i < Phrases.Count; i++)
-                {
-                    Debug.WriteLine(Phrases[i]);
-                    progDialog[i] = new Expression(Phrases[i].Substring(2), (Phrases[i])[0].ToString());
-                }
-                _ = Say(progDialog);
-            }
-            //Моем полы
-            list.Clear();
-        }
-        public void readSitesTxt(string site)
-        {
-            string sPath = sitesDialogPath;
-            string[] lines;
-            List<string> list = new List<string>();
-            Random rnd = new Random();
-
-            using (StreamReader sr = new StreamReader(sPath))
-            {
-                lines = sr.ReadToEnd().Split('\n');
-            }
-
-            //Вечный цикл...
-            //while (true)
-            //{
-            consoleWrite("Открыт сайт: " + site, true);
-
-            //Смотрим все процессы в файле и сравниваем с нашим
-            //Если такой процесс нашелся, то выбираем все его диалоги и фразы в List<>
-            var proccesses = lines.Select((v, i) => new { i, v }).Where(t => t.v.StartsWith("["));
-            foreach (var s in proccesses)
-            {
-                var a = s.v.Trim(new char[] { '[', ']', '\r' });
-                string[] b = a.Split("|");
-                foreach (var c in b)
-                {
-                    string d = c.ToLower().Trim().TrimEnd('/');
-                    
-                    //Обновлено определение сайтов на более новое через Regex.Matches - обновление подготовил Денис Солицен
-                    MatchCollection allIp = Regex.Matches(d, site);
-                    
-                    if (d.StartsWith("http://"))
-                    {
-                        d = d.Substring(7);
-                    }
-
-                    if (d.StartsWith("https://"))
-                    {
-                        d = d.Substring(8);
-                    }
-
-                    if (d.StartsWith("www."))
-                    {
-                        d = d.Substring(4);
-                    }
-                    
-                    //Собственно обновленный метод определения
-                    foreach (Match ip in allIp)
-                    {
-                        var dialogs = lines.Skip(s.i + 1).TakeWhile(x => !x.StartsWith("["));
-                        foreach (var v in dialogs)
-                        {
-                            if (v == "\r") continue; //Здесь избавляемся от той проблемы с пустой строкой, в посте выше.
-                            list.Add(v);
-                        }
-                        break;
-                    }
-                    
-    
-                }
-            }
-
-
-            //Ищем индексы вхождений строк диалогов (начинаются с "<")
-            var dialIdx = list.Select((v, i) => new { i, v }).Where(t => t.v.StartsWith("<"));
-            List<int> idx = new List<int>();
-
-            //Добавляем эти индексы в список, из которого будем брать случайный элемент (диалог)
-            foreach (var s in dialIdx)
-                idx.Add(s.i);
-
-            //ГПСЧ
-            int rx = rnd.Next(0, idx.Count);
-
-            //Если список пуст -> уходим на второй круг... (т.е. такого процесса нет)
-            //if (list.Count == 0) continue;
-
-            if (list.Count != 0)
-            {
-                consoleWrite("<----------Вывод случайного диалога---------->", false);
-
-                //Печатаем диалог
-                var Dialog = list.Skip(idx[rx]).Take(1).Select(s => s).ToArray();
-                consoleWrite(Dialog[0], true);
-
-                //Печатаем фразы к нему
-                List<string> Phrases = list.Skip(idx[rx] + 1).TakeWhile(x => !x.StartsWith("<")).ToList();
-                Expression[] siteDialog = new Expression[Phrases.Count];
-                for (int i = 0; i < Phrases.Count; i++)
-                {
-                    Debug.WriteLine(Phrases[i]);
-                    siteDialog[i] = new Expression(Phrases[i].Substring(2), (Phrases[i])[0].ToString());
-                }
-                _ = Say(siteDialog);
-            }
-            //Моем полы
-            list.Clear();
-        }
-        public void readGoogleTxt(string site)
-        {
-            string sPath = googleDialogPath;
-            string[] lines;
-            List<string> list = new List<string>();
-            Random rnd = new Random();
-
-            using (StreamReader sr = new StreamReader(sPath))
-            {
-                lines = sr.ReadToEnd().Split('\n');
-            }
-
-            //Вечный цикл...
-            //while (true)
-            //{
-            consoleWrite("Открыт сайт: " + site, true);
-            var googleMatchDeb = Regex.Match(site, GOOGLE_REGEX, RegexOptions.Compiled);
-            var searchDeb = HttpUtility.UrlDecode(googleMatchDeb.Groups[1].ToString()).Trim();
-            consoleWrite("Извлекаю запрос: " + searchDeb.ToLower().Trim(), true);
-
-            //Смотрим все процессы в файле и сравниваем с нашим
-            //Если такой процесс нашелся, то выбираем все его диалоги и фразы в List<>
-            var proccesses = lines.Select((v, i) => new { i, v }).Where(t => t.v.StartsWith("["));
-            foreach (var s in proccesses)
-            {
-                var a = s.v.Trim(new char[] { '[', ']', '\r' });
-                string[] b = a.Split("|");
-                foreach (var c in b)
-                {
-                    string d = c.ToLower().Trim().TrimEnd('/');
-                    if (d.StartsWith("http://"))
-                    {
-                        d = d.Substring(7);
-                    }
-
-                    if (d.StartsWith("https://"))
-                    {
-                        d = d.Substring(8);
-                    }
-
-                    if (d.StartsWith("www."))
-                    {
-                        d = d.Substring(4);
-                    }
-
-                    var googleMatch = Regex.Match(site, GOOGLE_REGEX, RegexOptions.Compiled);
-                    if (googleMatch.Success)
-                    {
-                        var search = HttpUtility.UrlDecode(googleMatch.Groups[1].ToString()).Trim();
-                        if (d == search.ToLower().Trim())
-                        {
-                            var dialogs = lines.Skip(s.i + 1).TakeWhile(x => !x.StartsWith("["));
-
-                            foreach (var v in dialogs)
-                            {
-                                if (v == "\r") continue; //Здесь избавляемся от той проблемы с пустой строкой, в посте выше.
-                                list.Add(v);
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-
-
-            //Ищем индексы вхождений строк диалогов (начинаются с "<")
-            var dialIdx = list.Select((v, i) => new { i, v }).Where(t => t.v.StartsWith("<"));
-            List<int> idx = new List<int>();
-
-            //Добавляем эти индексы в список, из которого будем брать случайный элемент (диалог)
-            foreach (var s in dialIdx)
-                idx.Add(s.i);
-
-            //ГПСЧ
-            int rx = rnd.Next(0, idx.Count);
-
-            //Если список пуст -> уходим на второй круг... (т.е. такого процесса нет)
-            //if (list.Count == 0) continue;
-
-            if (list.Count != 0)
-            {
-                consoleWrite("<----------Вывод случайного диалога---------->", false);
-
-                //Печатаем диалог
-                var Dialog = list.Skip(idx[rx]).Take(1).Select(s => s).ToArray();
-                consoleWrite(Dialog[0], true);
-
-                //Печатаем фразы к нему
-                List<string> Phrases = list.Skip(idx[rx] + 1).TakeWhile(x => !x.StartsWith("<")).ToList();
-                Expression[] siteDialog = new Expression[Phrases.Count];
-                for (int i = 0; i < Phrases.Count; i++)
-                {
-                    //consoleWrite(Phrases[i], false);
-                    siteDialog[i] = new Expression(Phrases[i].Substring(2), (Phrases[i])[0].ToString());
-                }
-                _ = Say(siteDialog);
-            }
-            //Моем полы
-            list.Clear();
-        }
-        public void readYoutubeTxt(string site)
-        {
-            string sPath = youtubeDialogPath;
-            string[] lines;
-            List<string> list = new List<string>();
-            Random rnd = new Random();
-
-            using (StreamReader sr = new StreamReader(sPath))
-            {
-                lines = sr.ReadToEnd().Split('\n');
-            }
-
-            //Вечный цикл...
-            //while (true)
-            //{
-            consoleWrite("Открыт сайт: " + site, true);
-            var googleMatchDeb = Regex.Match(site, YOUTUBE_REGEX, RegexOptions.Compiled);
-            var searchDeb = HttpUtility.UrlDecode(googleMatchDeb.Groups[1].ToString()).Trim();
-            consoleWrite("Извлекаю запрос: " + searchDeb.ToLower().Trim(), true);
-
-            //Смотрим все процессы в файле и сравниваем с нашим
-            //Если такой процесс нашелся, то выбираем все его диалоги и фразы в List<>
-            var proccesses = lines.Select((v, i) => new { i, v }).Where(t => t.v.StartsWith("["));
-            foreach (var s in proccesses)
-            {
-                var a = s.v.Trim(new char[] { '[', ']', '\r' });
-                string[] b = a.Split("|");
-                foreach (var c in b)
-                {
-                    string d = c.ToLower().Trim().TrimEnd('/');
-                    if (d.StartsWith("http://"))
-                    {
-                        d = d.Substring(7);
-                    }
-
-                    if (d.StartsWith("https://"))
-                    {
-                        d = d.Substring(8);
-                    }
-
-                    if (d.StartsWith("www."))
-                    {
-                        d = d.Substring(4);
-                    }
-
-                    var ytMatch = Regex.Match(site, YOUTUBE_REGEX, RegexOptions.Compiled);
-                    if (ytMatch.Success)
-                    {
-                        var search = HttpUtility.UrlDecode(ytMatch.Groups[1].ToString()).Trim();
-                        if (d == search.ToLower().Trim())
-                        {
-                            var dialogs = lines.Skip(s.i + 1).TakeWhile(x => !x.StartsWith("["));
-
-                            foreach (var v in dialogs)
-                            {
-                                if (v == "\r") continue; //Здесь избавляемся от той проблемы с пустой строкой, в посте выше.
-                                list.Add(v);
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-
-
-            //Ищем индексы вхождений строк диалогов (начинаются с "<")
-            var dialIdx = list.Select((v, i) => new { i, v }).Where(t => t.v.StartsWith("<"));
-            List<int> idx = new List<int>();
-
-            //Добавляем эти индексы в список, из которого будем брать случайный элемент (диалог)
-            foreach (var s in dialIdx)
-                idx.Add(s.i);
-
-            //ГПСЧ
-            int rx = rnd.Next(0, idx.Count);
-
-            //Если список пуст -> уходим на второй круг... (т.е. такого процесса нет)
-            //if (list.Count == 0) continue;
-
-            if (list.Count != 0)
-            {
-                consoleWrite("<----------Вывод случайного диалога---------->", false);
-                //Debug.WriteLine("<----------Вывод случайного диалога---------->");
-
-                //Печатаем диалог
-                var Dialog = list.Skip(idx[rx]).Take(1).Select(s => s).ToArray();
-                consoleWrite(Dialog[0], true);
-
-                //Печатаем фразы к нему
-                List<string> Phrases = list.Skip(idx[rx] + 1).TakeWhile(x => !x.StartsWith("<")).ToList();
-                Expression[] siteDialog = new Expression[Phrases.Count];
-                for (int i = 0; i < Phrases.Count; i++)
-                {
-                    //Debug.WriteLine(Phrases[i]);
-                    siteDialog[i] = new Expression(Phrases[i].Substring(2), (Phrases[i])[0].ToString());
-                }
-                _ = Say(siteDialog);
-            }
-            //Моем полы
-            list.Clear();
-        }
-        */
-
-        #endregion
 
         List<DialogModel> dm = new List<DialogModel>();
         int num = 0;
@@ -1390,6 +904,10 @@ namespace MonikaOnDesktop
                 {
                     S = s.Insert(0, "\n\t\t<Text>") + "</Text>";
                 }
+                if (s.Contains("affection"))
+                {
+                    S = s.Insert(0, "\n\t\t<Action>") + "</Action>";
+                }
                 mainXML += S;
             }
             f.Close();
@@ -1401,7 +919,7 @@ namespace MonikaOnDesktop
             #region
             string s1 = mainXml.Replace("\t", String.Empty);
             string s2 = s1.Replace("\n", String.Empty);
-            //Debug.WriteLine(mainXml);
+            Debug.WriteLine(mainXml);
             XmlDocument xDoc = new XmlDocument();
             //string path = testXml;
             //xDoc.Load(path);
@@ -1478,6 +996,31 @@ namespace MonikaOnDesktop
                     Debug.WriteLine(dialogNum);
                     break;
                 }
+                if (childnode.Name == "Action")
+                {
+                    try
+                    {
+                        Debug.WriteLine(childnode.InnerText);
+                        string[] i = childnode.InnerText.Split(" ");
+                        switch (i[1])
+                        {
+                            case "+":
+                            _ = Monika.affection + int.Parse(i[2]);
+                            break;
+                            case "-":
+                            _ = Monika.affection - int.Parse(i[2]);
+                            if (Monika.affection <= 0)
+                            {
+                                Monika.affection = 0;
+                            }
+                            break;
+                        }
+                        Debug.WriteLine(Monika.affection);
+                    } catch
+                    {
+                        Debug.WriteLine("ERR");
+                    }
+                }
                 if (childnode.Name == "Text")
                 {
                     //Console.WriteLine(childnode.InnerText);
@@ -1485,8 +1028,7 @@ namespace MonikaOnDesktop
                     try
                     {
                         await Say(new[] { new Expression(childnode.InnerText.Substring(5), childnode.InnerText.Substring(0, 4)) });
-                    }
-                    catch
+                    } catch
                     {
                         Debug.WriteLine("ERR");
                     }
@@ -1500,6 +1042,7 @@ namespace MonikaOnDesktop
                         setFace("1esa");
                     });
                     dialogNum = 0;
+                    Monika.saveData();
                     break;
                 }
                 //Thread.Sleep(delay1); // sleep
@@ -1521,6 +1064,10 @@ namespace MonikaOnDesktop
                 string m = f.ReadLine();
                 string s = m.Replace("\r", String.Empty);
                 string S = "";
+                if (s.Contains("affection"))
+                {
+                    S = s.Insert(0, "\n\t\t\t<Action>") + "</Action>";
+                }
                 if (s.Contains("menu:"))
                 {
                     S = s.Replace("menu:", "\n\t\t\t<Menu>");
