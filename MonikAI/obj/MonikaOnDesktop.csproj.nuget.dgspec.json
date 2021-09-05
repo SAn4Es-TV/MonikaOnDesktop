@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Санёк\\source\\MonikAI\\MonikAI\\MonikaOnDesktop.csproj": {}
+    "C:\\Users\\Санёк\\source\\repos\\MonikaOnDesktop\\MonikAI\\MonikaOnDesktop.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Санёк\\source\\MonikAI\\MonikAI\\MonikaOnDesktop.csproj": {
+    "C:\\Users\\Санёк\\source\\repos\\MonikaOnDesktop\\MonikAI\\MonikaOnDesktop.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Санёк\\source\\MonikAI\\MonikAI\\MonikaOnDesktop.csproj",
+        "projectUniqueName": "C:\\Users\\Санёк\\source\\repos\\MonikaOnDesktop\\MonikAI\\MonikaOnDesktop.csproj",
         "projectName": "MonikaOnDesktop",
-        "projectPath": "C:\\Users\\Санёк\\source\\MonikAI\\MonikAI\\MonikaOnDesktop.csproj",
+        "projectPath": "C:\\Users\\Санёк\\source\\repos\\MonikaOnDesktop\\MonikAI\\MonikaOnDesktop.csproj",
         "packagesPath": "C:\\Users\\Санёк\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Санёк\\source\\MonikAI\\MonikAI\\obj\\",
+        "outputPath": "C:\\Users\\Санёк\\source\\repos\\MonikaOnDesktop\\MonikAI\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Санёк\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -79,7 +79,7 @@
               "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.202\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.400\\RuntimeIdentifierGraph.json"
         }
       }
     }

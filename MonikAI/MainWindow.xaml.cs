@@ -879,6 +879,10 @@ namespace MonikaOnDesktop
                 string m = f.ReadLine();
                 string s = m.Replace("\r", String.Empty).Replace("    ", "\t");
                 string S = "";
+                if (s.Contains("affection"))
+                {
+                    S = s.Insert(0, "\n\t\t<Action>") + "</Action>";
+                }
                 if (s.Contains("menu:"))
                 {
                     S = s.Replace("menu:", "\n\t\t<Menu>");
@@ -900,13 +904,9 @@ namespace MonikaOnDesktop
                 {
                     S = s.Replace("\t\t\t", "\n\t\t\t\t<Text>") + "</Text>\n\t\t\t</Answer>\n\t\t</Menu>";
                 }
-                if (!s.Contains("\t\t") && !s.Contains("\t\t") && !s.Contains("menuend") && !s.Contains("menu:"))
+                if (!s.Contains("\t\t") && !s.Contains("\t\t") && !s.Contains("menuend") && !s.Contains("menu:") && !s.Contains("affection"))
                 {
                     S = s.Insert(0, "\n\t\t<Text>") + "</Text>";
-                }
-                if (s.Contains("affection"))
-                {
-                    S = s.Insert(0, "\n\t\t<Action>") + "</Action>";
                 }
                 mainXML += S;
             }
@@ -914,7 +914,11 @@ namespace MonikaOnDesktop
 
             mainXML += "\n\t</Dialog>\n</Dialogs>";
             string mainxml = mainXML.Replace("\n\t\t<Text>=</Text>", "\n\t</Dialog>\n\t<Dialog>");
-            string mainXml = mainxml.Replace("\n\t\t\t</Answer>\n\t\t</Menu>\n\t\t\t\t<Text>", "\n\t\t\t\t<Text>").Replace("\n\t\t\t</Answer>\n\t\t</Menu>\n\t\t\t<Answer", "\n\t\t\t<Answer").Replace("</Text>\n\t\t\t<Answer", "</Text>\n\t\t\t</Answer>\n\t\t\t<Answer");
+            string mainXml = mainxml.Replace("\n\t\t\t</Answer>\n\t\t</Menu>\n\t\t\t\t<Text>", "\n\t\t\t\t<Text>")
+                .Replace("\n\t\t\t</Answer>\n\t\t</Menu>\n\t\t\t<Answer", "\n\t\t\t<Answer")
+                .Replace("</Text>\n\t\t\t<Answer", "</Text>\n\t\t\t</Answer>\n\t\t\t<Answer")
+                .Replace("<Text>affection+</Text>", "<Action>affection + 1</Action>")
+                .Replace("<Text>affection-</Text>", "<Action>affection - 1</Action>");
 
             #region
             string s1 = mainXml.Replace("\t", String.Empty);
@@ -1005,10 +1009,12 @@ namespace MonikaOnDesktop
                         switch (i[1])
                         {
                             case "+":
-                            _ = Monika.affection + int.Parse(i[2]);
+                            Monika.affection += int.Parse(i[2]);
+                            Debug.WriteLine(i[1] + int.Parse(i[2]));
                             break;
                             case "-":
-                            _ = Monika.affection - int.Parse(i[2]);
+                            Monika.affection -= int.Parse(i[2]);
+                            Debug.WriteLine(i[1] + int.Parse(i[2]));
                             if (Monika.affection <= 0)
                             {
                                 Monika.affection = 0;
@@ -1094,7 +1100,7 @@ namespace MonikaOnDesktop
                 {
                     S = s.Replace("\t\t\t", "\n\t\t\t\t\t<Text>") + "</Text>\n\t\t\t\t</Answer>\n\t\t\t</Menu>";
                 }
-                if (!s.Contains("\t\t") && !s.Contains("\t\t") && !s.Contains("menuend") && !s.Contains("menu:"))
+                if (!s.Contains("\t\t") && !s.Contains("\t\t") && !s.Contains("menuend") && !s.Contains("menu:") && !s.Contains("affection"))
                 {
                     S = s.Insert(0, "\n\t\t\t<Text>") + "</Text>";
                 }

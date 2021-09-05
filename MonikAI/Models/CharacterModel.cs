@@ -10,9 +10,9 @@ namespace MonikaOnDesktop
 {
     class CharacterModel
     {
-        public string filePath { get; set; }
-        public int affection { get; set; }
-        public string pcName { get; set; }
+        public string filePath;
+        public int affection;
+        public string pcName;
 
         public CharacterModel(string path)
         {
