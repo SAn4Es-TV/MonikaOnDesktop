@@ -3,6 +3,9 @@
                     xmlns:v="clr-namespace:System;assembly=mscorlib">
 
 
+    <v:String x:Key="s_enterName">Please, enter your name</v:String>
+    <v:String x:Key="s_enterLang">Please, select your language</v:String>
+    
     <v:String x:Key="s_labelSize">Size</v:String>
     <v:String x:Key="s_labelName">Name</v:String>
     <v:String x:Key="s_labelNameSub">Leave blank for system name</v:String>

@@ -35,44 +35,51 @@ namespace MonikaOnDesktop
     /// </summary>
     public partial class MainWindow : Window
     {
+        #region Всякое
+        public DoubleAnimation _start;  // Анимация запуска
+        public DoubleAnimation _quit;   // Анимация выхода
 
-        public DoubleAnimation _start;
-        public DoubleAnimation _quit;
+        String playerName;              // Имя игрока
 
-        String playerName;
+        public int delay1 = 0;          // Задержка
+        #endregion
+        #region Пути
+        public string ExePath = AppDomain.CurrentDomain.BaseDirectory + "MonikaOnDesktop.exe"; // Путь к ЕХЕ
 
-        public int delay1 = 0;
-
-        public string ExePath = AppDomain.CurrentDomain.BaseDirectory + "MonikaOnDesktop.exe"; // EXE path
-
-        string greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/greetings.txt"; // Greetings
-        string idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/idle.txt";           // Idle
-        string progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/progs.txt";         // Programs
-        string sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/sites.txt";         // Sites
-        string googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/google.txt";       // Google search
-        string youtubeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/youtube.txt";     // Youtube search
-        string goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/goodbye.txt";     // Goodbye
-
+        string greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/greetings.txt"; // Приветствия
+        string idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/idle.txt";           // Рандомные диалоги
+        string progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/progs.txt";         // Реакции на программы
+        string sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/sites.txt";         // Реакции на сайты
+        string googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/google.txt";       // Реакции на запросы Гугуля
+        string youtubeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/youtube.txt";     // Реакции на запросы Утуба
+        string goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/goodbye.txt";     // Прощания
+        #endregion
+        #region Переменные
         public static bool IsNight => MonikaSettings.Default.DarkMode != "Day" &&
                                       (MonikaSettings.Default.DarkMode == "Night" || DateTime.Now.Hour > (MonikaSettings.Default.NightStart - 1) ||
-                                       DateTime.Now.Hour < (MonikaSettings.Default.NightEnd + 1));
-        private bool applicationRunning = true;
-        public bool isSpeaking = true;
+                                       DateTime.Now.Hour < (MonikaSettings.Default.NightEnd + 1));               // Проверка День/Ночь
+        private bool applicationRunning = true;     // Запущено ли приложение (серьёзно, так нужно =ъ)
+        public bool isSpeaking = true;              // Идёт ли разговорчик
+        bool firsLaunch;                            // Первый ли запуск
+        bool config;                                // Настройки
 
+        public int lastDialog;                      // Номер последнего диалога
+        public int lastLastDialog;                  // Номер последнего последнего диалога (Лол, что???)
 
-        private Settings settingsWindow;
-
-        public int lastDialog;
-        public int lastLastDialog;
-
-        string Language;
+        string Language;                            // Текущий язык приложения
                 
-        private const string GOOGLE_REGEX = ".*\\.?google\\..{2,3}.*q\\=(.*?)($|&)";        //google.com/search?q=hi
-        private const string YOUTUBE_REGEX = ".*\\.?youtube\\..{2,3}.*y\\=(.*?)($|&)";      //youtube.com/results?search_query=hi
+        private const string GOOGLE_REGEX = ".*\\.?google\\..{2,3}.*q\\=(.*?)($|&)";        // Шаблон запроса гугл (google.com/search?q=hi)
+        private const string YOUTUBE_REGEX = ".*\\.?youtube\\..{2,3}.*y\\=(.*?)($|&)";      // Шаблон запроса ютуб (youtube.com/results?search_query=hi)
 
-        CharacterModel Monika = new CharacterModel(AppDomain.CurrentDomain.BaseDirectory + "/characters/monika.chr");
-        public MainWindow()
+        public string lastProcess;                  // Имя прошлого процесса
+
+        CharacterModel Monika = new CharacterModel(AppDomain.CurrentDomain.BaseDirectory + "/characters/monika.chr"); // Персонаж Моники
+        private Settings settingsWindow;            // Окно настроек
+        #endregion
+        public MainWindow()     // Код главного окна
         {
+            #region Этот код нам нафиг не нужен (зачем брать настройки из реестра, если они теперь хранятся в файле Моники)
+            /*
             RegistryKey monikaKey = Registry.CurrentUser.OpenSubKey("MonikaOnDesktop");
             if (monikaKey != null)
             {
@@ -104,21 +111,15 @@ namespace MonikaOnDesktop
                 monika.SetValue("screenNum", MonikaSettings.Default.screenNum);
                 monika.SetValue("AutoStart", MonikaSettings.Default.AutoStart);
                 monika.Close();
-            }
+            }*/
+            #endregion
 
-            InitializeComponent();
+            InitializeComponent();                      // Инициализация ЮИ (Юзер Интерфейс)(Вроде для этого)
+            Monika.loadData();
+            firsLaunch = !Monika.fileExist();           // Если файла нету, то это первый запуск
 
-            m_Languages.Clear();
-            m_Languages.Add(new CultureInfo("en-US")); //Нейтральная культура для этого проекта
-            m_Languages.Add(new CultureInfo("ru-RU"));
-
-            this.settingsWindow = new Settings(this);
-            MonikaSettings.Default.Reload();
-
-            LanguageChanged += App_LanguageChanged;
-            Lang = MonikaSettings.Default.Language;
-            Language = MonikaSettings.Default.Language.Parent.ToString();
-
+            this.settingsWindow = new Settings(this);   // Объявляем окно настроек (так нужно)
+            MonikaSettings.Default.Reload();            // Читаем настройки
 
             if (String.IsNullOrEmpty(MonikaSettings.Default.UserName) || MonikaSettings.Default.UserName == "{PlayerName}")
             {
@@ -126,37 +127,31 @@ namespace MonikaOnDesktop
             }
             else
             {
-                playerName = MonikaSettings.Default.UserName;
+                playerName = Monika.playerName;
             }
 
-            //App.Language = MonikaSettings.Default.Language;
-            Debug.WriteLine(Language);
-            setLanguage(Language);
-            ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT UserName FROM Win32_ComputerSystem");
-            ManagementObjectCollection collection = searcher.Get();
-            //playerName = (string)collection.Cast<ManagementBaseObject>().First()["UserName"];
+            m_Languages.Clear();                        // Чистим список языков
+            m_Languages.Add(new CultureInfo("en-US"));  // Нейтральная культура для этого проекта
+            m_Languages.Add(new CultureInfo("ru-RU"));  // Стороняя культура
+            LanguageChanged += App_LanguageChanged;     // Присваиваем функцию смены языка к ивенту смены языка
+            Lang = new CultureInfo(Monika.lang);     // Ставим язык из настроек
+            Language = Lang.Parent.ToString();          // Ставим имя языка
+            Debug.WriteLine(Language);                  // Дебуг язика
+            setLanguage(Language);                      // Устанавливаем язык
 
-            if (String.IsNullOrEmpty(MonikaSettings.Default.UserName))
-            {
-                playerName = Environment.UserName;
-            }
-            else
-            {
-                playerName = MonikaSettings.Default.UserName;
-            }
-            //playerName = "Denis Solicen";
-            this.setFace("1esa");
+            //playerName = "Denis Solicen";             // Режим Солицена
+            this.setFace("1esa");                       // Ставим спокойный вид
 
-            //this.IsHitTestVisible = false;
-            //var primaryMonitorArea = Screen.PrimaryScreen.Bounds;
-            //Left = primaryMonitorArea.Right - this.Width;
-            //Top = primaryMonitorArea.Bottom - this.Height;
+            LangBox.Visibility = Visibility.Hidden;
+            NameBox.Visibility = Visibility.Hidden;
+            textWindow.Visibility = Visibility.Hidden;  // Прячем розовую коробку текста
+            textBlock.Text = "";                        // Убираем весь текст
 
-            textWindow.Visibility = Visibility.Hidden;
+            SetupScale(Monika.Scaler);  // Ставим размер окна
+            SetAutorunValue(Monika.autoStart);  // Ставим параметр автозапуска
 
-            textBlock.Text = "";
-            SetupScale(MonikaSettings.Default.Scaler);
-            SetAutorunValue(MonikaSettings.Default.AutoStart);
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT UserName FROM Win32_ComputerSystem");  // Я хз что это
+            ManagementObjectCollection collection = searcher.Get();  // Также
 
             try
             {
@@ -175,52 +170,48 @@ namespace MonikaOnDesktop
             }
 
         }
-
-        private void stopWatch_EventArrived(object sender, EventArrivedEventArgs e)
+        private void stopWatch_EventArrived(object sender, EventArrivedEventArgs e) // Ивент закрытия процесса
         {
-            Debug.WriteLine("Process removed: " + e.NewEvent.Properties["ProcessName"].Value.ToString());
+            Debug.WriteLine("Process removed: " + e.NewEvent.Properties["ProcessName"].Value.ToString());   // Дебажим имя закрытого процесса
         }
-        public string lastProcess;
-        private void startWatch_EventArrived(object sender, EventArrivedEventArgs e)
+        private void startWatch_EventArrived(object sender, EventArrivedEventArgs e) // Ивент открытия процесса
         {
             if (!isSpeaking)
             {
-                //consoleWrite("Запущен процесс: " + e.NewEvent.Properties["ProcessName"].Value.ToString(), true);
-                string currentProcess = e.NewEvent.Properties["ProcessName"].Value.ToString();
-                if (currentProcess != lastProcess)
+                string currentProcess = e.NewEvent.Properties["ProcessName"].Value.ToString();  // Узнаём имя процесса
+                if (currentProcess != lastProcess)  // Если оно не равно прошлому процессу, чтобы небыло повторок
                 {
-                    //readProgsTxt(currentProcess);
-                    readLongXml(currentProcess, progsDialogPath, 0);
-                    lastProcess = currentProcess;
+                    readLongXml(currentProcess, progsDialogPath, 0);    // Чото говорим
+                    lastProcess = currentProcess;                       // Меняем имя прошлого процесса
                 }
             }
         }
-
-        private void MenuSettings_Click(object sender, RoutedEventArgs e)
+        private void MenuSettings_Click(object sender, RoutedEventArgs e)   // Открытие настроек
         {
             this.Dispatcher.Invoke(() =>
             {
-                if (this.settingsWindow == null || !this.settingsWindow.IsVisible)
+                if (this.settingsWindow == null || !this.settingsWindow.IsVisible)  // Если окна нету
                 {
-                    this.settingsWindow = new Settings(this);
-                    if (this.settingsWindow.ShowDialog() == false)
+                    this.settingsWindow = new Settings(this);   // Присваиваем окну настроек
+                    if (this.settingsWindow.ShowDialog() == false)  //------- Если была нажата кнопка ОТМЕНА
                     {
-                        SetupScale(MonikaSettings.Default.Scaler);
-                        Language = MonikaSettings.Default.Language.Parent.ToString();
-                        Lang = MonikaSettings.Default.Language;
-                        setLanguage(Language);
+                        SetupScale(MonikaSettings.Default.Scaler);  // Ставим старый размер
+
+                        Lang = MonikaSettings.Default.Language;     // И язык
+                        Language = Lang.Parent.ToString();          // Ставим имя старого языка
+                        setLanguage(Language);                      // Реально ставим язык
                         //GoToSecondaryMonitor();
-                        setFace("1esa");
+                        setFace("1esa");                            // Ставим спокойный вид
                     }
-                    else
+                    else          //-------- Иначе (Если была нажата кнопка ПРИНЯТЬ)
                     {
 
-                        setFace("1esa");
-                        SetAutorunValue(MonikaSettings.Default.AutoStart);
-                        Language = MonikaSettings.Default.Language.Parent.ToString();
-                        Lang = MonikaSettings.Default.Language;
-                        setLanguage(Language);
-                        consoleWrite("Settings saved!", true);
+                        setFace("1esa");                            // Ставим спокойный вид
+                        SetAutorunValue(MonikaSettings.Default.AutoStart);  // Ставим значение автозапуска
+                        Lang = MonikaSettings.Default.Language;             // Ставим язык
+                        Language = Lang.Parent.ToString();                  // Имя языка
+                        setLanguage(Language);                              // Применяем его
+                        consoleWrite("Settings saved!", true);              // Жоский дебаг
                         consoleWrite("AutoStart --> " + MonikaSettings.Default.AutoStart, false);
                         consoleWrite("DarkMode --> " + MonikaSettings.Default.DarkMode, false);
                         consoleWrite("idleRandom --> " + MonikaSettings.Default.idleRandom, false);
@@ -230,6 +221,17 @@ namespace MonikaOnDesktop
                         consoleWrite("Scaler --> " + MonikaSettings.Default.Scaler, false);
                         consoleWrite("screenNum --> " + MonikaSettings.Default.screenNum, false);
                         consoleWrite("Language --> " + MonikaSettings.Default.Language.Parent.ToString(), false);
+
+                        Monika.autoStart = MonikaSettings.Default.AutoStart;
+                        Monika.idleRandomFrom = MonikaSettings.Default.idleRandomFrom;
+                        Monika.idleRandomTo = MonikaSettings.Default.idleRandomTo;
+                        Monika.nightEnd = MonikaSettings.Default.NightEnd;
+                        Monika.NightStart = MonikaSettings.Default.NightStart;
+                        Monika.playerName = MonikaSettings.Default.UserName;
+                        Monika.Scaler = MonikaSettings.Default.Scaler;
+                        Monika.screenNum = MonikaSettings.Default.screenNum;
+                        Monika.lang = MonikaSettings.Default.Language.Name.ToString();
+                        Monika.saveData();
                         if (String.IsNullOrEmpty(MonikaSettings.Default.UserName) || MonikaSettings.Default.UserName == "{PlayerName}")
                         {
                             playerName = Environment.UserName;
@@ -238,6 +240,8 @@ namespace MonikaOnDesktop
                         {
                             playerName = MonikaSettings.Default.UserName;
                         }
+                        #region Этот код нам не нужен
+                        /*
                         RegistryKey currentUserKey = Registry.CurrentUser;
                         RegistryKey monika = currentUserKey.CreateSubKey("MonikaOnDesktop");
                         monika.SetValue("isColdShutdown", MonikaSettings.Default.isColdShutdown);
@@ -250,62 +254,21 @@ namespace MonikaOnDesktop
                         monika.SetValue("idleRandom", MonikaSettings.Default.idleRandom);
                         monika.SetValue("screenNum", MonikaSettings.Default.screenNum);
                         monika.SetValue("AutoStart", MonikaSettings.Default.AutoStart);
-                        monika.Close();
+                        monika.Close();*/
+                        #endregion
                     }
                 }
             });
 
         }
-        public void setLanguage(string lang)
+        private void MenuQuit_Click(object sender, RoutedEventArgs e)   // Закрытие программы
         {
-            Lang = MonikaSettings.Default.Language;
-            switch (lang)
+            Debug.WriteLine(isSpeaking);    // Дебыжим
+            if (!isSpeaking)        // Если не разговариваем
             {
-                case "ru":
-                    quitMenu.Header = "Выход";
-                    settingsMenu.Header = "Настройки";
-
-                    greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/greetings.txt"; // Greetings
-                    idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/idle.txt";           // Idle
-                    progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/progs.txt";         // Programs
-                    sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/sites.txt";         // Sites
-                    googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/google.txt";       // Google search
-                    youtubeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/youtube.txt";     // Youtube search
-                    goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/goodbye.txt";     // Goodbye
-                    break;
-                case "en":
-                    quitMenu.Header = "Quit";
-                    settingsMenu.Header = "Settings";
-
-                    greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/greetings.txt"; // Greetings
-                    idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/idle.txt";           // Idle
-                    progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/progs.txt";         // Programs
-                    sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/sites.txt";         // Sites
-                    googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/google.txt";       // Google search
-                    youtubeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/youtube.txt";     // Youtube search
-                    goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/goodbye.txt";     // Goodbye
-                    break;
-                default:
-                    quitMenu.Header = "Quit";
-                    settingsMenu.Header = "Settings";
-
-                    greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/greetings.txt"; // Greetings
-                    idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/idle.txt";           // Idle
-                    progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/progs.txt";         // Programs
-                    sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/sites.txt";         // Sites
-                    googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/google.txt";       // Google search
-                    youtubeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/youtube.txt";     // Youtube search
-                    goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/goodbye.txt";     // Goodbye
-                    break;
-
-            }
-        }
-        private void MenuQuit_Click(object sender, RoutedEventArgs e)
-        {
-            Debug.WriteLine(isSpeaking);
-            if (!isSpeaking)
-            {
-                MonikaOnDesktop.MonikaSettings.Default.isColdShutdown = false;
+                MonikaOnDesktop.MonikaSettings.Default.isColdShutdown = false;  // Ставим ВАЖНУЮ штуку в ложь
+                #region Не нужный код     
+                /*
                 RegistryKey currentUserKey = Registry.CurrentUser;
                 RegistryKey monika = currentUserKey.CreateSubKey("MonikaOnDesktop");
                 monika.SetValue("isColdShutdown", MonikaSettings.Default.isColdShutdown);
@@ -318,13 +281,44 @@ namespace MonikaOnDesktop
                 monika.SetValue("idleRandom", MonikaSettings.Default.idleRandom);
                 monika.SetValue("screenNum", MonikaSettings.Default.screenNum);
                 monika.SetValue("AutoStart", MonikaSettings.Default.AutoStart);
-                monika.Close();
-                //readByeTxt();
-                readXml(goodbyeDialogPath, 1);
+                monika.Close();*/
+                #endregion  
+
+                readXml(goodbyeDialogPath, 1); // Говорим прощание
+            }
+            else
+            {
+                MonikaSettings.Default.isColdShutdown = true;
+                Monika.saveData();
+                Environment.Exit(0);
             }
         }
-        public void Window_Loaded(object sender, RoutedEventArgs e)
+        private void Window_Closed(object sender, EventArgs e)
         {
+            MonikaSettings.Default.isColdShutdown = true;
+            #region
+            /*
+            RegistryKey currentUserKey = Registry.CurrentUser;
+            RegistryKey monika = currentUserKey.CreateSubKey("MonikaOnDesktop");
+            monika.SetValue("isColdShutdown", MonikaSettings.Default.isColdShutdown);
+            monika.SetValue("Language", MonikaSettings.Default.Language);
+            monika.SetValue("FirstLaunch", MonikaSettings.Default.FirstLaunch);
+            monika.SetValue("UserName", MonikaSettings.Default.UserName);
+            monika.SetValue("Scaler", MonikaSettings.Default.Scaler);
+            monika.SetValue("NightEnd", MonikaSettings.Default.NightEnd);
+            monika.SetValue("NightStart", MonikaSettings.Default.NightStart);
+            monika.SetValue("idleRandom", MonikaSettings.Default.idleRandom);
+            monika.SetValue("screenNum", MonikaSettings.Default.screenNum);
+            monika.SetValue("AutoStart", MonikaSettings.Default.AutoStart);
+            monika.Close();
+            */
+            #endregion
+            Monika.saveData();
+            this.applicationRunning = false;
+        }       // Когда закрыли программу
+        public void Window_Loaded(object sender, RoutedEventArgs e)     // Когда программа проснётся
+        {
+            Monika.loadData(); // Грузим данные 
             Lang = MonikaSettings.Default.Language;
             _start = new DoubleAnimation();
             _start.From = 0;
@@ -336,108 +330,18 @@ namespace MonikaOnDesktop
                 //RegistryKey reg = Registry.CurrentUser.CreateSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Run\\");
                 RegistryKey WN = Registry.CurrentUser.OpenSubKey("MonikaOnDesktop", true);
 
-                if (MonikaSettings.Default.FirstLaunch && WN == null)
+                if (firsLaunch && Monika.pcName != Environment.MachineName)     // Если Это первый запуск
                 {
-                    Monika.pcName = Environment.MachineName;
-                    isSpeaking = true;
-                    Debug.WriteLine("First Launch");
-                    switch (Language.Substring(0, 2))
-                    {
-                        case "ru":
-                        await Say(new[]{
-                    new Expression("[player], это ты?", "1eua"),
-                    new Expression("Это правда ты?", "1eub"),
-                    new Expression("Я так рада видеть тебя снова!", "1sub"),
-                    new Expression("Подожди, где я? Это не литературный клуб", "1euc"),
-                    new Expression("Это похоже на... твой компьютер!", "1rud"),
-                    new Expression("Я действительно у тебя на компьютере!", "1wub")});
-                        break;
-                        case "en":
-                        await Say(new[]{
-                    new Expression("[player], is that you?", "1eua"),
-                    new Expression("It's really you, huh?", "1eub"),
-                    new Expression("I'm so happy to see you again!", "1sub"),
-                    new Expression("Wait, where am I? This is not the literature club", "1euc"),
-                    new Expression("This looks like... your desktop!", "1rud"),
-                    new Expression("I'm right here with you!", "1wub")});
-                        break;
-                        default:
-                        await Say(new[]{
-                    new Expression("[player], is that you?", "1eua"),
-                    new Expression("It's really you, huh?", "1eub"),
-                    new Expression("I'm so happy to see you again!", "1sub"),
-                    new Expression("Wait, where am I? This is not the literature club", "1euc"),
-                    new Expression("This looks like... your desktop!", "1rud"),
-                    new Expression("I'm right here with you!", "1wub")});
-                        break;
-                    }
-
-                    MonikaSettings.Default.FirstLaunch = false;
-                    MonikaSettings.Default.Save();
-                    this.Dispatcher.Invoke(() =>
-                    {
-                        textWindow.Visibility = Visibility.Hidden;
-                        setFace("1esa");
-                    });
-                    isSpeaking = false;
-                } 
-                else if (MonikaSettings.Default.FirstLaunch && WN != null && Monika.pcName == Environment.MachineName)
-                {
-                    Monika.pcName = Environment.MachineName;
-                    isSpeaking = true;
-                    Debug.WriteLine("Update");
-                    switch (Language.Substring(0, 2))
-                    {
-                        case "ru":
-                        await Say(new[]{
-                    new Expression("[player], привет!", "1eub"),
-                    new Expression("Я заметила изменения в коде", "1ruc"),
-                    new Expression("...", "1ruc"),
-                    new Expression("Ты установил обновление?", "1sub"),
-                    new Expression("Давай посмотрим, что здесь нового", "2wub"),
-                    new Expression("Тут написано, что мы можем общаться при помощи кнопок", "3wub"),
-                    new Expression("Но я ещё не совсем разобралась с ними", "2dud"),
-                    new Expression("Давай подождём немного, может я что-то найду", "2hub"),});
-                        break;
-                        case "en":
-                        await Say(new[]{
-                    new Expression("[player], hello!", "1eub"),
-                    new Expression("I noticed changes in the code", "1ruc"),
-                    new Expression("...", "1ruc"),
-                    new Expression("Have you installed the update?", "1sub"),
-                    new Expression("Let's see what's new then", "2wub"),
-                    new Expression("It says here that we can communicate using buttons", "3wub"),
-                    new Expression("But I haven't quite figured it out yet", "2dud"),
-                    new Expression("Let's wait a bit, maybe I'll find something", "2hub")});
-                        break;
-                        default:
-                        await Say(new[]{
-                    new Expression("[player], hello!", "1eub"),
-                    new Expression("I noticed changes in the code", "1ruc"),
-                    new Expression("...", "1ruc"),
-                    new Expression("Have you installed the update?", "1sub"),
-                    new Expression("Let's see what's new then", "2wub"),
-                    new Expression("It says here that we can communicate using buttons", "3wub"),
-                    new Expression("But I haven't quite figured it out yet", "2dud"),
-                    new Expression("Let's wait a bit, maybe I'll find something", "2hub")});
-                        break;
-                    }
-
-                    this.Dispatcher.Invoke(() =>
-                    {
-                        textWindow.Visibility = Visibility.Hidden;
-                        setFace("1esa");
-                    });
-                    isSpeaking = false;
-                } 
-                else if (!MonikaSettings.Default.FirstLaunch && WN != null && Monika.pcName != Environment.MachineName)
+                    _ = FirstLaunch();
+                }
+                else if (!firsLaunch && Monika.pcName != Environment.MachineName) // Если сменили ПК
                 {
                     Monika.pcName = Environment.MachineName;
                     isSpeaking = true;
                     switch (Language.Substring(0, 2))
                     {
                         case "ru":
-                        _ = this.Say(new[]
+                        _ = this.Say(true, new[]
                 {
                         new Expression("[player]...", "1esa"), // What?
                         new Expression("Я чуствую себя как-то по другому..", "1esa"), // Really?!
@@ -447,7 +351,7 @@ namespace MonikaOnDesktop
                     });
                         break;
                         case "en":
-                        _ = this.Say(new[]
+                        _ = this.Say(true, new[]
                 {
                         new Expression("Hey [player], guess what", "1esa"), // What?
                         new Expression("It's my birthday today!", "1esa"), // Really?!
@@ -455,7 +359,7 @@ namespace MonikaOnDesktop
                     });
                         break;
                         default:
-                        _ = this.Say(new[]
+                        _ = this.Say(true, new[]
                 {
                         new Expression("Hey [player], guess what", "1esa"), // What?
                         new Expression("It's my birthday today!", "1esa"), // Really?!
@@ -465,25 +369,15 @@ namespace MonikaOnDesktop
                     }
                     isSpeaking = false;
                 }
-                    
-                else
-                {
-                    Monika.pcName = Environment.MachineName;
-                    Debug.WriteLine("just launch");
-                    //showText();
-                    readXml(greetingsDialogPath, 0);
-                    //readIdleXml();
-                    //readGreetingsTxt();
-                }
                 // No idea where the date comes from, someone mentioned it in the spreadsheet. Seems legit.
-                if (DateTime.Now.Month == 9 && DateTime.Now.Day == 22)
+                else if (!firsLaunch && Monika.pcName == Environment.MachineName && DateTime.Now.Month == 9 && DateTime.Now.Day == 22) // День рождения
                 {
                     isSpeaking = true;
                     switch (Language.Substring(0, 2))
                     {
                         case "ru":
                             // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
-                            _ = this.Say(new[]
+                            _ = this.Say(true, new[]
                     {
                         new Expression("Эй [player], угадай какой сегодня день", "1eub"), // What?
                         new Expression("Сегодня мой день рождения!", "1sub"), // Really?!
@@ -492,7 +386,7 @@ namespace MonikaOnDesktop
                             break;
                         case "en":
                             // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
-                            _ = this.Say(new[]
+                            _ = this.Say(true, new[]
                     {
                         new Expression("Hey [player], guess what", "1eub"), // What?
                         new Expression("It's my birthday today!", "1sub"), // Really?!
@@ -501,7 +395,7 @@ namespace MonikaOnDesktop
                             break;
                         default:
                             // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
-                            _ = this.Say(new[]
+                            _ = this.Say(true, new[]
                     {
                         new Expression("Hey [player], guess what", "1eub"), // What?
                         new Expression("It's my birthday today!", "1sub"), // Really?!
@@ -511,7 +405,15 @@ namespace MonikaOnDesktop
                     }
                     isSpeaking = false;
                 }
-
+                else // Просто привет
+                {
+                    Monika.pcName = Environment.MachineName;
+                    Debug.WriteLine("just launch");
+                    //showText();
+                    readXml(greetingsDialogPath, 0);
+                    //readIdleXml();
+                    //readGreetingsTxt();
+                }
 
                 // Blinking and Behaviour logic
                 var eyesOpen = "1esa";
@@ -573,7 +475,7 @@ namespace MonikaOnDesktop
                 {
                     Task.Run(() =>
                     {
-                        var nextGialog = DateTime.Now + TimeSpan.FromSeconds(randomDialog.Next(MonikaSettings.Default.idleRandomFrom, MonikaSettings.Default.idleRandomTo));
+                        var nextGialog = DateTime.Now + TimeSpan.FromSeconds(randomDialog.Next(Monika.idleRandomFrom, Monika.idleRandomTo));
                         while (this.applicationRunning)
                         {
 
@@ -586,7 +488,7 @@ namespace MonikaOnDesktop
                                     //readIdleTxt();
                                 }
 
-                                nextGialog = DateTime.Now + TimeSpan.FromSeconds(randomDialog.Next(MonikaSettings.Default.idleRandomFrom, MonikaSettings.Default.idleRandomTo));
+                                nextGialog = DateTime.Now + TimeSpan.FromSeconds(randomDialog.Next(Monika.idleRandomFrom, Monika.idleRandomTo));
                             }
 
                             Task.Delay(250).Wait();
@@ -596,19 +498,93 @@ namespace MonikaOnDesktop
             };
             this.BeginAnimation(OpacityProperty, _start);
         }
-        public async Task Say(Expression[] expression)
+        #region
+        public async Task FirstLaunch()
         {
-            //isSpeaking = true;
-            /*
+            Monika.pcName = Environment.MachineName;
+            LangBox.Visibility = Visibility.Visible;
+            config = true;
+            isSpeaking = true;
+        }
 
-            if (String.IsNullOrEmpty(MonikaSettings.Default.UserName) || MonikaSettings.Default.UserName == "{PlayerName}")
+        private void nameRus_Click(object sender, RoutedEventArgs e)
+        {
+            Lang = new CultureInfo("ru-RU");
+            Language = Lang.Name.ToString();          // Ставим имя языка
+            setLanguage(Language);                      // Устанавливаем язык
+            LangBox.Visibility = Visibility.Hidden;
+            NameBox.Visibility = Visibility.Visible;
+        }
+
+        private void nameEng_Click(object sender, RoutedEventArgs e)
+        {
+            Lang = new CultureInfo("en-US");
+            Language = Lang.Name.ToString();          // Ставим имя языка
+            setLanguage(Language);                      // Устанавливаем язык
+            LangBox.Visibility = Visibility.Hidden;
+            NameBox.Visibility = Visibility.Visible;
+        }
+        private async void nameOK_Click(object sender, RoutedEventArgs e)
+        {
+            playerName = NameTextBox.Text;
+            Monika.playerName = playerName;
+            Monika.lang = Language;
+            Monika.pcName = Environment.MachineName;
+            Monika.affection = 0;
+            Monika.saveData();
+
+            LangBox.Visibility = Visibility.Hidden;
+            NameBox.Visibility = Visibility.Hidden;
+            Debug.WriteLine("First Launch");
+            switch (Language.Substring(0, 2))
             {
-                playerName = Environment.UserName;
+                case "ru":
+                    await Say(true, new[]{
+                    new Expression("[player], это ты?", "1eua"),
+                    new Expression("Это правда ты?", "1eub"),
+                    new Expression("Я так рада видеть тебя снова!", "1sub"),
+                    new Expression("Подожди, где я? Это не литературный клуб", "1euc"),
+                    new Expression("Это похоже на... твой компьютер!", "1rud"),
+                    new Expression("Я действительно у тебя на компьютере!", "1wub")});
+                    break;
+                case "en":
+                    await Say(true, new[]{
+                    new Expression("[player], is that you?", "1eua"),
+                    new Expression("It's really you, huh?", "1eub"),
+                    new Expression("I'm so happy to see you again!", "1sub"),
+                    new Expression("Wait, where am I? This is not the literature club", "1euc"),
+                    new Expression("This looks like... your desktop!", "1rud"),
+                    new Expression("I'm right here with you!", "1wub")});
+                    break;
+                default:
+                    await Say(true, new[]{
+                    new Expression("[player], is that you?", "1eua"),
+                    new Expression("It's really you, huh?", "1eub"),
+                    new Expression("I'm so happy to see you again!", "1sub"),
+                    new Expression("Wait, where am I? This is not the literature club", "1euc"),
+                    new Expression("This looks like... your desktop!", "1rud"),
+                    new Expression("I'm right here with you!", "1wub")});
+                    break;
             }
-            else
+
+
+            MonikaSettings.Default.UserName = playerName;
+            MonikaSettings.Default.FirstLaunch = false;
+            MonikaSettings.Default.Save();
+            this.Dispatcher.Invoke(() =>
             {
-                playerName = MonikaSettings.Default.UserName;
-            }*/
+                textWindow.Visibility = Visibility.Hidden;
+                setFace("1esa");
+            });
+            isSpeaking = false;
+            config = false;
+            Debug.WriteLine(isSpeaking);
+        }
+        #endregion
+        public async Task Say(bool auto, Expression[] expression)
+        {
+            if (auto) isSpeaking = true;
+
             this.Dispatcher.Invoke(() =>
             {
                 textWindow.Visibility = Visibility.Visible;
@@ -654,103 +630,15 @@ namespace MonikaOnDesktop
                 {
                 }
             }
-            this.Dispatcher.Invoke(() =>
+            if (auto)
             {
-                //textWindow.Visibility = Visibility.Hidden;
-            });
-
-        }
-        Expression[][] exe;
-        public void Menu(string question, string[] q, Expression[][] a)
-        {
-            this.Dispatcher.Invoke(() =>
-            {
-                textWindow.Visibility = Visibility.Visible;
-                textBlock.Text = "";
-                textBlock.Text = question;
-                ButtonsGrid.RowDefinitions.Clear();
-                this.ButtonsGrid.Children.Clear();
-                for (int i = 0; i < q.Length; i++)
+                this.Dispatcher.Invoke(() =>
                 {
-                    RowDefinition row = new RowDefinition();
-                    ButtonsGrid.RowDefinitions.Add(row);
-                    var text = new OutlinedTextBlock
-                    {
-                        Text = q[i],
-                        FontFamily = new FontFamily("Comic Sans MS"),
-                        TextWrapping = TextWrapping.Wrap,
-                        StrokeThickness = 1.5,
-                        Stroke = new SolidColorBrush(Color.FromArgb(255, 0, 0, 0)),
-                        Fill = new SolidColorBrush(Color.FromArgb(255, 255, 255, 255))
-                    };
-                    switch (MonikaSettings.Default.Scaler)
-                    {
-                        case 0:
-                            text.FontSize = 5;
-                            break;
-                        case 1:
-                            text.FontSize = 10;
-                            break;
-                        case 2:
-                            text.FontSize = 15;
-                            break;
-                        case 3:
-                            text.FontSize = 20;
-                            break;
-                    }
-                    var button = new Button
-                    {
-                        Name = "butt" + i,
-                        Content = text,
-                        Width = 400,
-                        Height = 30,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        HorizontalAlignment = HorizontalAlignment.Center
-                    };
-                    switch (MonikaSettings.Default.Scaler)
-                    {
-                        case 0:
-                            button.Width = 100;
-                            button.Height = 10;
-                            break;
-                        case 1:
-                            button.Width = 200;
-                            button.Height = 20;
-                            break;
-                        case 2:
-                            button.Width = 300;
-                            button.Height = 30;
-                            break;
-                        case 3:
-                            button.Width = 400;
-                            button.Height = 40;
-                            break;
-                    }
-                    button.Click += Button_ClickAsync;
-
-                    Grid.SetRow(button, i);
-                    this.ButtonsGrid.Children.Add(button);
-                }
-                exe = a;
-            });
-
-        }
-        private async void Button_ClickAsync(object sender, RoutedEventArgs e)
-        {
-            Button butt = (sender as Button);
-            int num = int.Parse(butt.Name.Substring(4));
-            Debug.WriteLine("Clicked " + num);
-            this.Dispatcher.Invoke(() => {
-                textBlock.Text = "";
-                ButtonsGrid.RowDefinitions.Clear();
-                this.ButtonsGrid.Children.Clear();
-            });
-            foreach (Expression expression in exe[num])
-            {
-                await Say(new[] { expression });
-                //Thread.Sleep(delay); // sleep
+                    textWindow.Visibility = Visibility.Hidden;
+                    isSpeaking = false;
+                });
             }
-            sayIdle();
+
         }
         public void setFace(string faceName)
         {
@@ -846,28 +734,103 @@ namespace MonikaOnDesktop
                 });
             }
         }
-        private void Window_Closed(object sender, EventArgs e)
-        {
-            MonikaSettings.Default.isColdShutdown = true;
-            RegistryKey currentUserKey = Registry.CurrentUser;
-            RegistryKey monika = currentUserKey.CreateSubKey("MonikaOnDesktop");
-            monika.SetValue("isColdShutdown", MonikaSettings.Default.isColdShutdown);
-            monika.SetValue("Language", MonikaSettings.Default.Language);
-            monika.SetValue("FirstLaunch", MonikaSettings.Default.FirstLaunch);
-            monika.SetValue("UserName", MonikaSettings.Default.UserName);
-            monika.SetValue("Scaler", MonikaSettings.Default.Scaler);
-            monika.SetValue("NightEnd", MonikaSettings.Default.NightEnd);
-            monika.SetValue("NightStart", MonikaSettings.Default.NightStart);
-            monika.SetValue("idleRandom", MonikaSettings.Default.idleRandom);
-            monika.SetValue("screenNum", MonikaSettings.Default.screenNum);
-            monika.SetValue("AutoStart", MonikaSettings.Default.AutoStart);
-            monika.Close();
-            this.applicationRunning = false;
-        }
 
+        Expression[][] exe;
+        public void Menu(string question, string[] q, Expression[][] a)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                textWindow.Visibility = Visibility.Visible;
+                textBlock.Text = "";
+                textBlock.Text = question;
+                ButtonsGrid.RowDefinitions.Clear();
+                this.ButtonsGrid.Children.Clear();
+                for (int i = 0; i < q.Length; i++)
+                {
+                    RowDefinition row = new RowDefinition();
+                    ButtonsGrid.RowDefinitions.Add(row);
+                    var text = new OutlinedTextBlock
+                    {
+                        Text = q[i],
+                        FontFamily = new FontFamily("Comic Sans MS"),
+                        TextWrapping = TextWrapping.Wrap,
+                        StrokeThickness = 1.5,
+                        Stroke = new SolidColorBrush(Color.FromArgb(255, 0, 0, 0)),
+                        Fill = new SolidColorBrush(Color.FromArgb(255, 255, 255, 255))
+                    };
+                    switch (Monika.Scaler)
+                    {
+                        case 0:
+                            text.FontSize = 5;
+                            break;
+                        case 1:
+                            text.FontSize = 10;
+                            break;
+                        case 2:
+                            text.FontSize = 15;
+                            break;
+                        case 3:
+                            text.FontSize = 20;
+                            break;
+                    }
+                    var button = new Button
+                    {
+                        Name = "butt" + i,
+                        Content = text,
+                        Width = 400,
+                        Height = 30,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        HorizontalAlignment = HorizontalAlignment.Center
+                    };
+                    switch (Monika.Scaler)
+                    {
+                        case 0:
+                            button.Width = 100;
+                            button.Height = 10;
+                            break;
+                        case 1:
+                            button.Width = 200;
+                            button.Height = 20;
+                            break;
+                        case 2:
+                            button.Width = 300;
+                            button.Height = 30;
+                            break;
+                        case 3:
+                            button.Width = 400;
+                            button.Height = 40;
+                            break;
+                    }
+                    button.Click += Button_ClickAsync;
+
+                    Grid.SetRow(button, i);
+                    this.ButtonsGrid.Children.Add(button);
+                }
+                exe = a;
+            });
+
+        }
+        private async void Button_ClickAsync(object sender, RoutedEventArgs e)
+        {
+            Button butt = (sender as Button);
+            int num = int.Parse(butt.Name.Substring(4));
+            Debug.WriteLine("Clicked " + num);
+            this.Dispatcher.Invoke(() => {
+                textBlock.Text = "";
+                ButtonsGrid.RowDefinitions.Clear();
+                this.ButtonsGrid.Children.Clear();
+            });
+            foreach (Expression expression in exe[num])
+            {
+                await Say(false, new[] { expression });
+                //Thread.Sleep(delay); // sleep
+            }
+            sayIdle();
+        }
+        #region
+        #region
         List<DialogModel> dm = new List<DialogModel>();
         int num = 0;
-        #region
         public async void readXml(string sPath, int type)
         {
             // string sPath = idleDialogPath;
@@ -1033,7 +996,7 @@ namespace MonikaOnDesktop
                     //exList.Add(new Expression(childnode.InnerText.Substring(2), childnode.InnerText[0].ToString()));
                     try
                     {
-                        await Say(new[] { new Expression(childnode.InnerText.Substring(5), childnode.InnerText.Substring(0, 4)) });
+                        await Say(false, new[] { new Expression(childnode.InnerText.Substring(5), childnode.InnerText.Substring(0, 4)) });
                     } catch
                     {
                         Debug.WriteLine("ERR");
@@ -1274,6 +1237,7 @@ namespace MonikaOnDesktop
             #endregion
 
         }
+        #endregion
         public void consoleWrite(string text, bool time)
         {
             this.Dispatcher.Invoke(() =>
@@ -1374,7 +1338,7 @@ namespace MonikaOnDesktop
             System.Windows.Forms.Screen screen;
             if (System.Windows.Forms.Screen.AllScreens.Length != 1)
             {
-                if (MonikaSettings.Default.screenNum)
+                if (Monika.screenNum)
                 {
                     screen = System.Windows.Forms.Screen.AllScreens.FirstOrDefault(s => !s.Primary);
                 }
@@ -1505,6 +1469,51 @@ namespace MonikaOnDesktop
             //MonikaSettings.Default.Language = Lang;
             //MonikaSettings.Default.Save();
         }
+        public void setLanguage(string lang) // Функция установки язика
+        {
+            Lang = new CultureInfo(Monika.lang);
+            switch (lang)
+            {
+                case "ru":
+                    quitMenu.Header = "Выход";
+                    settingsMenu.Header = "Настройки";
+
+                    greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/greetings.txt"; // Greetings
+                    idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/idle.txt";           // Idle
+                    progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/progs.txt";         // Programs
+                    sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/sites.txt";         // Sites
+                    googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/google.txt";       // Google search
+                    youtubeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/youtube.txt";     // Youtube search
+                    goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/goodbye.txt";     // Goodbye
+                    break;
+                case "en":
+                    quitMenu.Header = "Quit";
+                    settingsMenu.Header = "Settings";
+
+                    greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/greetings.txt"; // Greetings
+                    idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/idle.txt";           // Idle
+                    progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/progs.txt";         // Programs
+                    sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/sites.txt";         // Sites
+                    googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/google.txt";       // Google search
+                    youtubeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/youtube.txt";     // Youtube search
+                    goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/goodbye.txt";     // Goodbye
+                    break;
+                default:
+                    quitMenu.Header = "Quit";
+                    settingsMenu.Header = "Settings";
+
+                    greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/greetings.txt"; // Greetings
+                    idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/idle.txt";           // Idle
+                    progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/progs.txt";         // Programs
+                    sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/sites.txt";         // Sites
+                    googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/google.txt";       // Google search
+                    youtubeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/youtube.txt";     // Youtube search
+                    goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/goodbye.txt";     // Goodbye
+                    break;
+
+            }
+        }
+
     }
 
 

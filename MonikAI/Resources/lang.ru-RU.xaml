@@ -2,6 +2,9 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:v="clr-namespace:System;assembly=mscorlib">
 
+    <v:String x:Key="s_enterName">Пожалуйста, введите своё имя</v:String>
+    <v:String x:Key="s_enterLang">Пожалуйста, выберите свой язык</v:String>
+    
     <!-- Settings window -->
     <v:String x:Key="s_labelSize">Размер</v:String>
     <v:String x:Key="s_labelName">Имя</v:String>
