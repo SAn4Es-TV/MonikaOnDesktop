@@ -37,15 +37,14 @@ namespace MonikaOnDesktop
             DataContext = this;
 
             //cbItems = new ObservableCollection<ComboBoxItem>();
-            Debug.WriteLine(MainWindow.m_Languages.Count);
-            Debug.WriteLine("Current Language: " + currLang);
+            Debug.WriteLine("Текущий язык: " + currLang);
             foreach (var lang in MainWindow.m_Languages)
             {
                 ComboBoxItem menuLang = new ComboBoxItem();
                 menuLang.Content = lang.DisplayName;
                 menuLang.Tag = lang;
                 menuLang.Selected += ChangeLanguageClick;
-                Debug.WriteLine("Languages: " + lang);
+                //Debug.WriteLine("Languages: " + lang);
                 //comboBox.Items.Add(menuLang);
                 comboBox.Items.Add(menuLang);
                 if (lang.DisplayName == currLang.DisplayName)

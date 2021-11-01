@@ -61,15 +61,20 @@
 
     <Grid HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Top" IsHitTestVisible="True">
 
-        <Image x:Name="ribbon" Margin="0,-20,0,0" Source="pack://application:,,,/assets/monika/ribbon/acs-ribbon_def-0.png" StretchDirection="Both" Stretch="Uniform"/>
-        <Image x:Name="hairBack" Margin="0,-20,0,0" Source="pack://application:,,,/assets/monika/hair/hair-def-back.png" StretchDirection="Both" Stretch="Uniform"/>
-        <Image x:Name="main" Margin="0,-20,0,0" Source="pack://application:,,,/assets/monika/body/body-1.png" StretchDirection="Both" Stretch="Uniform"/>
-        <Image x:Name="hairFront" Margin="0,-20,0,0" Source="pack://application:,,,/assets/monika/hair/hair-def-front.png" StretchDirection="Both" Stretch="Uniform"/>
-        <Image x:Name="arms" Margin="0,-20,0,0" Source="pack://application:,,,/assets/monika/body/1.png" StretchDirection="Both" Stretch="Uniform"/>
-        <Image x:Name="eyes" Margin="0,-20,0,0" Source="pack://application:,,,/assets/monika/face/eyes/e.png" StretchDirection="Both" Stretch="Uniform"/>
-        <Image x:Name="brow" Margin="0,-20,0,0" Source="pack://application:,,,/assets/monika/face/brows/s.png" StretchDirection="Both" Stretch="Uniform"/>
-        <Image x:Name="mouth" Margin="0,-20,0,0" Source="pack://application:,,,/assets/monika/face/mouth/b.png" StretchDirection="Both" Stretch="Uniform"/>
-        <Image x:Name="nose" Margin="0,-20,0,0" Source="pack://application:,,,/assets/monika/face/face-nose-def.png" StretchDirection="Both" Stretch="Uniform"/>
+        <Grid x:Name="monika">
+        <Image x:Name="ribbon" Margin="0,0,0,0" Source="pack://application:,,,/assets/monika/ribbon/acs-ribbon_def-0.png" StretchDirection="Both" Stretch="Uniform"/>
+        <Image x:Name="hairBack" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/hair/hair-def-back.png" StretchDirection="Both" Stretch="Uniform"/>
+        <Image x:Name="main" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/body/body-1.png" StretchDirection="Both" Stretch="Uniform"/>
+        <Image x:Name="hairFront" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/hair/hair-def-front.png" StretchDirection="Both" Stretch="Uniform"/>
+        <Image x:Name="arms" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/body/1.png" StretchDirection="Both" Stretch="Uniform"/>
+        <Image x:Name="eyes" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/face/eyes/e.png" StretchDirection="Both" Stretch="Uniform"/>
+        <Image x:Name="brow" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/face/brows/s.png" StretchDirection="Both" Stretch="Uniform"/>
+        <Image x:Name="mouth" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/face/mouth/b.png" StretchDirection="Both" Stretch="Uniform"/>
+        <Image x:Name="nose" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/face/face-nose-def.png" StretchDirection="Both" Stretch="Uniform"/>
+        </Grid>
+        <Grid x:Name="gifts">
+            
+        </Grid>
         <Image x:Name="textWindow" Margin="50,390,50,20" Stretch="Fill" Source="pack://application:,,,/assets/gui/textbox.png" Visibility="Hidden"/>
         <local:OutlinedTextBlock x:Name="textBlock" FontFamily="Comic Sans MS" Margin="70,410,70,40" Text="Текстовый текст" TextWrapping="Wrap" StrokeThickness="1.5" Stroke="{StaticResource outlineColor}" Fill="{StaticResource mainColor}">
             <!--<TextBlock.Effect>
@@ -96,7 +101,7 @@
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>
         </tb:TaskbarIcon>
-        <Grid x:Name="NameBox" Background="#FFE6F4" Margin="80,100,80,100" Visibility="Visible">
+        <Grid x:Name="NameBox" Background="#FFE6F4" Margin="80,100,80,100" Visibility="Hidden">
             <Border BorderBrush="#FFBDE1" BorderThickness="10">
             </Border>
             <TextBlock HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="36" FontFamily="Comic Sans MS" Margin="0,43,0,0" Text="{DynamicResource s_enterName}"/>
@@ -106,7 +111,7 @@
             <TextBox x:Name="NameTextBox" Text="NameTextBox" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="48" FontFamily="Comic Sans MS" Background="{x:Null}" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" SelectionTextBrush="{x:Null}" BorderThickness="0,0,0,0"/>
 
         </Grid>
-        <Grid x:Name="LangBox" Background="#FFE6F4" Margin="80,100,80,100" Visibility="Visible">
+        <Grid x:Name="LangBox" Background="#FFE6F4" Margin="80,100,80,100" Visibility="Hidden">
             <Border BorderBrush="#FFBDE1" BorderThickness="10">
             </Border>
             <TextBlock HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="36" FontFamily="Comic Sans MS" Margin="0,43,0,0" Text="{DynamicResource s_enterLang}"/>

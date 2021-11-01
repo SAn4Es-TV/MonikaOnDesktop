@@ -36,6 +36,7 @@ namespace MonikaOnDesktop
     public partial class MainWindow : Window
     {
         #region Всякое
+
         public DoubleAnimation _start;  // Анимация запуска
         public DoubleAnimation _quit;   // Анимация выхода
 
@@ -53,27 +54,28 @@ namespace MonikaOnDesktop
         string googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/google.txt";       // Реакции на запросы Гугуля
         string youtubeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/youtube.txt";     // Реакции на запросы Утуба
         string goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/goodbye.txt";     // Прощания
+        string giftsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/gifts/gifts.txt";// Подарки
         #endregion
         #region Переменные
         public static bool IsNight => MonikaSettings.Default.DarkMode != "Day" &&
                                       (MonikaSettings.Default.DarkMode == "Night" || DateTime.Now.Hour > (MonikaSettings.Default.NightStart - 1) ||
                                        DateTime.Now.Hour < (MonikaSettings.Default.NightEnd + 1));               // Проверка День/Ночь
+        public static bool IsBDay => DateTime.Now.Month == 9 && DateTime.Now.Day == 22;                          // Проверка Дня Рождения
         private bool applicationRunning = true;     // Запущено ли приложение (серьёзно, так нужно =ъ)
         public bool isSpeaking = true;              // Идёт ли разговорчик
         bool firsLaunch;                            // Первый ли запуск
-        bool config;                                // Настройки
 
         public int lastDialog;                      // Номер последнего диалога
         public int lastLastDialog;                  // Номер последнего последнего диалога (Лол, что???)
 
         string Language;                            // Текущий язык приложения
-                
+
         private const string GOOGLE_REGEX = ".*\\.?google\\..{2,3}.*q\\=(.*?)($|&)";        // Шаблон запроса гугл (google.com/search?q=hi)
         private const string YOUTUBE_REGEX = ".*\\.?youtube\\..{2,3}.*y\\=(.*?)($|&)";      // Шаблон запроса ютуб (youtube.com/results?search_query=hi)
 
         public string lastProcess;                  // Имя прошлого процесса
 
-        CharacterModel Monika = new CharacterModel(AppDomain.CurrentDomain.BaseDirectory + "/characters/monika.chr"); // Персонаж Моники
+        CharacterModel Monika = new CharacterModel(AppDomain.CurrentDomain.BaseDirectory + "/characters/monika.chr", AppDomain.CurrentDomain.BaseDirectory + "/characters/"); // Персонаж Моники
         private Settings settingsWindow;            // Окно настроек
         #endregion
         public MainWindow()     // Код главного окна
@@ -136,7 +138,7 @@ namespace MonikaOnDesktop
             LanguageChanged += App_LanguageChanged;     // Присваиваем функцию смены языка к ивенту смены языка
             Lang = new CultureInfo(Monika.lang);     // Ставим язык из настроек
             Language = Lang.Parent.ToString();          // Ставим имя языка
-            Debug.WriteLine(Language);                  // Дебуг язика
+            //Debug.WriteLine(Language);                  // Дебуг язика
             setLanguage(Language);                      // Устанавливаем язык
 
             //playerName = "Denis Solicen";             // Режим Солицена
@@ -149,6 +151,11 @@ namespace MonikaOnDesktop
 
             SetupScale(Monika.Scaler);  // Ставим размер окна
             SetAutorunValue(Monika.autoStart);  // Ставим параметр автозапуска
+
+            if (IsBDay)
+                Debug.WriteLine("Сегодня день рождения?: Да");
+            else
+                Debug.WriteLine("Сегодня день рождения?: Нет");
 
             ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT UserName FROM Win32_ComputerSystem");  // Я хз что это
             ManagementObjectCollection collection = searcher.Get();  // Также
@@ -169,10 +176,30 @@ namespace MonikaOnDesktop
                     "An error occured: " + ex.Message + "\r\n\r\n(Try run this app as an administrator.)");
             }
 
+            FileSystemWatcher giftWatcher = new FileSystemWatcher();
+            giftWatcher.Path = Monika.giftsPath;
+            giftWatcher.NotifyFilter = NotifyFilters.FileName;
+            giftWatcher.Created += GiftWatcher_Created;
+            giftWatcher.EnableRaisingEvents = true;
+            loadGifts();
+        }
+        public void loadGifts()
+        {
+            foreach (string i in Monika.gifts)
+            {
+                string[] gift = i.Split(" | ");
+                Image img = new Image
+                {
+                    Source = new BitmapImage(new Uri(AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/gifts/" + gift[1])),
+                    Name = gift[0]
+                };
+                RegisterName(gift[0], img);
+                gifts.Children.Add(img);
+            }
         }
         private void stopWatch_EventArrived(object sender, EventArrivedEventArgs e) // Ивент закрытия процесса
         {
-            Debug.WriteLine("Process removed: " + e.NewEvent.Properties["ProcessName"].Value.ToString());   // Дебажим имя закрытого процесса
+            Debug.WriteLine("Процесс закрыт: " + e.NewEvent.Properties["ProcessName"].Value.ToString());   // Дебажим имя закрытого процесса
         }
         private void startWatch_EventArrived(object sender, EventArrivedEventArgs e) // Ивент открытия процесса
         {
@@ -263,7 +290,8 @@ namespace MonikaOnDesktop
         }
         private void MenuQuit_Click(object sender, RoutedEventArgs e)   // Закрытие программы
         {
-            Debug.WriteLine(isSpeaking);    // Дебыжим
+            if (isSpeaking)
+                Debug.WriteLine("isSpeaking: " + isSpeaking);    // Дебыжим
             if (!isSpeaking)        // Если не разговариваем
             {
                 MonikaOnDesktop.MonikaSettings.Default.isColdShutdown = false;  // Ставим ВАЖНУЮ штуку в ложь
@@ -283,7 +311,6 @@ namespace MonikaOnDesktop
                 monika.SetValue("AutoStart", MonikaSettings.Default.AutoStart);
                 monika.Close();*/
                 #endregion  
-
                 readXml(goodbyeDialogPath, 1); // Говорим прощание
             }
             else
@@ -341,36 +368,36 @@ namespace MonikaOnDesktop
                     switch (Language.Substring(0, 2))
                     {
                         case "ru":
-                        _ = this.Say(true, new[]
-                {
+                            _ = this.Say(true, new[]
+                    {
                         new Expression("[player]...", "1esa"), // What?
                         new Expression("Я чуствую себя как-то по другому..", "1esa"), // Really?!
                         new Expression("Ты.. Сменил компьютер?", "1esa"), // Really?!
                         new Expression("Или.. Переустановил систему?", "1esa"), // Really?!
                         new Expression("В любом случае, ты спасибо тебе, что сохранил мой файл", "1esa")
                     });
-                        break;
+                            break;
                         case "en":
-                        _ = this.Say(true, new[]
-                {
+                            _ = this.Say(true, new[]
+                    {
                         new Expression("Hey [player], guess what", "1esa"), // What?
                         new Expression("It's my birthday today!", "1esa"), // Really?!
                         new Expression("Happy Birthday to me!", "1esa") // To you too, Monika! 
                     });
-                        break;
+                            break;
                         default:
-                        _ = this.Say(true, new[]
-                {
+                            _ = this.Say(true, new[]
+                    {
                         new Expression("Hey [player], guess what", "1esa"), // What?
                         new Expression("It's my birthday today!", "1esa"), // Really?!
                         new Expression("Happy Birthday to me!", "1esa") // To you too, Monika! 
                     });
-                        break;
+                            break;
                     }
                     isSpeaking = false;
                 }
                 // No idea where the date comes from, someone mentioned it in the spreadsheet. Seems legit.
-                else if (!firsLaunch && Monika.pcName == Environment.MachineName && DateTime.Now.Month == 9 && DateTime.Now.Day == 22) // День рождения
+                else if (!firsLaunch && Monika.pcName == Environment.MachineName && IsBDay) // День рождения
                 {
                     isSpeaking = true;
                     switch (Language.Substring(0, 2))
@@ -408,7 +435,7 @@ namespace MonikaOnDesktop
                 else // Просто привет
                 {
                     Monika.pcName = Environment.MachineName;
-                    Debug.WriteLine("just launch");
+                    Debug.WriteLine("Просто запуск");
                     //showText();
                     readXml(greetingsDialogPath, 0);
                     //readIdleXml();
@@ -441,10 +468,18 @@ namespace MonikaOnDesktop
                             // Check if currently speaking, only blink if not in dialog
                             if (!isSpeaking)
                             {
-                                Debug.WriteLine(formatURL(query));
-                                readLongXml(formatURL(query), sitesDialogPath, 1);
+                                Debug.WriteLine("Открыт сайт: " + formatURL(query));
+                                //readLongXml(formatURL(query), sitesDialogPath, 1);
+                            }
+                            if (!isSpeaking)
+                            {
+                                Debug.WriteLine("Введён запрос Google: " + formatURL(query));
                                 readLongXml(formatURL(query), googleDialogPath, 2);
-                                readLongXml(formatURL(query), youtubeDialogPath, 3);
+                            }
+                            if (!isSpeaking)
+                            {
+                                Debug.WriteLine("Введён запрос Youtube: " + formatURL(query));
+                                //readLongXml(formatURL(query), youtubeDialogPath, 3);
                             }
                             //readSitesTxt(formatURL(query));
                             //readGoogleTxt(formatURL(query));
@@ -456,10 +491,10 @@ namespace MonikaOnDesktop
                                 {
                                     consoleWrite("Моргнули", true);
                                     this.setFace(eyesClosed);
-                                    Debug.WriteLine("eyesClosed");
+                                    Debug.WriteLine("Закрываем глаза");
                                     Task.Delay(200).Wait();
                                     this.setFace(eyesOpen);
-                                    Debug.WriteLine("eyesOpen");
+                                    Debug.WriteLine("Открываем глаза");
                                 }
 
                                 nextBlink = DateTime.Now + TimeSpan.FromSeconds(random.Next(7, 50));
@@ -495,15 +530,35 @@ namespace MonikaOnDesktop
                         }
                     });
                 });
+
             };
             this.BeginAnimation(OpacityProperty, _start);
+        }
+
+        private void GiftWatcher_Created(object sender, FileSystemEventArgs e)
+        {
+            string file = e.FullPath;
+            // Assuming you have one file that you care about, pass it off to whatever
+            // handling code you have defined.
+            Debug.WriteLine("Перекинули файл:" + file);
+            FileInfo info = new FileInfo(file);
+            if (info.Exists)
+            {
+                if (info.Extension == ".gift")
+                {
+                    string giftName = info.Name.ToLower().Replace(".gift", String.Empty);
+                    //getGift(giftName);
+                    info.Delete();
+                    readLongXml(giftName, giftsDialogPath, 4);
+                    Debug.WriteLine("Подарен подарок:" + giftName);
+                }
+            }
         }
         #region
         public async Task FirstLaunch()
         {
             Monika.pcName = Environment.MachineName;
             LangBox.Visibility = Visibility.Visible;
-            config = true;
             isSpeaking = true;
         }
 
@@ -535,7 +590,7 @@ namespace MonikaOnDesktop
 
             LangBox.Visibility = Visibility.Hidden;
             NameBox.Visibility = Visibility.Hidden;
-            Debug.WriteLine("First Launch");
+            Debug.WriteLine("Первый запуск");
             switch (Language.Substring(0, 2))
             {
                 case "ru":
@@ -577,8 +632,7 @@ namespace MonikaOnDesktop
                 setFace("1esa");
             });
             isSpeaking = false;
-            config = false;
-            Debug.WriteLine(isSpeaking);
+            //Debug.WriteLine(isSpeaking);
         }
         #endregion
         public async Task Say(bool auto, Expression[] expression)
@@ -814,8 +868,9 @@ namespace MonikaOnDesktop
         {
             Button butt = (sender as Button);
             int num = int.Parse(butt.Name.Substring(4));
-            Debug.WriteLine("Clicked " + num);
-            this.Dispatcher.Invoke(() => {
+            Debug.WriteLine("Нажата кнопка " + num);
+            this.Dispatcher.Invoke(() =>
+            {
                 textBlock.Text = "";
                 ButtonsGrid.RowDefinitions.Clear();
                 this.ButtonsGrid.Children.Clear();
@@ -842,10 +897,6 @@ namespace MonikaOnDesktop
                 string m = f.ReadLine();
                 string s = m.Replace("\r", String.Empty).Replace("    ", "\t");
                 string S = "";
-                if (s.Contains("affection"))
-                {
-                    S = s.Insert(0, "\n\t\t<Action>") + "</Action>";
-                }
                 if (s.Contains("menu:"))
                 {
                     S = s.Replace("menu:", "\n\t\t<Menu>");
@@ -854,7 +905,7 @@ namespace MonikaOnDesktop
                 {
                     S = s.Replace("menuend", "\n\t\t\t</Answer>\n\t\t</Menu>");
                 }
-                if (s.Contains("\t\t"))
+                if (s.Contains("\t\t") && !s.Contains("affection") && !s.Contains("giftAdd") && !s.Contains("giftRemove"))
                 {
                     //S = s.Insert(0, "\n\t\t\t<answer text = \"") + "\">";
                     S = s.Replace("\t\t", "\n\t\t\t<Answer text=\"") + "\">";
@@ -867,7 +918,7 @@ namespace MonikaOnDesktop
                 {
                     S = s.Replace("\t\t\t", "\n\t\t\t\t<Text>") + "</Text>\n\t\t\t</Answer>\n\t\t</Menu>";
                 }
-                if (!s.Contains("\t\t") && !s.Contains("\t\t") && !s.Contains("menuend") && !s.Contains("menu:") && !s.Contains("affection"))
+                if (!s.Contains("\t\t") && !s.Contains("\t\t") && !s.Contains("menuend") && !s.Contains("menu:"))
                 {
                     S = s.Insert(0, "\n\t\t<Text>") + "</Text>";
                 }
@@ -886,11 +937,11 @@ namespace MonikaOnDesktop
             #region
             string s1 = mainXml.Replace("\t", String.Empty);
             string s2 = s1.Replace("\n", String.Empty);
-            Debug.WriteLine(mainXml);
+            //Debug.WriteLine(s1);
             XmlDocument xDoc = new XmlDocument();
             //string path = testXml;
             //xDoc.Load(path);
-            xDoc.LoadXml(s2);
+            xDoc.LoadXml(s1);
             // получим корневой элемент
             XmlElement xRoot = xDoc.DocumentElement;
             // обход всех узлов в корневом элементе
@@ -937,7 +988,7 @@ namespace MonikaOnDesktop
         {
             isSpeaking = true;
             this.Dispatcher.Invoke(() => { textWindow.Visibility = Visibility.Visible; });
-            Debug.WriteLine(dm[num].Node.InnerXml);
+            //Debug.WriteLine(dm[num].Node.InnerXml);
             for (int u = dialogNum; u < dm[num].Node.ChildNodes.Count; u++)
             {
                 int delay = 0;
@@ -960,35 +1011,8 @@ namespace MonikaOnDesktop
                     }
                     Menu(dm[num].Node.ChildNodes[u - 1].InnerText.Substring(5), q, ex);
                     dialogNum = u + 1;
-                    Debug.WriteLine(dialogNum);
+                    //Debug.WriteLine(dialogNum);
                     break;
-                }
-                if (childnode.Name == "Action")
-                {
-                    try
-                    {
-                        Debug.WriteLine(childnode.InnerText);
-                        string[] i = childnode.InnerText.Split(" ");
-                        switch (i[1])
-                        {
-                            case "+":
-                            Monika.affection += int.Parse(i[2]);
-                            Debug.WriteLine(i[1] + int.Parse(i[2]));
-                            break;
-                            case "-":
-                            Monika.affection -= int.Parse(i[2]);
-                            Debug.WriteLine(i[1] + int.Parse(i[2]));
-                            if (Monika.affection <= 0)
-                            {
-                                Monika.affection = 0;
-                            }
-                            break;
-                        }
-                        Debug.WriteLine(Monika.affection);
-                    } catch
-                    {
-                        Debug.WriteLine("ERR");
-                    }
                 }
                 if (childnode.Name == "Text")
                 {
@@ -996,17 +1020,69 @@ namespace MonikaOnDesktop
                     //exList.Add(new Expression(childnode.InnerText.Substring(2), childnode.InnerText[0].ToString()));
                     try
                     {
-                        await Say(false, new[] { new Expression(childnode.InnerText.Substring(5), childnode.InnerText.Substring(0, 4)) });
-                    } catch
+                        if (childnode.InnerText.Contains("affection"))
+                        {
+                            Debug.WriteLine("Тип кода: " + childnode.InnerText);
+                            string[] i = childnode.InnerText.Split(" ");
+                            switch (i[1])
+                            {
+                                case "+":
+                                    Monika.affection += int.Parse(i[2]);
+                                    Debug.WriteLine("Привязанность " + i[1] + int.Parse(i[2]));
+                                    break;
+                                case "-":
+                                    Monika.affection -= int.Parse(i[2]);
+                                    Debug.WriteLine("Привязанность " + i[1] + int.Parse(i[2]));
+                                    if (Monika.affection <= 0)
+                                    {
+                                        Monika.affection = 0;
+                                    }
+                                    break;
+                            }
+                            Debug.WriteLine("Привязанность = " + Monika.affection);
+
+                        }
+                        else if (childnode.InnerText.Contains("giftAdd"))
+                        {
+                            try
+                            {
+                                string[] i = childnode.InnerText.Split(" ");
+                                addGift(i[1], i[2]);
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.WriteLine(e.Message);
+                            }
+                        }
+                        else if (childnode.InnerText.Contains("giftRemove"))
+                        {
+                            try
+                            {
+                                string[] i = childnode.InnerText.Split(" ");
+                                removeGift(i[1]);
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.WriteLine(e.Message);
+                            }
+                        }
+                        else
+                        {
+                            //Debug.WriteLine("Говорим: " + childnode.InnerText.Substring(5));
+                            await Say(false, new[] { new Expression(childnode.InnerText.Substring(5), childnode.InnerText.Substring(0, 4)) });
+                        }
+                    }
+                    catch
                     {
-                        Debug.WriteLine("ERR");
+                        Debug.WriteLine("ОШИБКА");
                     }
                 }
                 if (u >= dm[num].Node.ChildNodes.Count - 1)
                 {
                     isSpeaking = false;
-                    Debug.WriteLine("End");
-                    this.Dispatcher.Invoke(() => {
+                    Debug.WriteLine("Конец диалога");
+                    this.Dispatcher.Invoke(() =>
+                    {
                         textWindow.Visibility = Visibility.Hidden;
                         setFace("1esa");
                     });
@@ -1021,8 +1097,10 @@ namespace MonikaOnDesktop
         #endregion
 
         List<NamedDialogModel> ldm = new List<NamedDialogModel>();
+        string[] giftNameList;
         public void readLongXml(string Name, string sPath, int type)
         {
+            Debug.WriteLine("Ввели текст: " + Name);
             #region
             //string sPath = progsDialogPath;
             string mainXML = "<Mains>";
@@ -1093,7 +1171,7 @@ namespace MonikaOnDesktop
             foreach (XmlNode xnode in xRoot)
             {
                 List<DialogModel> dm = new List<DialogModel>();
-                string[] name = xnode.Attributes.GetNamedItem("name").Value.Split("|");
+                string[] name = xnode.Attributes.GetNamedItem("name").Value.ToLower().Split("|");
                 if (xnode.Name == "Main")
                 {
                     foreach (XmlNode progsnode in xnode.ChildNodes)
@@ -1102,7 +1180,6 @@ namespace MonikaOnDesktop
                     }
                 }
                 Ldm.Add(new NamedDialogModel(name, dm));
-                //Console.WriteLine(ndm[0].Names[0] + "|" + ndm[0].DM[0].Node.InnerText);
             }
             dialogNum = 0;
             switch (type)
@@ -1226,18 +1303,115 @@ namespace MonikaOnDesktop
 
                                     Random rnd = new Random();
                                     num = rnd.Next(dm.Count);
-                                    sayIdle();
+                                    _ = sayIdle();
                                 }
                             }
                         }
                     }
                     break;
+                case 4:
+                    foreach (NamedDialogModel NDM in Ldm)
+                    {
+                        if (NDM.Names.Contains(Name))
+                        {
 
+                            dm = NDM.DM;
+                            if (NDM.DM.Count != 1)
+                            {
+                                Monika.loadData();
+                                Debug.WriteLine(Monika.gifts.Count);
+                                List<string> giftList = new List<string>();
+                                List<string> loadedGiftList = new List<string>();
+                                foreach (string i in Monika.gifts)
+                                {
+                                    string[] gift = i.Split(" | ");
+                                    giftList.Add(gift[0]);
+                                    string[] a = gift[2].Split("|");
+                                    foreach (string b in a)
+                                    {
+                                        loadedGiftList.Add(b);
+                                    }
+                                }
+                                giftNameList = NDM.Names;
+                                if (giftList.Contains(Name) || loadedGiftList.Contains(Name))
+                                {
+                                    Debug.WriteLine(dm[1].Node.InnerText);
+                                    num = 1;
+                                    _ = sayIdle();
+                                    Debug.WriteLine("Подарок уже дарили");
+                                }
+                                else
+                                {
+                                    Debug.WriteLine(dm[0].Node.InnerText);
+                                    num = 0;
+                                    _ = sayIdle();
+                                    Debug.WriteLine("Первый подарок");
+                                }
+                            }
+                            else
+                            {
+                                Debug.WriteLine(dm[0].Node.InnerText);
+                                num = 0;
+                                _ = sayIdle();
+                                Debug.WriteLine("Одиночный файл");
+                            }
+                        }
+                    }
+                    break;
             }
             #endregion
 
         }
         #endregion
+        public void addGift(string name, string path)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                Image img1 = (Image)gifts.FindName(name);
+                if (img1 == null)
+                {
+                    Image img = new Image
+                    {
+                        Source = new BitmapImage(new Uri(AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/gifts/" + path)),
+                        Name = name
+                    };
+                    RegisterName(name, img);
+                    gifts.Children.Add(img);
+                    string giftList = "";
+                    foreach(string i in giftNameList)
+                    {
+                        giftList += i + "|";
+                    }
+                    Monika.gifts.Add(name + " | " + path + " | " + giftList);
+                    Debug.WriteLine("Подарен подарок " + name);
+                }
+            });
+
+        }
+        public void removeGift(string name)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                Image img = (Image)gifts.FindName(name);
+
+                if (img != null)
+                {
+                Debug.WriteLine("Имя картинки: " + img.Name);
+                    UnregisterName(img.Name);
+                    gifts.Children.Remove(img);
+                    for (int i = 0; i < Monika.gifts.Count; i++)
+                    {
+                        string[] gift = Monika.gifts[i].Split(" | ");
+                        if (gift[0] == name)
+                        {
+                            Monika.gifts.RemoveAt(i);
+                            Debug.WriteLine("Подарок удалён: " + name);
+                            Monika.saveData();
+                        }
+                    }
+                }
+            });
+        }
         public void consoleWrite(string text, bool time)
         {
             this.Dispatcher.Invoke(() =>
@@ -1259,11 +1433,7 @@ namespace MonikaOnDesktop
                 case 0:
                     this.Width = 200;
                     this.Height = 128;
-                    this.main.Margin = new Thickness(0, -15, 0, 0);
-                    this.hairBack.Margin = new Thickness(0, -15, 0, 0);
-                    this.hairFront.Margin = new Thickness(0, -15, 0, 0);
-                    this.arms.Margin = new Thickness(0, -15, 0, 0);
-                    this.ribbon.Margin = new Thickness(0, -15, 0, 0);
+                    this.monika.Margin = new Thickness(0, -15, 0, 0);
                     this.textWindow.Margin = new Thickness(12.5, 97.5, 12.5, 5);
                     this.textBlock.Margin = new Thickness(17.5, 102.5, 17.5, 10);
                     this.textBlock.FontSize = 5;
@@ -1273,11 +1443,7 @@ namespace MonikaOnDesktop
                 case 1:
                     this.Width = 400;
                     this.Height = 256;
-                    this.main.Margin = new Thickness(0, -15, 0, 0);
-                    this.hairBack.Margin = new Thickness(0, -15, 0, 0);
-                    this.hairFront.Margin = new Thickness(0, -15, 0, 0);
-                    this.arms.Margin = new Thickness(0, -15, 0, 0);
-                    this.ribbon.Margin = new Thickness(0, -15, 0, 0);
+                    this.monika.Margin = new Thickness(0, -15, 0, 0);
                     this.textWindow.Margin = new Thickness(25, 195, 25, 10);
                     this.textBlock.Margin = new Thickness(35, 205, 35, 20);
                     this.textBlock.FontSize = 10;
@@ -1287,11 +1453,7 @@ namespace MonikaOnDesktop
                 case 2:
                     this.Width = 600;
                     this.Height = 384;
-                    this.main.Margin = new Thickness(0, -15, 0, 0);
-                    this.hairBack.Margin = new Thickness(0, -15, 0, 0);
-                    this.hairFront.Margin = new Thickness(0, -15, 0, 0);
-                    this.arms.Margin = new Thickness(0, -15, 0, 0);
-                    this.ribbon.Margin = new Thickness(0, -15, 0, 0);
+                    this.monika.Margin = new Thickness(0, -15, 0, 0);
                     this.textWindow.Margin = new Thickness(37.5, 292.5, 37.5, 15);
                     this.textBlock.Margin = new Thickness(52.5, 307.5, 52.5, 30);
                     this.textBlock.FontSize = 15;
@@ -1301,11 +1463,7 @@ namespace MonikaOnDesktop
                 case 3:
                     this.Width = 800;
                     this.Height = 512;
-                    this.main.Margin = new Thickness(0, -20, 0, 0);
-                    this.hairBack.Margin = new Thickness(0, -20, 0, 0);
-                    this.hairFront.Margin = new Thickness(0, -20, 0, 0);
-                    this.arms.Margin = new Thickness(0, -20, 0, 0);
-                    this.ribbon.Margin = new Thickness(0, -20, 0, 0);
+                    this.monika.Margin = new Thickness(0, -20, 0, 0);
                     this.textWindow.Margin = new Thickness(50, 390, 50, 20);
                     this.textBlock.Margin = new Thickness(70, 410, 70, 40);
                     this.textBlock.FontSize = 20;
@@ -1409,6 +1567,8 @@ namespace MonikaOnDesktop
         }
 
         public static List<CultureInfo> m_Languages = new List<CultureInfo>();
+        private int plushieCount;
+
         public static List<CultureInfo> Languages
         {
             get

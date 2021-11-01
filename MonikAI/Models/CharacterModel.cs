@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Windows.Shapes;
@@ -11,6 +12,7 @@ namespace MonikaOnDesktop
     class CharacterModel
     {
         public string filePath;
+        public string giftsPath;
         public int affection = 0;
         public string pcName;
         public string playerName;
@@ -23,9 +25,16 @@ namespace MonikaOnDesktop
         public int Scaler = 3;
         public bool screenNum = false;
 
-        public CharacterModel(string path)
+        public List<string> gifts = new List<string>(); 
+
+        public CharacterModel(string path, string giftsPath)
         {
             this.filePath = path;
+            this.giftsPath = giftsPath;
+            foreach (string gift in gifts)
+            {
+                Debug.WriteLine("start: " + gift);
+            }
         }
         public bool fileExist()
         {
@@ -56,6 +65,18 @@ namespace MonikaOnDesktop
             text += nightEnd + ",";
             text += Scaler + ",";
             text += screenNum + ",";
+            text += "\n==\r\n";
+            if (gifts.Count != 0)
+            {
+                foreach (string gift in gifts)
+                {
+                    if (!String.IsNullOrEmpty(gift) || !String.IsNullOrWhiteSpace(gift) || gift==" ")
+                    {
+                        text += gift + "\n";
+                        Debug.WriteLine("saved: " + gift);
+                    }
+                }
+            }
             DirectoryInfo dirInfo = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory + "/characters");
             if (!dirInfo.Exists)
             {
@@ -73,7 +94,17 @@ namespace MonikaOnDesktop
             {
                 using (StreamReader sr = new StreamReader(filePath))
                 {
-                    string[] data = sr.ReadToEnd().Split(",");
+                    string file = sr.ReadToEnd();
+                    string[] lines = new string[1];
+                    if (file.Contains("\n==\r\n"))
+                    {
+                        lines = file.Split("\n==\r\n");
+                    }
+                    if (file.Contains("\n==\n"))
+                    {
+                        lines = file.Split("\n==\n");
+                    }
+                    string[] data = lines[0].Split(",");
                     this.affection = int.Parse(data[0]);
                     this.pcName = data[1];
                     this.playerName = data[2];
@@ -85,6 +116,20 @@ namespace MonikaOnDesktop
                     this.nightEnd = int.Parse(data[8]);
                     this.Scaler = int.Parse(data[9]);
                     this.screenNum = Boolean.Parse(data[10]);
+
+                    string line = lines[1].Replace("\n\n", String.Empty).Replace("\r", String.Empty);
+                    string[] giftsLoaded = line.Split("\n");
+                    //Debug.WriteLine(line);
+                    List<string> newGiftsList = new List<string>();
+                    foreach(string gift in giftsLoaded)
+                    {
+                        if (!String.IsNullOrEmpty(gift) || !String.IsNullOrWhiteSpace(gift) || gift == " ")
+                        {
+                            newGiftsList.Add(gift);
+                            Debug.WriteLine("Loaded: " + gift);
+                        }
+                    }
+                    gifts = newGiftsList;
                 }
             }
         }
