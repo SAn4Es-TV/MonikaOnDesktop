@@ -1,0 +1,13 @@
+[игрушка|toy]
+1esc Спасибо за игрушку
+giftAdd toy toy.png
+1esd Поставлю её здесь
+=
+1esc Ты мне уже дарил его
+[Кофе|coffee]
+giftAdd coffee mug.png
+1esb Ох
+1esb Кофе
+1esb Не могу дождаться, чтобы попробовать!
+1esb Спасибо, [player]!
+giftRemove coffee
