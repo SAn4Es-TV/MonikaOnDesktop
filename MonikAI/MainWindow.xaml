@@ -96,6 +96,7 @@
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu>
                     <MenuItem x:Name="settingsMenu" Header="{DynamicResource s_labelSettings}" Click="MenuSettings_Click"/>
+                    <MenuItem x:Name="about" Header="{DynamicResource s_labelAbout}" Click="about_Click"/>
                     <Separator/>
                     <MenuItem x:Name="quitMenu" Header="{DynamicResource s_labelExit}" Click="MenuQuit_Click"/>
                 </ContextMenu>

@@ -150,3 +150,5 @@ C:\Users\SAn4Es_TV\Source\Repos\MonikaOnDesktop\MonikAI\obj\Debug\netcoreapp3.1\
 C:\Users\SAn4Es_TV\Source\Repos\MonikaOnDesktop\MonikAI\obj\Debug\netcoreapp3.1\MonikaOnDesktop.dll
 C:\Users\SAn4Es_TV\Source\Repos\MonikaOnDesktop\MonikAI\obj\Debug\netcoreapp3.1\MonikaOnDesktop.pdb
 C:\Users\SAn4Es_TV\Source\Repos\MonikaOnDesktop\MonikAI\obj\Debug\netcoreapp3.1\MonikaOnDesktop.genruntimeconfig.cache
+C:\Users\SAn4Es_TV\Source\Repos\MonikaOnDesktop\MonikAI\obj\Debug\netcoreapp3.1\AboutWindow.g.cs
+C:\Users\SAn4Es_TV\Source\Repos\MonikaOnDesktop\MonikAI\obj\Debug\netcoreapp3.1\AboutWindow.baml

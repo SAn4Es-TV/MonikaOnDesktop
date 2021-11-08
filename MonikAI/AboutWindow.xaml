@@ -1,0 +1,41 @@
+﻿<Window x:Class="MonikaOnDesktop.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MonikaOnDesktop"
+        mc:Ignorable="d"
+        Title="{DynamicResource s_labelAbout}" Height="230" Width="590">
+    <Grid>
+        <Label Margin="25,20,0,0" FontSize="20">MonikaOnDesktop by</Label>
+        <Label Margin="223,20,0,0" FontSize="20">
+            <Hyperlink NavigateUri="https://github.com/SAn4Es-TV" RequestNavigate="Hyperlink_RequestNavigate">
+                SAn4Es_TV
+            </Hyperlink>
+        </Label>
+        <Label Margin="25,60,0,0" FontSize="20">GitHub:</Label>
+        <Label Margin="97,60,0,0" FontSize="20">
+            <Hyperlink NavigateUri="https://github.com/SAn4Es-TV/MonikaOnDesktop" RequestNavigate="Hyperlink_RequestNavigate">
+                https://github.com/SAn4Es-TV/MonikaOnDesktop
+            </Hyperlink>
+        </Label>
+        <Label Margin="25,90,0,0" FontSize="20">MOD Community (Discord):</Label>
+        <Label Margin="274,90,0,0" FontSize="20">
+            <Hyperlink NavigateUri="https://discord.gg/UCUkczKyhd" RequestNavigate="Hyperlink_RequestNavigate">
+                https://discord.gg/UCUkczKyhd
+            </Hyperlink>
+        </Label>
+        <Label Margin="25,120,0,0" FontSize="20">Support (Patreon):</Label>
+        <Label Margin="192,120,0,0" FontSize="20">
+            <Hyperlink NavigateUri="https://www.patreon.com/san4es_tv" RequestNavigate="Hyperlink_RequestNavigate">
+                https://www.patreon.com/san4es_tv
+            </Hyperlink>
+        </Label>
+        <Label Margin="25,150,0,0" FontSize="20">Support (Boosty): </Label>
+        <Label Margin="184,150,0,0" FontSize="20">
+            <Hyperlink NavigateUri="https://boosty.to/san4es-tv" RequestNavigate="Hyperlink_RequestNavigate">
+                https://boosty.to/san4es-tv
+            </Hyperlink>
+        </Label>
+    </Grid>
+</Window>

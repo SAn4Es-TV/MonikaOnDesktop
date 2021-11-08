@@ -129,7 +129,7 @@ namespace MonikaOnDesktop
             firsLaunch = !Monika.fileExist();           // Если файла нету, то это первый запуск
 
             SolicenTEAM.Updater.ExeFileName = "MonikaOnDesktop"; // Имя ЕХЕ для перезапука
-            SolicenTEAM.Updater.IgnoreFiles = "characters/monika.chr|monika.chr";     //  игнорируемый файл
+            SolicenTEAM.Updater.IgnoreFiles = "characters/monika.chr";     //  игнорируемый файл
 
             this.settingsWindow = new Settings(this);   // Объявляем окно настроек (так нужно)
             MonikaSettings.Default.Reload();            // Читаем настройки
@@ -456,7 +456,7 @@ namespace MonikaOnDesktop
                     //readIdleXml();
                     //readGreetingsTxt();
                 }
-                
+
                 //_ = checkUpdatesAsync();      // Раскоментировать для включения проверки обновлдений
                 // Blinking and Behaviour logic
                 var eyesOpen = "1esa";
@@ -545,7 +545,7 @@ namespace MonikaOnDesktop
                             Task.Delay(250).Wait();
                         }
                     });
-                }); 
+                });
                 await checkUpdatesAsync();
 
             };
@@ -553,7 +553,7 @@ namespace MonikaOnDesktop
         }
         public async Task checkUpdatesAsync()
         {
-            await SolicenTEAM.Updater.CheckUpdate("SAn4Es-TV", "MODgitTest");  // Проверяем наличие обновления
+            await SolicenTEAM.Updater.CheckUpdate("SAn4Es-TV", "MonikaOnDesktop");  // Проверяем наличие обновления
             bool updateIsAvaliable = false;
             Debug.WriteLine("This Ver: " + SolicenTEAM.Updater.CurrentVersion);
             Debug.WriteLine("New Ver: " + SolicenTEAM.Updater.UpdateVersion);
@@ -564,11 +564,11 @@ namespace MonikaOnDesktop
             }
             else
             {
-            while (isSpeaking)
-            {
-                await Task.Delay(10);
-            }
-            isSpeaking = true;
+                while (isSpeaking)
+                {
+                    await Task.Delay(10);
+                }
+                isSpeaking = true;
                 WebClient client = new WebClient();
                 client.Proxy = new WebProxy();
                 Stream stream = client.OpenRead("http://raw.githubusercontent.com/SAn4Es-TV/MODgitTest/main/gitDesc.txt");
@@ -960,25 +960,12 @@ namespace MonikaOnDesktop
                 }
                 else if (expression.Text.Contains("emove") && expression.Face == "gift")
                 {
-                        string[] i = expression.Text.Split(" ");
-                        removeGift(i[1]);
+                    string[] i = expression.Text.Split(" ");
+                    removeGift(i[1]);
                 }
                 else if (expression.Text.Contains("date") && expression.Face == "gitU")
                 {
-                    await SolicenTEAM.Updater.CheckUpdate("SAn4Es-TV", "MODgitTest");
-                    if (SolicenTEAM.Updater.UpdateVersion != SolicenTEAM.Updater.CurrentVersion && SolicenTEAM.Updater.UpdateVersion != "")
-                    {
-                        SolicenTEAM.Updater.DownloadUpdate(SolicenTEAM.Updater.gitUser, SolicenTEAM.Updater.gitRepo);
-
-                        while (!SolicenTEAM.Updater.readyToUpdate)
-                        {
-                            Debug.WriteLine("Update is ready: " + SolicenTEAM.Updater.readyToUpdate);
-                            await Task.Delay(10);
-                        }
-                        Debug.WriteLine("Update is ready: " + SolicenTEAM.Updater.readyToUpdate);
-                        SolicenTEAM.Updater.ExtractArchive();
-                    }
-                    Debug.WriteLine("Updated");
+                    updateZip();
                 }
                 else
                 {
@@ -1098,7 +1085,7 @@ namespace MonikaOnDesktop
                     {
                         case "ru":
                             num = 0;
-                    sayIdle();
+                            sayIdle();
                             break;
                         case "en":
                             num = 1;
@@ -1201,21 +1188,7 @@ namespace MonikaOnDesktop
                         }
                         else if (childnode.InnerText.Contains("gitUpdate"))
                         {
-                            try
-                            {
-                                SolicenTEAM.Updater.DownloadUpdate(SolicenTEAM.Updater.gitUser, SolicenTEAM.Updater.gitRepo);
-
-                                while (!SolicenTEAM.Updater.readyToUpdate)
-                                {
-                                    Debug.WriteLine("Update not ready");
-                                    await Task.Delay(10);
-                                }
-                                SolicenTEAM.Updater.ExtractArchive();
-                            }
-                            catch (Exception e)
-                            {
-                                Debug.WriteLine(e.Message);
-                            }
+                            updateZip();
                         }
                         else
                         {
@@ -1227,7 +1200,7 @@ namespace MonikaOnDesktop
                     {
                         Debug.WriteLine("ОШИБКА");
                     }
-                            Debug.WriteLine("u = " + dialogNum + " count = " + (dm[num].Node.ChildNodes.Count - 1));
+                    Debug.WriteLine("u = " + dialogNum + " count = " + (dm[num].Node.ChildNodes.Count - 1));
                 }
                 if (u >= dm[num].Node.ChildNodes.Count - 1)
                 {
@@ -1564,6 +1537,49 @@ namespace MonikaOnDesktop
                 }
             });
         }
+        public async void updateZip()
+        {
+            try
+            {
+                await SolicenTEAM.Updater.CheckUpdate("SAn4Es-TV", "MonikaOnDesktop");
+                if (SolicenTEAM.Updater.UpdateVersion != SolicenTEAM.Updater.CurrentVersion && SolicenTEAM.Updater.UpdateVersion != "")
+                {
+                    SolicenTEAM.Updater.DownloadUpdate(SolicenTEAM.Updater.gitUser, SolicenTEAM.Updater.gitRepo);
+
+                    while (!SolicenTEAM.Updater.readyToUpdate)
+                    {
+                        Debug.WriteLine("Update is ready: " + SolicenTEAM.Updater.readyToUpdate);
+                        await Task.Delay(10);
+                    }
+                    Debug.WriteLine("Update is ready: " + SolicenTEAM.Updater.readyToUpdate);
+                    SolicenTEAM.Updater.ExtractArchive();
+                    /*
+                    string processName = "Updater";
+                    var arrayProcesses = Process.GetProcessesByName(processName);
+                    while (arrayProcesses == null || arrayProcesses.Length < 1)
+                    {
+                        Debug.WriteLine("Starting Updater");
+                        Process.Start(AppDomain.CurrentDomain.BaseDirectory + "/Updater.exe");
+                        arrayProcesses = Process.GetProcessesByName(processName);
+                        //Process proc = new Process();
+                        //proc.StartInfo.FileName = "C:\\HelloWorld.exe";
+                        await Task.Delay(2000);
+                    }
+                    Debug.WriteLine("Updater count: " + arrayProcesses.Length);
+                    await Task.Delay(100);
+                    /*
+                    Debug.WriteLine("Starting Updater");
+                    Process.Start("Updater.exe");
+                    Debug.WriteLine("Exiting");
+                    Environment.Exit(0);*/
+                }
+                Debug.WriteLine("Updated");
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+            }
+        }
         public void consoleWrite(string text, bool time)
         {
             this.Dispatcher.Invoke(() =>
@@ -1829,6 +1845,12 @@ namespace MonikaOnDesktop
             }
         }
 
+        private void about_Click(object sender, RoutedEventArgs e)
+        {
+            AboutWindow about = new AboutWindow();
+            about.Show();
+
+        }
     }
 
 

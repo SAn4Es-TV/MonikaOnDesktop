@@ -25,5 +25,6 @@
 
     <v:String x:Key="s_labelExit">Выход</v:String>
     <v:String x:Key="s_labelSettings">Настройки</v:String>
+    <v:String x:Key="s_labelAbout">О программе</v:String>
 
 </ResourceDictionary>

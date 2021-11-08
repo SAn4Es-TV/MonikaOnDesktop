@@ -31,7 +31,7 @@ namespace SolicenTEAM
                     if (item.ToString().StartsWith("\"browser"))
                     {
                         tempItem = item.ToString();
-                        //Console.WriteLine(item);
+                        Debug.WriteLine("item - " + item);
                     }
                 }
 
@@ -50,6 +50,7 @@ namespace SolicenTEAM
 
             var pathArchive = Environment.CurrentDirectory + "\\" + gitRepo + ".zip";
             //Console.WriteLine(browserURL);
+            Debug.WriteLine("browserURL - " + browserURL);
             WebClient webClient = new WebClient();
             if (File.Exists(pathArchive))
             File.Delete(pathArchive);
@@ -64,6 +65,7 @@ namespace SolicenTEAM
                 }
                 catch
                 {
+                    Debug.WriteLine("Renty");
                     await Task.Delay(30000);
                     continue;
                 }
