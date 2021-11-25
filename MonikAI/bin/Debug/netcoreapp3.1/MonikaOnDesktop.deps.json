@@ -8,7 +8,6 @@
     ".NETCoreApp,Version=v3.1": {
       "MonikaOnDesktop/1.0.0": {
         "dependencies": {
-          "Costura.Fody": "5.7.0",
           "Hardcodet.NotifyIcon.Wpf": "1.1.0",
           "Lyre": "1.0.10",
           "Microsoft.AspNet.WebApi.Core": "5.2.7",
@@ -19,19 +18,6 @@
           "MonikaOnDesktop.dll": {}
         }
       },
-      "Costura.Fody/5.7.0": {
-        "dependencies": {
-          "Fody": "6.5.5",
-          "NETStandard.Library": "1.6.1"
-        },
-        "runtime": {
-          "lib/netstandard1.0/Costura.dll": {
-            "assemblyVersion": "5.7.0.0",
-            "fileVersion": "5.7.0.0"
-          }
-        }
-      },
-      "Fody/6.5.5": {},
       "Hardcodet.NotifyIcon.Wpf/1.1.0": {
         "runtime": {
           "lib/netcoreapp3.1/Hardcodet.NotifyIcon.Wpf.dll": {
@@ -996,20 +982,6 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
-    },
-    "Costura.Fody/5.7.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-MmL28WOOnJEBWORXj6bfSxfWaZW8gWSXEJTdrjB9AQi4COX6RXr2xdGL9HsxpWwn6f5Io0NmNuwFJe94w1YmQA==",
-      "path": "costura.fody/5.7.0",
-      "hashPath": "costura.fody.5.7.0.nupkg.sha512"
-    },
-    "Fody/6.5.5": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-Krca41L/PDva1VsmDec5n52cQZxQAQp/bsHdzsNi8iLLI0lqKL94fNIkNaC8tVolUkCyWsbzvxfxJCeD2789fA==",
-      "path": "fody/6.5.5",
-      "hashPath": "fody.6.5.5.nupkg.sha512"
     },
     "Hardcodet.NotifyIcon.Wpf/1.1.0": {
       "type": "package",

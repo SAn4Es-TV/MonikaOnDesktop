@@ -2,29 +2,6 @@
   "version": 3,
   "targets": {
     ".NETCoreApp,Version=v3.1": {
-      "Costura.Fody/5.7.0": {
-        "type": "package",
-        "dependencies": {
-          "Fody": "6.5.5",
-          "NETStandard.Library": "1.6.1"
-        },
-        "compile": {
-          "lib/netstandard1.0/_._": {}
-        },
-        "runtime": {
-          "lib/netstandard1.0/Costura.dll": {}
-        },
-        "build": {
-          "build/Costura.Fody.props": {},
-          "build/Costura.Fody.targets": {}
-        }
-      },
-      "Fody/6.5.5": {
-        "type": "package",
-        "build": {
-          "build/Fody.targets": {}
-        }
-      },
       "Hardcodet.NotifyIcon.Wpf/1.1.0": {
         "type": "package",
         "compile": {
@@ -1582,60 +1559,6 @@
     }
   },
   "libraries": {
-    "Costura.Fody/5.7.0": {
-      "sha512": "MmL28WOOnJEBWORXj6bfSxfWaZW8gWSXEJTdrjB9AQi4COX6RXr2xdGL9HsxpWwn6f5Io0NmNuwFJe94w1YmQA==",
-      "type": "package",
-      "path": "costura.fody/5.7.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "build/Costura.Fody.props",
-        "build/Costura.Fody.targets",
-        "costura.fody.5.7.0.nupkg.sha512",
-        "costura.fody.nuspec",
-        "icon.png",
-        "lib/netstandard1.0/Costura.dll",
-        "lib/netstandard1.0/Costura.pdb",
-        "lib/netstandard1.0/Costura.xml",
-        "netclassicweaver/Costura.Fody.dll",
-        "netclassicweaver/Costura.Fody.xcf",
-        "netstandardweaver/Costura.Fody.dll",
-        "netstandardweaver/Costura.Fody.xcf"
-      ]
-    },
-    "Fody/6.5.5": {
-      "sha512": "Krca41L/PDva1VsmDec5n52cQZxQAQp/bsHdzsNi8iLLI0lqKL94fNIkNaC8tVolUkCyWsbzvxfxJCeD2789fA==",
-      "type": "package",
-      "path": "fody/6.5.5",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "License.txt",
-        "build/Fody.targets",
-        "fody.6.5.5.nupkg.sha512",
-        "fody.nuspec",
-        "netclassictask/Fody.dll",
-        "netclassictask/FodyCommon.dll",
-        "netclassictask/FodyHelpers.dll",
-        "netclassictask/FodyIsolated.dll",
-        "netclassictask/Mono.Cecil.Pdb.dll",
-        "netclassictask/Mono.Cecil.Pdb.pdb",
-        "netclassictask/Mono.Cecil.Rocks.dll",
-        "netclassictask/Mono.Cecil.Rocks.pdb",
-        "netclassictask/Mono.Cecil.dll",
-        "netclassictask/Mono.Cecil.pdb",
-        "netstandardtask/Fody.dll",
-        "netstandardtask/FodyCommon.dll",
-        "netstandardtask/FodyHelpers.dll",
-        "netstandardtask/FodyIsolated.dll",
-        "netstandardtask/Mono.Cecil.Pdb.dll",
-        "netstandardtask/Mono.Cecil.Pdb.pdb",
-        "netstandardtask/Mono.Cecil.Rocks.dll",
-        "netstandardtask/Mono.Cecil.Rocks.pdb",
-        "netstandardtask/Mono.Cecil.dll",
-        "netstandardtask/Mono.Cecil.pdb"
-      ]
-    },
     "Hardcodet.NotifyIcon.Wpf/1.1.0": {
       "sha512": "FFEkdRSidMrbMfQVwhCzq6KtSyR1qQojqtiUrkCyjnOOuMf7W3TNQkzFnBBxYxFe7uLk5mz7M38wFh1qdWyfvg==",
       "type": "package",
@@ -5731,7 +5654,6 @@
   },
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v3.1": [
-      "Costura.Fody >= 5.7.0",
       "Hardcodet.NotifyIcon.Wpf >= 1.1.0",
       "Lyre >= 1.0.10",
       "Microsoft.AspNet.WebApi.Core >= 5.2.7",
@@ -5783,12 +5705,6 @@
       "netcoreapp3.1": {
         "targetAlias": "netcoreapp3.1",
         "dependencies": {
-          "Costura.Fody": {
-            "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
-            "suppressParent": "All",
-            "target": "Package",
-            "version": "[5.7.0, )"
-          },
           "Hardcodet.NotifyIcon.Wpf": {
             "target": "Package",
             "version": "[1.1.0, )"

@@ -29,6 +29,7 @@ using System.Xml;
 using MonikaOnDesktop.Models;
 using static System.Net.Mime.MediaTypeNames;
 using System.Numerics;
+using System.Xml.Linq;
 
 namespace MonikaOnDesktop
 {
@@ -160,7 +161,6 @@ namespace MonikaOnDesktop
             textWindow.Visibility = Visibility.Hidden;  // Прячем розовую коробку текста
             textBlock.Text = "";                        // Убираем весь текст
 
-            SetupScale(Monika.Scaler);  // Ставим размер окна
             SetAutorunValue(Monika.autoStart);  // Ставим параметр автозапуска
 
             if (IsBDay)
@@ -356,7 +356,9 @@ namespace MonikaOnDesktop
         }       // Когда закрыли программу
         public void Window_Loaded(object sender, RoutedEventArgs e)     // Когда программа проснётся
         {
+
             Monika.loadData(); // Грузим данные 
+            SetupScale(Monika.Scaler);  // Ставим размер окна
             Lang = MonikaSettings.Default.Language;
             _start = new DoubleAnimation();
             _start.From = 0;
@@ -571,7 +573,7 @@ namespace MonikaOnDesktop
                 isSpeaking = true;
                 WebClient client = new WebClient();
                 client.Proxy = new WebProxy();
-                Stream stream = client.OpenRead("http://raw.githubusercontent.com/SAn4Es-TV/MODgitTest/main/gitDesc.txt");
+                Stream stream = client.OpenRead("https://raw.githubusercontent.com/SAn4Es-TV/MonikaOnDesktop/master/gitDesc.txt");
                 StreamReader reader = new StreamReader(stream);
                 String content = reader.ReadToEnd();
                 Debug.Write(content);
@@ -1683,8 +1685,27 @@ namespace MonikaOnDesktop
             }
 
             var workingArea = screen.WorkingArea;
-            this.Left = workingArea.Right - this.Width;
-            this.Top = workingArea.Bottom - this.Height;
+
+
+            double ratio = 96.0 / (int)typeof(SystemParameters).GetProperty("Dpi", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null, null);
+            System.Drawing.Rectangle screen1 = screen.WorkingArea;
+            Left = (screen1.Width - ActualWidth / ratio - BorderThickness.Left - BorderThickness.Right) * ratio;
+            Top = (screen1.Height - ActualHeight / ratio - BorderThickness.Top - BorderThickness.Bottom) * ratio;
+
+            /*
+            //this.Left = workingArea.Right - this.Width;
+            //this.Top = workingArea.Bottom - this.Height;
+            this.Left = workingArea.Width - this.Width;
+            this.Top = workingArea.Height - this.Height;*/
+            Debug.WriteLine("Width - " + this.Width + "  ActualWidth: " + this.ActualWidth + " Screen Width: " + workingArea.Width);
+            Debug.WriteLine("Height - " + this.Height + "  ActualHeight: " + this.ActualHeight + " Screen Height: " + workingArea.Height);
+
+            string text = "Width - " + this.Width.ToString() + "  ActualWidth: " + this.ActualWidth + " Screen Width: " + workingArea.Width + " Left: " + this.Left + " Screen Left: " + workingArea.Left + "\n";
+            text += "Height - " + this.Height.ToString() + "  ActualHeight: " + this.ActualHeight + " Screen Height: " + workingArea.Height + " Top: " + this.Top + " Screen Top: " + workingArea.Top + "\n";
+            using (StreamWriter sw = new StreamWriter(AppDomain.CurrentDomain.BaseDirectory + "/debug.txt", false, System.Text.Encoding.Default))
+            {
+                sw.WriteLine(text);
+            }
         }
 
         const string name = "MonikaStartUp";
