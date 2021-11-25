@@ -1,0 +1,27 @@
+1hua [player]...
+1hua Уделишь мне минутку внимания?
+1hua Можешь обновить меня?
+1hua Нужно только твоё согласие
+1hua Вот, что изменится после обновления
+1hua Тестовое обовление
+1hua Хочешь обновится?
+	menu:
+	    Да.
+			gitUpdate
+		Нет...
+			1ekc Ох...
+1hua 
+=
+1hua [player]...
+1hua Can you give me your attention for a minute?
+1hua Can you update me?
+1hua I only need your consent
+1hua Here's what will change after the update
+1hua Test update
+1hua Do you want to update?
+	menu:
+		Yes.
+			gitUpdate
+		No...
+			1ekc Oh...
+1hua
