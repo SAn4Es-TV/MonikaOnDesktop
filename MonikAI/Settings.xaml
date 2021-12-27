@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MonikaOnDesktop"
         mc:Ignorable="d"
-        Title="Настройки" Height="305" Width="800" ResizeMode="NoResize">
+        Title="Настройки" Height="460" Width="780" ResizeMode="NoResize">
     <Window.Resources>
         <Style x:Key="FocusVisual">
             <Setter Property="Control.Template">
@@ -64,25 +64,37 @@
         </Style>
     </Window.Resources>
     <Grid>
-        <Button x:Name="close" Content="{DynamicResource s_labelCancel}" HorizontalAlignment="Right" Margin="0,0,107,10" Width="92" Height="20" VerticalAlignment="Bottom" IsCancel="True"/>
-        <Button Style="{DynamicResource ButtonStyle1}" x:Name="save" Content="{DynamicResource s_labelSave}" HorizontalAlignment="Right" Margin="0,0,10,10" Width="92" Height="20" VerticalAlignment="Bottom" Click="save_Click"/>
-        <Slider x:Name="monikaSize" Margin="0,18,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="622"  Maximum="3" Value="1" SmallChange="1" TickPlacement="None" ValueChanged="monikaSize_ValueChanged" Minimum="0"/>
-        <TextBlock x:Name="label" Text="{DynamicResource s_labelSize}" FontSize="20" HorizontalAlignment="Left" Height="35" Margin="10,10,0,0" VerticalAlignment="Top" Width="153"/>
-        <TextBox x:Name="userName" HorizontalAlignment="Right" Margin="0,50,246,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Width="386" Height="32"/>
-        <TextBlock x:Name="label1" Text="{DynamicResource s_labelName}" FontSize="20" HorizontalAlignment="Left" Height="32" Margin="10,50,0,0" VerticalAlignment="Top" Width="153"/>
-        <TextBlock x:Name="label2" Text="{DynamicResource s_labelNameSub}" FontSize="13" HorizontalAlignment="Right" Height="32" Margin="0,50,10,0" VerticalAlignment="Top" Width="231"/>
-        <TextBlock x:Name="label3" Text="{DynamicResource s_labelEvening}" FontSize="20" HorizontalAlignment="Left" Height="37" Margin="10,87,0,0" VerticalAlignment="Top" Width="153"/>
-        <TextBox x:Name="nightStartText" Text="22" MaxLength="2" VerticalAlignment="Top" VerticalContentAlignment="Center" FontSize="24" Height="37" Margin="168,87,558,0" FontStretch="Normal" MaxLines="1"/>
-        <TextBlock x:Name="label4" Text="{DynamicResource s_labelMorning}" FontSize="20" HorizontalAlignment="Left" Height="37" Margin="247,87,0,0" VerticalAlignment="Top" Width="153"/>
-        <TextBox x:Name="nightEndText" Text="7" MaxLength="2" VerticalAlignment="Top" VerticalContentAlignment="Center" FontSize="24" Height="37" Margin="400,87,326,0" FontStretch="Normal" MaxLines="1"/>
-        <Slider x:Name="randomIdle" Margin="0,138,246,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="361" TickPlacement="None" ValueChanged="randomIdle_ValueChanged" SmallChange="1" Maximum="4" Value="2"/>
-        <TextBlock x:Name="label5" Text="{DynamicResource s_labelDP}" FontSize="20" HorizontalAlignment="Left" Height="35" Margin="10,129,0,0" VerticalAlignment="Top" Width="179"/>
-        <TextBlock x:Name="label6" Text="{DynamicResource s_labelDP3}" FontSize="13" HorizontalAlignment="Right" Height="32" Margin="0,129,10,0" VerticalAlignment="Top" Width="231"/>
-        <TextBlock x:Name="label7" Text="{DynamicResource s_labelUseMon}" FontSize="20" HorizontalAlignment="Left" Height="35" Margin="10,196,0,0" VerticalAlignment="Top" Width="295"/>
-        <CheckBox x:Name="checkBox" Content="" HorizontalAlignment="Left" Margin="310,205,0,0" VerticalAlignment="Top" Height="17" Checked="checkBox_Checked" Unchecked="checkBox_Unchecked"/>
-        <TextBlock x:Name="label8" Text="{DynamicResource s_labelAs}" FontSize="20" HorizontalAlignment="Left" Height="35" Margin="10,161,0,0" VerticalAlignment="Top" Width="295"/>
-        <CheckBox x:Name="checkBox1" Content="" HorizontalAlignment="Left" Margin="310,168,0,0" VerticalAlignment="Top" Height="17"/>
-        <TextBlock x:Name="label9" Text="{DynamicResource s_labelLang}" FontSize="20" HorizontalAlignment="Left" Height="35" Margin="10,231,0,0" VerticalAlignment="Top" Width="295"/>
-        <ComboBox x:Name="comboBox" HorizontalAlignment="Left" Margin="310,238,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="comboBox_SelectionChanged"/>
+        <Image Source="pack://application:,,,/assets/gui/menu.png" HorizontalAlignment="Center" Width="790" Height="460" VerticalAlignment="Bottom"/>
+        <Grid x:Name="buttons">
+            <Button FontFamily="Comic Sans MS"  Style="{DynamicResource ButtonStyle1}" x:Name="monikaSettings" Content="{DynamicResource s_labelMonika}" Margin="28,0,0,242" Height="28" VerticalAlignment="Bottom" Click="monikaSettings_Click" Background="#00DDDDDD" BorderBrush="#00707070" Foreground="#FFFF7FBF" FontWeight="Bold" FontSize="16" HorizontalAlignment="Left" Width="92"/>
+            <Button FontFamily="Comic Sans MS"  Style="{DynamicResource ButtonStyle1}" x:Name="appSettings" Content="{DynamicResource s_labelApp}" HorizontalAlignment="Left" Margin="28,0,0,0" Width="92" Height="31" VerticalAlignment="Center" Click="appSettings_Click" Background="#00DDDDDD" BorderBrush="#00707070" Foreground="#FFFF7FBF" FontWeight="Bold" FontSize="16"/>
+            <Button FontFamily="Comic Sans MS"  x:Name="close" Content="{DynamicResource s_labelCancel}" Margin="28,0,0,18" Height="26" VerticalAlignment="Bottom" IsCancel="True" BorderBrush="#00707070" Background="#00707070" Foreground="#FFFF7FBF" FontWeight="Bold" FontSize="16" HorizontalAlignment="Left" Width="92"/>
+            <Button FontFamily="Comic Sans MS"  Style="{DynamicResource ButtonStyle1}" x:Name="save" Content="{DynamicResource s_labelSave}" Margin="28,0,0,49" Height="27" VerticalAlignment="Bottom" Click="save_Click" Background="#00DDDDDD" BorderBrush="#00707070" Foreground="#FFFF7FBF" FontWeight="Bold" FontSize="16" HorizontalAlignment="Left" Width="92"/>
+        </Grid>
+        <Grid Visibility="Hidden" x:Name="monika">
+            <Slider x:Name="monikaSize" Margin="0,18,37,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="384"  Maximum="100" Value="50" SmallChange="1" TickPlacement="None" ValueChanged="monikaSize_ValueChanged" Minimum="1"/>
+            <TextBlock FontFamily="Comic Sans MS" x:Name="label" Text="{DynamicResource s_labelSize}" FontSize="20" HorizontalAlignment="Left" Height="34" Margin="223,10,0,0" VerticalAlignment="Top" Width="104"/>
+            <TextBox FontFamily="Comic Sans MS" x:Name="userName" HorizontalAlignment="Right" Margin="0,50,212,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Width="209" Height="32"/>
+            <TextBlock FontFamily="Comic Sans MS" x:Name="label1" Text="{DynamicResource s_labelName}" FontSize="20" HorizontalAlignment="Left" Height="32" Margin="223,49,0,0" VerticalAlignment="Top" Width="104"/>
+            <TextBlock TextWrapping="Wrap" FontFamily="Comic Sans MS" x:Name="label2" Text="{DynamicResource s_labelNameSub}" FontSize="13" HorizontalAlignment="Right" Height="32" Margin="0,50,37,0" VerticalAlignment="Top" Width="170"/>
+            <TextBlock FontFamily="Comic Sans MS" x:Name="label3" Text="{DynamicResource s_labelEvening}" FontSize="20" HorizontalAlignment="Left" Height="37" Margin="223,87,0,0" VerticalAlignment="Top" Width="104"/>
+            <TextBox FontFamily="Comic Sans MS" x:Name="nightStartText" Text="22" MaxLength="2" VerticalAlignment="Top" VerticalContentAlignment="Center" FontSize="24" Height="37" Margin="359,87,365,0" FontStretch="Normal" MaxLines="1" d:LayoutOverrides="HorizontalAlignment"/>
+            <TextBlock FontFamily="Comic Sans MS" x:Name="label4" Text="{DynamicResource s_labelMorning}" FontSize="20" HorizontalAlignment="Left" Height="37" Margin="420,87,0,0" VerticalAlignment="Top" Width="96"/>
+            <TextBox FontFamily="Comic Sans MS" x:Name="nightEndText" Text="7" MaxLength="2" VerticalAlignment="Top" VerticalContentAlignment="Center" FontSize="24" Height="37" Margin="516,87,212,0" FontStretch="Normal" MaxLines="1"/>
+            <Slider x:Name="randomIdle" Margin="0,174,37,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="520" TickPlacement="None" ValueChanged="randomIdle_ValueChanged" SmallChange="1" Maximum="4" Value="2" RenderTransformOrigin="0.504,0.473"/>
+            <TextBlock FontFamily="Comic Sans MS" x:Name="label5" Text="{DynamicResource s_labelDP}" FontSize="20" HorizontalAlignment="Left" Height="35" Margin="223,134,0,0" VerticalAlignment="Top"/>
+            <TextBlock FontFamily="Comic Sans MS" x:Name="label6" Text="{DynamicResource s_labelDP3}" FontSize="13" HorizontalAlignment="Right" Margin="0,143,45,0" VerticalAlignment="Top" Width="231" d:LayoutOverrides="VerticalAlignment"/>
+        </Grid>
+        <Grid Visibility="Visible" x:Name="app">
+            <TextBlock FontFamily="Comic Sans MS" x:Name="label7" Text="{DynamicResource s_labelUseMon}" FontSize="20" HorizontalAlignment="Left" Margin="223,124,0,0" Height="35" VerticalAlignment="Top"/>
+            <CheckBox x:Name="checkBox" Content="" HorizontalAlignment="Left" Margin="479,133,0,0" VerticalAlignment="Top" Height="17" Checked="checkBox_Checked" Unchecked="checkBox_Unchecked"/>
+            <TextBlock FontFamily="Comic Sans MS" x:Name="label8" Text="{DynamicResource s_labelAs}" FontSize="20" Margin="223,10,0,0" HorizontalAlignment="Left" Height="35" VerticalAlignment="Top"/>
+            <CheckBox x:Name="checkBox1" Content="" HorizontalAlignment="Left" Margin="479,20,0,0" VerticalAlignment="Top" Height="17" d:LayoutOverrides="VerticalAlignment"/>
+            <TextBlock FontFamily="Comic Sans MS" x:Name="label9" Text="{DynamicResource s_labelLang}" FontSize="20" HorizontalAlignment="Left" Height="35" Margin="223,84,0,0" VerticalAlignment="Top"/>
+            <ComboBox FontFamily="Comic Sans MS" x:Name="comboBox" HorizontalAlignment="Left" Margin="479,90,0,0" VerticalAlignment="Top" Width="253" SelectionChanged="comboBox_SelectionChanged"/>
+            <TextBlock FontFamily="Comic Sans MS" x:Name="label7_Copy" Text="{DynamicResource s_labelMouseHide}" FontSize="20" HorizontalAlignment="Left" Margin="223,46,0,0" Height="35" VerticalAlignment="Top"/>
+            <CheckBox x:Name="checkBox_Copy" Content="" HorizontalAlignment="Left" Margin="479,55,0,0" VerticalAlignment="Top" Height="17"/>
+
+        </Grid>
     </Grid>
 </Window>

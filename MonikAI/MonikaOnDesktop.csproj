@@ -14,6 +14,7 @@
     <None Remove="assets\gui\choice_hover_background.png" />
     <None Remove="assets\gui\choice_idle_background.png" />
     <None Remove="assets\gui\logo.png" />
+    <None Remove="assets\gui\menu.png" />
     <None Remove="assets\gui\nice_pic.png" />
     <None Remove="assets\gui\textbox.png" />
     <None Remove="assets\monika\body\1-n.png" />
@@ -163,6 +164,9 @@
     <Resource Include="assets\gui\choice_hover_background.png" />
     <Resource Include="assets\gui\choice_idle_background.png" />
     <Resource Include="assets\gui\logo.png" />
+    <Resource Include="assets\gui\menu.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="assets\gui\nice_pic.png" />
     <Resource Include="assets\gui\textbox.png" />
     <Resource Include="assets\monika\body\1-n.png">

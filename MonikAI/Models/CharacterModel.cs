@@ -24,6 +24,7 @@ namespace MonikaOnDesktop
         public int nightEnd = 6;
         public int Scaler = 3;
         public bool screenNum = false;
+        public bool isMouse = false;
 
         public List<string> gifts = new List<string>(); 
 
@@ -53,6 +54,7 @@ namespace MonikaOnDesktop
             MonikaSettings.Default.idleRandomTo = idleRandomTo;
             MonikaSettings.Default.screenNum = screenNum;
             MonikaSettings.Default.AutoStart = autoStart;
+            MonikaSettings.Default.isMouse = isMouse;
 
             string text = affection.ToString() + ",";
             text += pcName + ",";
@@ -65,6 +67,7 @@ namespace MonikaOnDesktop
             text += nightEnd + ",";
             text += Scaler + ",";
             text += screenNum + ",";
+            text += isMouse + ",";
             text += "\n==\r\n";
             if (gifts.Count != 0)
             {
@@ -116,6 +119,7 @@ namespace MonikaOnDesktop
                     this.nightEnd = int.Parse(data[8]);
                     this.Scaler = int.Parse(data[9]);
                     this.screenNum = Boolean.Parse(data[10]);
+                    this.isMouse = Boolean.Parse(data[11]);
 
                     string line = lines[1].Replace("\n\n", String.Empty).Replace("\r", String.Empty);
                     string[] giftsLoaded = line.Split("\n");

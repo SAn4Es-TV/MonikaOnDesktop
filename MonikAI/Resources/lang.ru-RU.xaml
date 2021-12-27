@@ -22,6 +22,9 @@
     <v:String x:Key="s_labelLang">Язык</v:String>
     <v:String x:Key="s_labelCancel">Отмена</v:String>
     <v:String x:Key="s_labelSave">Сохранить</v:String>
+    <v:String x:Key="s_labelMonika">Моника</v:String>
+    <v:String x:Key="s_labelApp">Программа</v:String>
+    <v:String x:Key="s_labelMouseHide">Скрывать при наведении</v:String>
 
     <v:String x:Key="s_labelExit">Выход</v:String>
     <v:String x:Key="s_labelSettings">Настройки</v:String>

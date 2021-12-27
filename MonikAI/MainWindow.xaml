@@ -10,6 +10,7 @@
         Topmost="True" HorizontalAlignment="Right" VerticalAlignment="Bottom"
         Loaded="Window_Loaded"
         Closed="Window_Closed" Icon="/5a9a580ac2da1161eae7ea2e.png"
+        x:Name="window"
         >
     <Window.Resources>
         <SolidColorBrush x:Key="mainColor" Color="White" />
@@ -59,7 +60,7 @@
         <SolidColorBrush Opacity="0.0" Color="White" />
     </Window.Background>
 
-    <Grid HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Top" IsHitTestVisible="True">
+    <Grid HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Top" IsHitTestVisible="True" x:Name="mainApp">
 
         <Grid x:Name="monika">
         <Image x:Name="ribbon" Margin="0,0,0,0" Source="pack://application:,,,/assets/monika/ribbon/acs-ribbon_def-0.png" StretchDirection="Both" Stretch="Uniform"/>

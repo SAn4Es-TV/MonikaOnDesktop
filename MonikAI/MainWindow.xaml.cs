@@ -30,6 +30,8 @@ using MonikaOnDesktop.Models;
 using static System.Net.Mime.MediaTypeNames;
 using System.Numerics;
 using System.Xml.Linq;
+using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 namespace MonikaOnDesktop
 {
@@ -71,6 +73,8 @@ namespace MonikaOnDesktop
 
         public int lastDialog;                      // Номер последнего диалога
         public int lastLastDialog;                  // Номер последнего последнего диалога (Лол, что???)
+
+        private float dpiScale = 1.0f;
 
         string Language;                            // Текущий язык приложения
 
@@ -121,6 +125,7 @@ namespace MonikaOnDesktop
             #endregion
 
             InitializeComponent();                      // Инициализация ЮИ (Юзер Интерфейс)(Вроде для этого)
+            AllowsTransparency = true;
             DirectoryInfo dirInfo = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory + "/characters");
             if (!dirInfo.Exists)
             {
@@ -269,6 +274,7 @@ namespace MonikaOnDesktop
                         Monika.Scaler = MonikaSettings.Default.Scaler;
                         Monika.screenNum = MonikaSettings.Default.screenNum;
                         Monika.lang = MonikaSettings.Default.Language.Name.ToString();
+                        Monika.isMouse = MonikaSettings.Default.isMouse;
                         Monika.saveData();
                         if (String.IsNullOrEmpty(MonikaSettings.Default.UserName) || MonikaSettings.Default.UserName == "{PlayerName}")
                         {
@@ -356,6 +362,9 @@ namespace MonikaOnDesktop
         }       // Когда закрыли программу
         public void Window_Loaded(object sender, RoutedEventArgs e)     // Когда программа проснётся
         {
+
+            var wpfDpi = PresentationSource.FromVisual(this)?.CompositionTarget?.TransformToDevice.M11;
+            this.dpiScale = 1f / (float)wpfDpi.GetValueOrDefault(1);
 
             Monika.loadData(); // Грузим данные 
             SetupScale(Monika.Scaler);  // Ставим размер окна
@@ -522,7 +531,6 @@ namespace MonikaOnDesktop
                         }
                     });
                 });
-
                 var randomDialog = new Random();
                 this.Dispatcher.Invoke(() =>
                 {
@@ -548,10 +556,92 @@ namespace MonikaOnDesktop
                         }
                     });
                 });
-                await checkUpdatesAsync();
+                Dispatcher.Invoke(() => {
+                    Task.Run(async () =>
+                    {
+                        var prev = new System.Drawing.Point();
 
+                        var rectangle = new System.Drawing.Rectangle();
+                        await this.Dispatcher.InvokeAsync(() =>
+                        {
+                            rectangle = new System.Drawing.Rectangle((int)this.Left, (int)this.Top, (int)this.Width,
+                                (int)this.Height);
+                        });
+                        while (true)
+                        {
+                            var point = new System.Drawing.Point();
+                            MainWindow.GetCursorPos(ref point);
+                            point.X = (int)(point.X * this.dpiScale);
+                            point.Y = (int)(point.Y * this.dpiScale);
+
+                            if (!point.Equals(prev))
+                            {
+                               
+                                prev = point;
+
+                                var opacity = 1.0;
+                                const double MIN_OP = 0.125;
+                                const double FADE = 175;
+                                if (rectangle.Contains(point))
+                                {
+                                    opacity = MIN_OP;
+                                }
+                                else
+                                {
+                                    if (point.Y <= rectangle.Bottom)
+                                    {
+                                        if (point.Y >= rectangle.Y)
+                                        {
+                                            if (point.X < rectangle.X && rectangle.X - point.X < FADE)
+                                            {
+                                                opacity = MainWindow.Lerp(1.0, MIN_OP, (rectangle.X - point.X) / FADE);
+                                            }
+                                            else if (point.X > rectangle.Right && point.X - rectangle.Right < FADE)
+                                            {
+                                                opacity = MainWindow.Lerp(1.0, MIN_OP,
+                                                    (point.X - rectangle.Right) / FADE);
+                                            }
+                                        }
+                                        else if (point.Y < rectangle.Y)
+                                        {
+                                            if (point.X >= rectangle.X && point.X <= rectangle.Right)
+                                            {
+                                                if (rectangle.Y - point.Y < FADE)
+                                                {
+                                                    opacity = MainWindow.Lerp(1.0, MIN_OP,
+                                                        (rectangle.Y - point.Y) / FADE);
+                                                }
+                                            }
+                                            else if (rectangle.X > point.X || rectangle.Right < point.X)
+                                            {
+                                                var distance =
+                                                    Math.Sqrt(
+                                                        Math.Pow(
+                                                            (point.X < rectangle.X ? rectangle.X : rectangle.Right) -
+                                                            point.X, 2) +
+                                                        Math.Pow(rectangle.Y - point.Y, 2));
+                                                if (distance < FADE)
+                                                {
+                                                    opacity = MainWindow.Lerp(1.0, MIN_OP, distance / FADE);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                //Debug.WriteLine("opacity: " + opacity);
+                                if (Monika.isMouse)
+                                {
+                                    Dispatcher.Invoke(() => { mainApp.Opacity = opacity; });
+                                }
+                            }
+                        }
+                    });
+                });
+                await checkUpdatesAsync();
+                
             };
             this.BeginAnimation(OpacityProperty, _start);
+            
         }
         public async Task checkUpdatesAsync()
         {
@@ -881,14 +971,14 @@ namespace MonikaOnDesktop
                             text.FontSize = 20;
                             break;
                     }
-                    var button = new Button
+                    var button = new System.Windows.Controls.Button
                     {
                         Name = "butt" + i,
                         Content = text,
                         Width = 400,
                         Height = 30,
                         VerticalAlignment = VerticalAlignment.Center,
-                        HorizontalAlignment = HorizontalAlignment.Center
+                        HorizontalAlignment = System.Windows.HorizontalAlignment.Center
                     };
                     switch (Monika.Scaler)
                     {
@@ -920,7 +1010,7 @@ namespace MonikaOnDesktop
         }
         private async void Button_ClickAsync(object sender, RoutedEventArgs e)
         {
-            Button butt = (sender as Button);
+            System.Windows.Controls.Button butt = (sender as System.Windows.Controls.Button);
             int num = int.Parse(butt.Name.Substring(4));
             Debug.WriteLine("Нажата кнопка " + num);
             this.Dispatcher.Invoke(() =>
@@ -1596,107 +1686,87 @@ namespace MonikaOnDesktop
                 }
             });
         }
+
         public void SetupScale(int scaler)
         {
-            switch (scaler)
-            {
-                case 0:
-                    this.Width = 200;
-                    this.Height = 128;
-                    this.monika.Margin = new Thickness(0, -15, 0, 0);
-                    this.textWindow.Margin = new Thickness(12.5, 97.5, 12.5, 5);
-                    this.textBlock.Margin = new Thickness(17.5, 102.5, 17.5, 10);
-                    this.textBlock.FontSize = 5;
-                    this.ButtonsGrid.Width = 125;
-                    this.ButtonsGrid.Height = 100;
-                    break;
-                case 1:
-                    this.Width = 400;
-                    this.Height = 256;
-                    this.monika.Margin = new Thickness(0, -15, 0, 0);
-                    this.textWindow.Margin = new Thickness(25, 195, 25, 10);
-                    this.textBlock.Margin = new Thickness(35, 205, 35, 20);
-                    this.textBlock.FontSize = 10;
-                    this.ButtonsGrid.Width = 250;
-                    this.ButtonsGrid.Height = 200;
-                    break;
-                case 2:
-                    this.Width = 600;
-                    this.Height = 384;
-                    this.monika.Margin = new Thickness(0, -15, 0, 0);
-                    this.textWindow.Margin = new Thickness(37.5, 292.5, 37.5, 15);
-                    this.textBlock.Margin = new Thickness(52.5, 307.5, 52.5, 30);
-                    this.textBlock.FontSize = 15;
-                    this.ButtonsGrid.Width = 375;
-                    this.ButtonsGrid.Height = 300;
-                    break;
-                case 3:
-                    this.Width = 800;
-                    this.Height = 512;
-                    this.monika.Margin = new Thickness(0, -20, 0, 0);
-                    this.textWindow.Margin = new Thickness(50, 390, 50, 20);
-                    this.textBlock.Margin = new Thickness(70, 410, 70, 40);
-                    this.textBlock.FontSize = 20;
-                    this.ButtonsGrid.Width = 500;
-                    this.ButtonsGrid.Height = 400;
-                    break;
-                default:
-                    this.Width = 600;
-                    this.Height = 384;
-                    this.main.Margin = new Thickness(0, -15, 0, 0);
-                    this.hairBack.Margin = new Thickness(0, -15, 0, 0);
-                    this.hairFront.Margin = new Thickness(0, -15, 0, 0);
-                    this.arms.Margin = new Thickness(0, -15, 0, 0);
-                    this.ribbon.Margin = new Thickness(0, -15, 0, 0);
-                    this.textWindow.Margin = new Thickness(37.5, 292.5, 37.5, 15);
-                    this.textBlock.Margin = new Thickness(52.5, 307.5, 52.5, 30);
-                    this.textBlock.FontSize = 15;
-                    this.ButtonsGrid.Width = 375;
-                    this.ButtonsGrid.Height = 300;
-                    break;
-            }
+            this.Width = 8 * scaler;
+            this.Height = 5.12 * scaler;
+            this.monika.Margin = new Thickness(0, -20 * scaler / 100, 0, 0);
+            this.textWindow.Margin = new Thickness(50 * scaler / 100, 390 * scaler / 100, 50 * scaler / 100, 20 * scaler / 100);
+            this.textBlock.Margin = new Thickness(70 * scaler / 100, 410 * scaler / 100, 70 * scaler / 100, 40 * scaler / 100);
+            this.textBlock.FontSize = 0.2 * scaler;
+            this.ButtonsGrid.Width = 5 * scaler;
+            this.ButtonsGrid.Height = 4 * scaler;
 
             //var primaryMonitorArea = SystemParameters.WorkArea;
             //Left = primaryMonitorArea.Right - this.Width;
             //Top = primaryMonitorArea.Bottom - this.Height;
             GoToSecondaryMonitor();
         }
-        public void GoToSecondaryMonitor()
+        public void dsa()
         {
-            System.Windows.Forms.Screen screen;
-            if (System.Windows.Forms.Screen.AllScreens.Length != 1)
+            bool useScreen = false;
+            Screen workingScreen = Screen.PrimaryScreen;
+            var workingRectangle = Screen.PrimaryScreen.WorkingArea;
+            foreach (Screen screen in Screen.AllScreens)
             {
-                if (Monika.screenNum)
+                if (useScreen)
                 {
-                    screen = System.Windows.Forms.Screen.AllScreens.FirstOrDefault(s => !s.Primary);
+                    if (screen.Primary)
+                    {
+                        workingScreen = screen;
+                    }
                 }
                 else
                 {
-                    screen = System.Windows.Forms.Screen.AllScreens[0];
+                    if (!screen.Primary)
+                    {
+                        workingScreen = screen;
+                    }
                 }
+            }
+        }
+        public void GoToSecondaryMonitor()
+        {
+            // Вот здесь можно посмотреть координаты экранов
+            var ss = System.Windows.Forms.Screen.AllScreens;
+            //_ = MessageBox.Show(string.Join(Environment.NewLine + Environment.NewLine, (object[])ss), "Параметры мониторов");
+
+            var rightScreen = System.Windows.Forms.Screen.AllScreens[0];
+            var leftScreen = System.Windows.Forms.Screen.AllScreens[0];
+            foreach (var s in System.Windows.Forms.Screen.AllScreens.Skip(1))
+            {
+                if (s.WorkingArea.X > rightScreen.WorkingArea.X)
+                {
+                    rightScreen = s;
+                }
+                else
+                {
+                    leftScreen = s;
+                }
+            }
+            var rightWorkingArea = rightScreen.WorkingArea;
+            if (MonikaSettings.Default.screenNum)
+            {
+                var workingRectangle = Screen.PrimaryScreen.WorkingArea;
+                rightWorkingArea = rightScreen.WorkingArea;
             }
             else
             {
-                screen = System.Windows.Forms.Screen.AllScreens[0];
+                rightWorkingArea = leftScreen.WorkingArea;
             }
-            if (screen == null)
-            {
-                return;
-            }
-
-            var workingArea = screen.WorkingArea;
-
+            //Left = rightWorkingArea.X + rightWorkingArea.Width - Width;
+            //Top = rightWorkingArea.Y + rightWorkingArea.Height - Height;
 
             double ratio = 96.0 / (int)typeof(SystemParameters).GetProperty("Dpi", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null, null);
-            System.Drawing.Rectangle screen1 = screen.WorkingArea;
-            Left = (screen1.Width - ActualWidth / ratio - BorderThickness.Left - BorderThickness.Right) * ratio;
-            Top = (screen1.Height - ActualHeight / ratio - BorderThickness.Top - BorderThickness.Bottom) * ratio;
-
+            Left = (rightWorkingArea.X + rightWorkingArea.Width - ActualWidth / ratio - BorderThickness.Left - BorderThickness.Right) * ratio;
+            Top = (rightWorkingArea.Y + rightWorkingArea.Height - ActualHeight / ratio - BorderThickness.Top - BorderThickness.Bottom) * ratio;
+            
             /*
             //this.Left = workingArea.Right - this.Width;
             //this.Top = workingArea.Bottom - this.Height;
             this.Left = workingArea.Width - this.Width;
-            this.Top = workingArea.Height - this.Height;*/
+            this.Top = workingArea.Height - this.Height;
             Debug.WriteLine("Width - " + this.Width + "  ActualWidth: " + this.ActualWidth + " Screen Width: " + workingArea.Width);
             Debug.WriteLine("Height - " + this.Height + "  ActualHeight: " + this.ActualHeight + " Screen Height: " + workingArea.Height);
 
@@ -1705,7 +1775,7 @@ namespace MonikaOnDesktop
             using (StreamWriter sw = new StreamWriter(AppDomain.CurrentDomain.BaseDirectory + "/debug.txt", false, System.Text.Encoding.Default))
             {
                 sw.WriteLine(text);
-            }
+            }*/
         }
 
         const string name = "MonikaStartUp";
@@ -1754,6 +1824,14 @@ namespace MonikaOnDesktop
             }
             return newUrl;
         }
+        private static double Lerp(double firstFloat, double secondFloat, double by)
+        {
+            return firstFloat * by + secondFloat * (1 - by);
+        }
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool GetCursorPos(ref System.Drawing.Point lpPoint);
 
         public static List<CultureInfo> m_Languages = new List<CultureInfo>();
         private int plushieCount;

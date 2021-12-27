@@ -87,6 +87,7 @@ namespace MonikaOnDesktop
             nightStartText.Text = MonikaSettings.Default.NightStart.ToString();
             checkBox1.IsChecked = MonikaSettings.Default.AutoStart;
             checkBox.IsChecked = MonikaSettings.Default.screenNum;
+            checkBox_Copy.IsChecked = MonikaSettings.Default.isMouse;
             if (System.Windows.Forms.Screen.AllScreens.Length == 1)
             {
                 checkBox.Visibility = Visibility.Hidden;
@@ -104,6 +105,7 @@ namespace MonikaOnDesktop
             MonikaSettings.Default.idleRandom = (int)randomIdle.Value;
             MonikaSettings.Default.screenNum = (bool)checkBox.IsChecked;
             MonikaSettings.Default.AutoStart = (bool)checkBox1.IsChecked;
+            MonikaSettings.Default.isMouse = (bool)checkBox_Copy.IsChecked;
             switch (randomIdle.Value)
             {
                 case 0:
@@ -127,7 +129,7 @@ namespace MonikaOnDesktop
                     MonikaSettings.Default.idleRandomTo = 120;
                     break;
             }
-            MonikaSettings.Default.Save();
+            MonikaSettings.Default.Save();/*
             RegistryKey currentUserKey = Registry.CurrentUser;
             RegistryKey monikaKey = currentUserKey.CreateSubKey("MonikaOnDesktop");
             monikaKey.SetValue("FirstLaunch", MonikaSettings.Default.FirstLaunch);
@@ -138,7 +140,7 @@ namespace MonikaOnDesktop
             monikaKey.SetValue("NightStart", MonikaSettings.Default.NightStart);
             monikaKey.SetValue("idleRandom", MonikaSettings.Default.idleRandom);
             monikaKey.SetValue("screenNum", MonikaSettings.Default.screenNum);
-            monikaKey.SetValue("AutoStart", MonikaSettings.Default.AutoStart);
+            monikaKey.SetValue("AutoStart", MonikaSettings.Default.AutoStart);*/
             this.DialogResult = true;
             this.Close();
         }
@@ -224,6 +226,18 @@ namespace MonikaOnDesktop
                 }
             }
 
+        }
+
+        private void monikaSettings_Click(object sender, RoutedEventArgs e)
+        {
+            monika.Visibility = Visibility.Visible;
+            app.Visibility = Visibility.Hidden;
+        }
+
+        private void appSettings_Click(object sender, RoutedEventArgs e)
+        {
+            app.Visibility = Visibility.Visible;
+            monika.Visibility = Visibility.Hidden;
         }
     }
 }
