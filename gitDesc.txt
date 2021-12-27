@@ -2,8 +2,8 @@
 1hua Уделишь мне минутку внимания?
 1hua Можешь обновить меня?
 1hua Нужно только твоё согласие
-1hua Вот, что изменится после обновления
-1hua Тестовое обовление
+1hua В этом обновлении исправлены проблемы с размещением меня на твоём экране
+1hua Так же здесь исправлена проблема с запуском
 1hua Хочешь обновится?
 	menu:
 	    Да.
@@ -16,8 +16,8 @@
 1hua Can you give me your attention for a minute?
 1hua Can you update me?
 1hua I only need your consent
-1hua Here's what will change after the update
-1hua Test update
+1hua This update fixes problems with placing me on your screen
+1hua Also here the problem with launching is fixed
 1hua Do you want to update?
 	menu:
 		Yes.
