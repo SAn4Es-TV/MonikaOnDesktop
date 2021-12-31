@@ -2,8 +2,8 @@
 1hua Уделишь мне минутку внимания?
 1hua Можешь обновить меня?
 1hua Нужно только твоё согласие
-1hua В этом обновлении исправлены проблемы с размещением меня на твоём экране
-1hua Так же здесь исправлена проблема с запуском
+1hua В этом обновлении ты можешь настроить мой рамер более точно!
+1hua Так же я теперь могу прятатся при наведении курсора
 1hua Хочешь обновится?
 	menu:
 	    Да.
@@ -16,8 +16,8 @@
 1hua Can you give me your attention for a minute?
 1hua Can you update me?
 1hua I only need your consent
-1hua This update fixes problems with placing me on your screen
-1hua Also here the problem with launching is fixed
+1hua In this update, you can adjust my size more precisely!
+1hua Also I can now hide when hovering over
 1hua Do you want to update?
 	menu:
 		Yes.
