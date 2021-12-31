@@ -129,7 +129,6 @@ C:\Users\SAn4Es_TV\Source\Repos\MonikaOnDesktop\MonikAI\bin\Debug\netcoreapp3.1\
 C:\Users\SAn4Es_TV\Source\Repos\MonikaOnDesktop\MonikAI\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp2.0\System.Security.AccessControl.dll
 C:\Users\SAn4Es_TV\Source\Repos\MonikaOnDesktop\MonikAI\bin\Debug\netcoreapp3.1\runtimes\unix\lib\netcoreapp2.1\System.Security.Principal.Windows.dll
 C:\Users\SAn4Es_TV\Source\Repos\MonikaOnDesktop\MonikAI\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp2.1\System.Security.Principal.Windows.dll
-C:\Users\SAn4Es_TV\Source\Repos\MonikaOnDesktop\MonikAI\obj\Debug\netcoreapp3.1\MonikaOnDesktop.csproj.AssemblyReference.cache
 C:\Users\SAn4Es_TV\Source\Repos\MonikaOnDesktop\MonikAI\obj\Debug\netcoreapp3.1\Resources\lang.ru-RU.baml
 C:\Users\SAn4Es_TV\Source\Repos\MonikaOnDesktop\MonikAI\obj\Debug\netcoreapp3.1\Resources\lang.baml
 C:\Users\SAn4Es_TV\Source\Repos\MonikaOnDesktop\MonikAI\obj\Debug\netcoreapp3.1\MainWindow.g.cs

@@ -26,8 +26,59 @@ namespace MonikaOnDesktop
         public bool screenNum = false;
         public bool isMouse = false;
 
-        public List<string> gifts = new List<string>(); 
+        public List<string> gifts = new List<string>();
 
+
+        public string leaningWord = "leaning";
+        public string nullPath = "null";
+        public string[] body = new string[] { "arms-crossed-5",
+            "arms-crossed-10",
+            "arms-leaning-def-left-def-10",
+            "arms-leaning-def-right-def-5",
+            "arms-leaning-def-right-def-10",
+            "arms-left-down-0",
+            "arms-left-rest-10",
+            "arms-right-down-0",
+            "arms-right-point-0",
+            "arms-right-restpoint-10",
+            "arms-steepling-10",
+            "body-def-0",
+            "body-def-1",
+            "body-def-head",
+            "body-leaning-def-0",
+            "body-leaning-def-1",
+            "body-leaning-def-head"};
+        public string[] eyes = new string[] { "eyes-closedhappy",
+            "eyes-closedsad",
+            "eyes-crazy",
+            "eyes-left",
+            "eyes-normal",
+            "eyes-right",
+            "eyes-smug",
+            "eyes-smugleft",
+            "eyes-smugright",
+            "eyes-soft",
+            "eyes-sparkle",
+            "eyes-wide",
+            "eyes-winkleft",
+            "eyes-winkright",};
+        public string[] eyesBrow = new string[] { "eyebrows-furrowed",
+            "eyebrows-knit",
+            "eyebrows-mid",
+            "eyebrows-think",
+            "eyebrows-up"};
+        public string[] mouth = new string[] { "mouth-angry",
+            "mouth-big",
+            "mouth-gasp",
+            "mouth-pout",
+            "mouth-small",
+            "mouth-smile",
+            "mouth-smirk",
+            "mouth-smug",
+            "mouth-triangle",
+            "mouth-wide",};
+
+        public string hairType = "def";
         public CharacterModel(string path, string giftsPath)
         {
             this.filePath = path;
@@ -42,7 +93,6 @@ namespace MonikaOnDesktop
             FileInfo fileInf = new FileInfo(filePath);
             return fileInf.Exists;
         }
-
         public void saveData()
         {
             MonikaSettings.Default.Language = new System.Globalization.CultureInfo(lang);
@@ -119,7 +169,14 @@ namespace MonikaOnDesktop
                     this.nightEnd = int.Parse(data[8]);
                     this.Scaler = int.Parse(data[9]);
                     this.screenNum = Boolean.Parse(data[10]);
-                    this.isMouse = Boolean.Parse(data[11]);
+                    if (data.Length == 12)
+                    {
+                        this.isMouse = true;
+                    }
+                    else
+                    {
+                        this.isMouse = Boolean.Parse(data[11]);
+                    }
 
                     string line = lines[1].Replace("\n\n", String.Empty).Replace("\r", String.Empty);
                     string[] giftsLoaded = line.Split("\n");
@@ -136,7 +193,6 @@ namespace MonikaOnDesktop
                     gifts = newGiftsList;
                 }
             }
-        }
-        
+        } 
     }
 }

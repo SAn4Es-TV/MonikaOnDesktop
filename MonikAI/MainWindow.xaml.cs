@@ -844,6 +844,7 @@ namespace MonikaOnDesktop
             string eye = faceName[1].ToString();
             string eyebrow = faceName[2].ToString();
             string mouth = faceName[3].ToString();
+            
             //Debug.Write("Body: " + body + ", Eyes: " + eye + ", Eyesbrow: " + eyebrow + ", Mouth: " + mouth + "\n");
             if (IsNight)
             {
@@ -891,6 +892,172 @@ namespace MonikaOnDesktop
             {
                 this.Dispatcher.Invoke(() =>
                 {
+                    #region beta
+                    /*
+                    switch (body)
+                    {
+                        case 1:
+                            this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
+                            this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
+                            this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
+                            this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[10] + ".png"));
+                            this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            break;
+                        case 2:
+                            this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
+                            this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
+                            this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
+                            this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[0] + ".png"));
+                            this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[1] + ".png"));
+                            this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            break;
+                        case 3:
+                            this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
+                            this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
+                            this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
+                            this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"));
+                            this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[6] + ".png"));
+                            this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            break;
+                        case 4:
+                            this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
+                            this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
+                            this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
+                            this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"));
+                            this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"));
+                            this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            break;
+                        case 5:
+                            this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[14] + ".png"));
+                            this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[15] + ".png"));
+                            this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[16] + ".png"));
+                            this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[2] + ".png"));
+                            this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[3] + ".png"));
+                            this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[4] + ".png"));
+                            break;
+                        case 6:
+                            this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
+                            this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
+                            this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
+                            this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[7] + ".png"));
+                            this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"));
+                            this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            break;
+                        case 7:
+                            this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
+                            this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
+                            this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
+                            this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[10] + ".png"));
+                            this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            break;
+                        default:
+                            this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
+                            this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
+                            this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
+                            this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"));
+                            this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"));
+                            this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            break;
+                    }
+                    if (body == 5) { Monika.leaningWord = "leaning-def-"; } else { Monika.leaningWord = ""; }
+                    switch (eye)
+                    {
+                        case "e":
+                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[4] + ".png"));
+                            break;
+                        case "w":
+                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[11] + ".png"));
+                            break;
+                        case "s":
+                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[10] + ".png"));
+                            break;
+                        case "t":
+                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[6] + ".png"));
+                            break;
+                        case "c":
+                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[2] + ".png"));
+                            break;
+                        case "r":
+                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[5] + ".png"));
+                            break;
+                        case "l":
+                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[3] + ".png"));
+                            break;
+                        case "h":
+                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[0] + ".png"));
+                            break;
+                        case "d":
+                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[1] + ".png"));
+                            break;
+                        case "k":
+                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[12] + ".png"));
+                            break;
+                        case "n":
+                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[13] + ".png"));
+                            break;
+                        case "f":
+                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[9] + ".png"));
+                            break;
+                        case "m":
+                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[7] + ".png"));
+                            break;
+                        case "g":
+                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[8] + ".png"));
+                            break;
+                        default:
+                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[4] + ".png"));
+                            break;
+                    }
+                    switch (eyebrow)
+                    {
+                        case "u":
+                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"));
+                            break;
+                        case "k":
+                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[1] + ".png"));
+                            break;
+                        case "s":
+                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[2] + ".png"));
+                            break;
+                        case "t":
+                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[3] + ".png"));
+                            break;
+                        case "f":
+                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[0] + ".png"));
+                            break;
+                        default:
+                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"));
+                            break;
+                    }
+                    switch (mouth)
+                    {
+                        case "u":
+                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"));
+                            break;
+                        case "k":
+                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[1] + ".png"));
+                            break;
+                        case "s":
+                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[2] + ".png"));
+                            break;
+                        case "t":
+                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[3] + ".png"));
+                            break;
+                        case "f":
+                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[0] + ".png"));
+                            break;
+                        default:
+                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"));
+                            break;
+                    }
+                    if (body == 5) { Monika.leaningWord = "leaning"; } else { Monika.leaningWord = ""; }
+                    string hairPath = "hair-" + Monika.leaningWord + "" + Monika.hairType;
+                    this.Hair.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/h/" + hairPath + "-front.png"));
+                    this.HairBack.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/h/" + hairPath + "-back.png"));
+                    */
+                    #endregion
                     if (body == 5)
                     {
                         this.main.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/body/body-" + body + ".png"));
@@ -928,7 +1095,6 @@ namespace MonikaOnDesktop
                         this.mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/mouth/" + mouth + ".png"));
                         this.nose.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/face-nose-def.png"));
                     }
-
                 });
             }
         }

@@ -62,8 +62,26 @@
 
     <Grid HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Top" IsHitTestVisible="True" x:Name="mainApp">
 
-        <Grid x:Name="monika">
-        <Image x:Name="ribbon" Margin="0,0,0,0" Source="pack://application:,,,/assets/monika/ribbon/acs-ribbon_def-0.png" StretchDirection="Both" Stretch="Uniform"/>
+        <Grid x:Name="monika" IsHitTestVisible="False">
+            <!--<Grid x:Name="table">
+                <Image x:Name="table1" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/t/chair-def.png" StretchDirection="Both" Stretch="Uniform"/>
+            </Grid>
+            <Grid x:Name="main">
+                <Image x:Name="HairBack" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/body/body-1.png" StretchDirection="Both" Stretch="Uniform"/>
+                <Image x:Name="Body" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/body/body-1.png" StretchDirection="Both" Stretch="Uniform"/>
+                <Image x:Name="Body1" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/body/body-1.png" StretchDirection="Both" Stretch="Uniform"/>
+                <Image x:Name="Head" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/body/body-1.png" StretchDirection="Both" Stretch="Uniform"/>
+                <Image x:Name="Face" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/body/body-1.png" StretchDirection="Both" Stretch="Uniform"/>
+                <Image x:Name="Hair" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/body/body-1.png" StretchDirection="Both" Stretch="Uniform"/>
+                <Image x:Name="Eyes" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/body/body-1.png" StretchDirection="Both" Stretch="Uniform"/>
+                <Image x:Name="EyeBrow" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/body/body-1.png" StretchDirection="Both" Stretch="Uniform"/>
+                <Image x:Name="Hand" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/body/body-1.png" StretchDirection="Both" Stretch="Uniform"/>
+                <Image x:Name="Hand1" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/body/body-1.png" StretchDirection="Both" Stretch="Uniform"/>
+                <Image x:Name="Hand2" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/body/body-1.png" StretchDirection="Both" Stretch="Uniform"/>
+            </Grid>
+                <Image x:Name="table2" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/t/table-def.png" StretchDirection="Both" Stretch="Uniform"/>
+                <Image x:Name="table3" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/t/table-def-s.png" StretchDirection="Both" Stretch="Uniform"/>-->
+            <Image x:Name="ribbon" Margin="0,0,0,0" Source="pack://application:,,,/assets/monika/ribbon/acs-ribbon_def-0.png" StretchDirection="Both" Stretch="Uniform"/>
         <Image x:Name="hairBack" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/hair/hair-def-back.png" StretchDirection="Both" Stretch="Uniform"/>
         <Image x:Name="main" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/body/body-1.png" StretchDirection="Both" Stretch="Uniform"/>
         <Image x:Name="hairFront" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/hair/hair-def-front.png" StretchDirection="Both" Stretch="Uniform"/>
