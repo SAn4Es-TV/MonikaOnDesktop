@@ -49,3 +49,7 @@
 **ПРИМЕЧАНИЕ**: Если вы разрабатываете в Visual Studio, вам необходимо запустить VS от имени администратора, поскольку MonikaOnDesktop запускается только тогда, когда VS запускается от имени администратора!
 
 [LocalDirectory]: https://github.com/SAn4Es-TV/MonikaOnDesktop/tree/master/MonikaOnDesktop
+# Спонсоры
+Denis Solicen
+
+Вы также можете поддержать меня на Patreon: https://www.patreon.com/san4es_tv
