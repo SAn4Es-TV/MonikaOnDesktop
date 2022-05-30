@@ -2,8 +2,7 @@
   "runtimeOptions": {
     "additionalProbingPaths": [
       "C:\\Users\\SAn4Es_TV\\.dotnet\\store\\|arch|\\|tfm|",
-      "C:\\Users\\SAn4Es_TV\\.nuget\\packages",
-      "C:\\Program Files (x86)\\Microsoft\\Xamarin\\NuGet"
+      "C:\\Users\\SAn4Es_TV\\.nuget\\packages"
     ]
   }
 }

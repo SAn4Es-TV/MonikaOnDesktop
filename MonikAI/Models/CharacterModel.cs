@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Windows.Shapes;
+using System.Xml.Linq;
+using System.Linq;
 
 using static System.Net.Mime.MediaTypeNames;
 
@@ -25,6 +27,8 @@ namespace MonikaOnDesktop
         public int Scaler = 3;
         public bool screenNum = false;
         public bool isMouse = false;
+        public string costumeName = "def";
+        public int secondTogether = 0;
 
         public List<string> gifts = new List<string>();
 
@@ -93,7 +97,153 @@ namespace MonikaOnDesktop
             FileInfo fileInf = new FileInfo(filePath);
             return fileInf.Exists;
         }
+
         public void saveData()
+        {
+            MonikaSettings.Default.Language = new System.Globalization.CultureInfo(lang);
+            MonikaSettings.Default.UserName = playerName;
+            MonikaSettings.Default.Scaler = Scaler;
+            MonikaSettings.Default.NightEnd = nightEnd;
+            MonikaSettings.Default.NightStart = NightStart;
+            MonikaSettings.Default.idleRandomFrom = idleRandomFrom;
+            MonikaSettings.Default.idleRandomTo = idleRandomTo;
+            MonikaSettings.Default.screenNum = screenNum;
+            MonikaSettings.Default.AutoStart = autoStart;
+            MonikaSettings.Default.isMouse = isMouse;
+            
+            XDocument xDoc = new XDocument();
+            XElement xml = new XElement("xml");
+            XElement mainSettings = new XElement("settings");
+            XElement affection_ = new XElement("affection"); affection_.Value = affection.ToString();
+            XElement pcName_ = new XElement("pcName"); pcName_.Value = pcName;
+            XElement player_ = new XElement("player"); player_.Value = playerName;
+            XElement lang_ = new XElement("lang"); lang_.Value = lang;
+            XElement autoStart_ = new XElement("autoStart"); autoStart_.Value = autoStart.ToString();
+            XElement idleRandomFrom_ = new XElement("idleRandomFrom"); idleRandomFrom_.Value = idleRandomFrom.ToString();
+            XElement idleRandomTo_ = new XElement("idleRandomTo"); idleRandomTo_.Value = idleRandomTo.ToString();
+            XElement NightStart_ = new XElement("NightStart"); NightStart_.Value = NightStart.ToString();
+            XElement nightEnd_ = new XElement("nightEnd"); nightEnd_.Value = nightEnd.ToString();
+            XElement Scaler_ = new XElement("Scaler"); Scaler_.Value = Scaler.ToString();
+            XElement screenNum_ = new XElement("screenNum"); screenNum_.Value = screenNum.ToString();
+            XElement isMouse_ = new XElement("isMouse"); isMouse_.Value = isMouse.ToString();
+            XElement secondTogether_ = new XElement("secondTogether"); secondTogether_.Value = secondTogether.ToString();
+            XElement costume_ = new XElement("costume"); costume_.Value = costumeName.ToString();
+
+            mainSettings.Add(affection_);
+            mainSettings.Add(pcName_);
+            mainSettings.Add(player_);
+            mainSettings.Add(lang_);
+            mainSettings.Add(autoStart_);
+            mainSettings.Add(idleRandomFrom_);
+            mainSettings.Add(idleRandomTo_);
+            mainSettings.Add(NightStart_);
+            mainSettings.Add(nightEnd_);
+            mainSettings.Add(Scaler_);
+            mainSettings.Add(screenNum_);
+            mainSettings.Add(isMouse_);
+            mainSettings.Add(secondTogether_);
+            mainSettings.Add(costume_);
+
+            XElement gifts_ = new XElement("gifts");
+            if (gifts.Count != 0)
+            {
+                foreach (string gift in gifts)
+                {
+                    if (!String.IsNullOrEmpty(gift) || !String.IsNullOrWhiteSpace(gift) || gift==" ")
+                    {
+                        XElement gift_ = new XElement("gift"); gift_.Value = gift;
+                        gifts_.Add(gift_);
+                        Debug.WriteLine("saved: " + gift);
+                    }
+                }
+            }
+            xml.Add(mainSettings);
+            xml.Add(gifts_);
+            xDoc.Add(xml);
+
+            DirectoryInfo dirInfo = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory + "/characters");
+            if (!dirInfo.Exists)
+            {
+                dirInfo.Create();
+            }
+            xDoc.Save(filePath);
+        }
+        public void loadData()
+        {
+            XDocument xDoc = XDocument.Load(filePath);
+            XElement xml = xDoc.Element("xml");
+            if(xml != null)
+            {
+                XElement settings = xml.Element("settings");
+                if (settings != null)
+                {
+
+                    // проходим по всем элементам person
+                    foreach (XElement option in settings.Elements())
+                    {
+                        switch (option.Name.LocalName)
+                        {
+                            case "affection":
+                                affection = int.Parse(option.Value);
+                                break;
+                            case "pcName":
+                                pcName = option.Value;
+                                break;
+                            case "player":
+                                playerName = option.Value;
+                                break;
+                            case "lang":
+                                lang = option.Value;
+                                break;
+                            case "autoStart":
+                                autoStart = bool.Parse(option.Value);
+                                break;
+                            case "idleRandomFrom":
+                                idleRandomFrom = int.Parse(option.Value);
+                                break;
+                            case "idleRandomTo":
+                                idleRandomTo = int.Parse(option.Value);
+                                break;
+                            case "NightStart":
+                                NightStart = int.Parse(option.Value);
+                                break;
+                            case "nightEnd":
+                                nightEnd = int.Parse(option.Value);
+                                break;
+                            case "Scaler":
+                                Scaler = int.Parse(option.Value);
+                                break;
+                            case "screenNum":
+                                screenNum = bool.Parse(option.Value);
+                                break;
+                            case "isMouse":
+                                isMouse = bool.Parse(option.Value);
+                                break;
+                            case "secondTogether":
+                                secondTogether = int.Parse(option.Value);
+                                break;
+                            case "costume":
+                                costumeName = option.Value;
+                                break;
+                        }
+                    }
+                }
+                XElement gifts_ = xml.Element("gifts");
+                if (gifts_ != null)
+                {
+                    List<string> newGiftsList = new List<string>();
+                    // проходим по всем элементам person
+                    foreach (XElement gift in gifts_.Elements("gift"))
+                    {
+                        newGiftsList.Add(gift.Value);
+                        Debug.WriteLine("Loaded: " + gift.Value);
+                    }
+                    gifts = newGiftsList;
+                }
+            }
+        }
+
+        public void saveData_()
         {
             MonikaSettings.Default.Language = new System.Globalization.CultureInfo(lang);
             MonikaSettings.Default.UserName = playerName;
@@ -118,6 +268,7 @@ namespace MonikaOnDesktop
             text += Scaler + ",";
             text += screenNum + ",";
             text += isMouse + ",";
+            text += secondTogether + ",";
             text += "\n==\r\n";
             if (gifts.Count != 0)
             {
@@ -140,7 +291,7 @@ namespace MonikaOnDesktop
                 sw.WriteLine(text);
             }
         }
-        public void loadData()
+        public void loadData_()
         {
             FileInfo fileInf = new FileInfo(filePath);
             if (fileInf.Exists)
@@ -168,15 +319,21 @@ namespace MonikaOnDesktop
                     this.NightStart = int.Parse(data[7]);
                     this.nightEnd = int.Parse(data[8]);
                     this.Scaler = int.Parse(data[9]);
-                    this.screenNum = Boolean.Parse(data[10]);
-                    if (data.Length == 12)
-                    {
-                        this.isMouse = true;
-                    }
+
+                    if (!String.IsNullOrEmpty(data[10]))
+                        this.screenNum = Boolean.Parse(data[10]);
                     else
-                    {
+                        this.screenNum = false;
+
+                    if (!String.IsNullOrEmpty(data[11]))
                         this.isMouse = Boolean.Parse(data[11]);
-                    }
+                    else
+                        this.isMouse = false;
+
+                    if (!String.IsNullOrEmpty(data[12]))
+                        this.secondTogether = int.Parse(data[12]);
+                    else
+                        this.secondTogether = 0;
 
                     string line = lines[1].Replace("\n\n", String.Empty).Replace("\r", String.Empty);
                     string[] giftsLoaded = line.Split("\n");

@@ -50,6 +50,84 @@
     <None Remove="assets\monika\b\body-leaning-def-0.png" />
     <None Remove="assets\monika\b\body-leaning-def-1.png" />
     <None Remove="assets\monika\b\body-leaning-def-head.png" />
+    <None Remove="assets\monika\c\blackdress\arms-crossed-10.png" />
+    <None Remove="assets\monika\c\blackdress\arms-crossed-5.png" />
+    <None Remove="assets\monika\c\blackdress\arms-leaning-def-left-def-10.png" />
+    <None Remove="assets\monika\c\blackdress\arms-leaning-def-right-def-10.png" />
+    <None Remove="assets\monika\c\blackdress\arms-leaning-def-right-def-5.png" />
+    <None Remove="assets\monika\c\blackdress\arms-left-down-0.png" />
+    <None Remove="assets\monika\c\blackdress\arms-left-rest-10.png" />
+    <None Remove="assets\monika\c\blackdress\arms-right-down-0.png" />
+    <None Remove="assets\monika\c\blackdress\arms-right-point-0.png" />
+    <None Remove="assets\monika\c\blackdress\arms-right-restpoint-10.png" />
+    <None Remove="assets\monika\c\blackdress\arms-steepling-10.png" />
+    <None Remove="assets\monika\c\blackdress\body-def-0.png" />
+    <None Remove="assets\monika\c\blackdress\body-def-1.png" />
+    <None Remove="assets\monika\c\blackdress\body-leaning-def-0.png" />
+    <None Remove="assets\monika\c\blackdress\body-leaning-def-1.png" />
+    <None Remove="assets\monika\c\def\arms-crossed-10.png" />
+    <None Remove="assets\monika\c\def\arms-crossed-5.png" />
+    <None Remove="assets\monika\c\def\arms-leaning-def-left-def-10.png" />
+    <None Remove="assets\monika\c\def\arms-leaning-def-right-def-10.png" />
+    <None Remove="assets\monika\c\def\arms-leaning-def-right-def-5.png" />
+    <None Remove="assets\monika\c\def\arms-left-down-0.png" />
+    <None Remove="assets\monika\c\def\arms-left-rest-10.png" />
+    <None Remove="assets\monika\c\def\arms-right-down-0.png" />
+    <None Remove="assets\monika\c\def\arms-right-point-0.png" />
+    <None Remove="assets\monika\c\def\arms-right-restpoint-10.png" />
+    <None Remove="assets\monika\c\def\arms-steepling-10.png" />
+    <None Remove="assets\monika\c\def\body-def-0.png" />
+    <None Remove="assets\monika\c\def\body-def-1.png" />
+    <None Remove="assets\monika\c\def\body-leaning-def-0.png" />
+    <None Remove="assets\monika\c\def\body-leaning-def-1.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-crossed-0-n.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-crossed-0.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-crossed-1-n.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-crossed-10.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-crossed-5.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-leaning-def-left-def-1-n.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-leaning-def-left-def-1.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-leaning-def-left-def-10.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-leaning-def-right-def-0-n.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-leaning-def-right-def-0.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-leaning-def-right-def-1-n.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-leaning-def-right-def-1.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-leaning-def-right-def-10.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-leaning-def-right-def-5.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-left-down-0-n.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-left-down-0.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-left-rest-1-n.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-left-rest-1.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-left-rest-10.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-right-down-0-n.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-right-down-0.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-right-point-0-n.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-right-point-0.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-right-restpoint-1-n.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-right-restpoint-1.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-right-restpoint-10.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-steepling-10-n.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\arms-steepling-10.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\body-def-0-n.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\body-def-0.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\body-def-1-n.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\body-def-1.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\body-leaning-def-0-n.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\body-leaning-def-0.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\body-leaning-def-1-n.png" />
+    <None Remove="assets\monika\c\orcaramelo_hatsune_miku\body-leaning-def-1.png" />
+    <None Remove="assets\monika\c\santa_lingerie\body-def-0.png" />
+    <None Remove="assets\monika\c\santa_lingerie\body-def-1.png" />
+    <None Remove="assets\monika\c\santa_lingerie\body-leaning-def-0.png" />
+    <None Remove="assets\monika\c\santa_lingerie\body-leaning-def-1.png" />
+    <None Remove="assets\monika\c\sundress_white\body-def-0.png" />
+    <None Remove="assets\monika\c\sundress_white\body-def-1.png" />
+    <None Remove="assets\monika\c\sundress_white\body-leaning-def-0.png" />
+    <None Remove="assets\monika\c\sundress_white\body-leaning-def-1.png" />
+    <None Remove="assets\monika\c\vday_lingerie\body-def-0.png" />
+    <None Remove="assets\monika\c\vday_lingerie\body-def-1.png" />
+    <None Remove="assets\monika\c\vday_lingerie\body-leaning-def-0.png" />
+    <None Remove="assets\monika\c\vday_lingerie\body-leaning-def-1.png" />
     <None Remove="assets\monika\face\brows\5f-n.png" />
     <None Remove="assets\monika\face\brows\5f.png" />
     <None Remove="assets\monika\face\brows\5k-n.png" />
@@ -190,6 +268,27 @@
     <None Remove="assets\monika\fe\face-leaning-def-eyes-wide.png" />
     <None Remove="assets\monika\fe\face-leaning-def-eyes-winkleft.png" />
     <None Remove="assets\monika\fe\face-leaning-def-eyes-winkright.png" />
+    <None Remove="assets\monika\fm\face-leaning-def-mouth-angry.png" />
+    <None Remove="assets\monika\fm\face-leaning-def-mouth-big.png" />
+    <None Remove="assets\monika\fm\face-leaning-def-mouth-disgust.png" />
+    <None Remove="assets\monika\fm\face-leaning-def-mouth-gasp.png" />
+    <None Remove="assets\monika\fm\face-leaning-def-mouth-pout.png" />
+    <None Remove="assets\monika\fm\face-leaning-def-mouth-small.png" />
+    <None Remove="assets\monika\fm\face-leaning-def-mouth-smile.png" />
+    <None Remove="assets\monika\fm\face-leaning-def-mouth-smirk.png" />
+    <None Remove="assets\monika\fm\face-leaning-def-mouth-smug.png" />
+    <None Remove="assets\monika\fm\face-leaning-def-mouth-triangle.png" />
+    <None Remove="assets\monika\fm\face-leaning-def-mouth-wide.png" />
+    <None Remove="assets\monika\fm\face-mouth-angry.png" />
+    <None Remove="assets\monika\fm\face-mouth-big.png" />
+    <None Remove="assets\monika\fm\face-mouth-gasp.png" />
+    <None Remove="assets\monika\fm\face-mouth-pout.png" />
+    <None Remove="assets\monika\fm\face-mouth-small.png" />
+    <None Remove="assets\monika\fm\face-mouth-smile.png" />
+    <None Remove="assets\monika\fm\face-mouth-smirk.png" />
+    <None Remove="assets\monika\fm\face-mouth-smug.png" />
+    <None Remove="assets\monika\fm\face-mouth-triangle.png" />
+    <None Remove="assets\monika\fm\face-mouth-wide.png" />
     <None Remove="assets\monika\hair\hair-def-back-n.png" />
     <None Remove="assets\monika\hair\hair-def-back.png" />
     <None Remove="assets\monika\hair\hair-def-front-n.png" />
@@ -230,6 +329,7 @@
     <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.1.0" />
     <PackageReference Include="Lyre" Version="1.0.10" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.7" />
+    <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.2" />
     <PackageReference Include="System.Management" Version="5.0.0" />
     <PackageReference Include="uHttpSharp" Version="0.1.6.22" />
   </ItemGroup>
@@ -341,6 +441,177 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="assets\monika\b\body-leaning-def-head.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\blackdress\arms-crossed-10.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\blackdress\arms-crossed-5.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\blackdress\arms-leaning-def-left-def-10.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\blackdress\arms-leaning-def-right-def-10.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\blackdress\arms-leaning-def-right-def-5.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\blackdress\arms-left-down-0.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\blackdress\arms-left-rest-10.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\blackdress\arms-right-down-0.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\blackdress\arms-right-point-0.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\blackdress\arms-right-restpoint-10.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\blackdress\arms-steepling-10.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\blackdress\body-def-0.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\blackdress\body-def-1.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\blackdress\body-leaning-def-0.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\blackdress\body-leaning-def-1.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\def\arms-crossed-10.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\def\arms-crossed-5.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\def\arms-leaning-def-left-def-10.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\def\arms-leaning-def-right-def-10.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\def\arms-leaning-def-right-def-5.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\def\arms-left-down-0.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\def\arms-left-rest-10.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\def\arms-right-down-0.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\def\arms-right-point-0.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\def\arms-right-restpoint-10.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\def\arms-steepling-10.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\def\body-def-0.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\def\body-def-1.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\def\body-leaning-def-0.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\def\body-leaning-def-1.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\orcaramelo_hatsune_miku\arms-crossed-10.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\orcaramelo_hatsune_miku\arms-crossed-5.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\orcaramelo_hatsune_miku\arms-leaning-def-left-def-10.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\orcaramelo_hatsune_miku\arms-leaning-def-right-def-10.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\orcaramelo_hatsune_miku\arms-leaning-def-right-def-5.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\orcaramelo_hatsune_miku\arms-left-down-0.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\orcaramelo_hatsune_miku\arms-left-rest-10.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\orcaramelo_hatsune_miku\arms-right-down-0.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\orcaramelo_hatsune_miku\arms-right-point-0.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\orcaramelo_hatsune_miku\arms-right-restpoint-10.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\orcaramelo_hatsune_miku\arms-steepling-10.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\orcaramelo_hatsune_miku\body-def-0.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\orcaramelo_hatsune_miku\body-def-1.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\orcaramelo_hatsune_miku\body-leaning-def-0.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\orcaramelo_hatsune_miku\body-leaning-def-1.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\santa_lingerie\body-def-0.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\santa_lingerie\body-def-1.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\santa_lingerie\body-leaning-def-0.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\santa_lingerie\body-leaning-def-1.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\sundress_white\body-def-0.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\sundress_white\body-def-1.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\sundress_white\body-leaning-def-0.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\sundress_white\body-leaning-def-1.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\vday_lingerie\body-def-0.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\vday_lingerie\body-def-1.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\vday_lingerie\body-leaning-def-0.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\c\vday_lingerie\body-leaning-def-1.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="assets\monika\face\brows\5f-n.png">
@@ -761,6 +1032,69 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="assets\monika\fe\face-leaning-def-eyes-winkright.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\fm\face-leaning-def-mouth-angry.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\fm\face-leaning-def-mouth-big.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\fm\face-leaning-def-mouth-disgust.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\fm\face-leaning-def-mouth-gasp.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\fm\face-leaning-def-mouth-pout.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\fm\face-leaning-def-mouth-small.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\fm\face-leaning-def-mouth-smile.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\fm\face-leaning-def-mouth-smirk.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\fm\face-leaning-def-mouth-smug.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\fm\face-leaning-def-mouth-triangle.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\fm\face-leaning-def-mouth-wide.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\fm\face-mouth-angry.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\fm\face-mouth-big.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\fm\face-mouth-gasp.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\fm\face-mouth-pout.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\fm\face-mouth-small.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\fm\face-mouth-smile.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\fm\face-mouth-smirk.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\fm\face-mouth-smug.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\fm\face-mouth-triangle.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\fm\face-mouth-wide.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="assets\monika\hair\hair-def-back-n.png">

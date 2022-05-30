@@ -32,6 +32,14 @@ using System.Numerics;
 using System.Xml.Linq;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using Microsoft.Toolkit.Uwp.Notifications;
+using System.IO.Compression;
+using Windows.UI.Xaml.Shapes;
+using System.Windows.Threading;
+using System.Drawing;
+using Windows.UI.Xaml.Controls;
+using Newtonsoft.Json.Linq;
+using System.Windows.Media.Media3D;
 
 namespace MonikaOnDesktop
 {
@@ -82,9 +90,12 @@ namespace MonikaOnDesktop
         private const string YOUTUBE_REGEX = ".*\\.?youtube\\..{2,3}.*y\\=(.*?)($|&)";      // Шаблон запроса ютуб (youtube.com/results?search_query=hi)
 
         public string lastProcess;                  // Имя прошлого процесса
+        public string normalPose = "1esc";
 
         CharacterModel Monika = new CharacterModel(AppDomain.CurrentDomain.BaseDirectory + "/characters/monika.chr", AppDomain.CurrentDomain.BaseDirectory + "/characters/"); // Персонаж Моники
         private Settings settingsWindow;            // Окно настроек
+
+        private NotifyIcon NI = new NotifyIcon();
         #endregion
         public MainWindow()     // Код главного окна
         {
@@ -159,7 +170,7 @@ namespace MonikaOnDesktop
             setLanguage(Language);                      // Устанавливаем язык
 
             //playerName = "Denis Solicen";             // Режим Солицена
-            this.setFace("1esa");                       // Ставим спокойный вид
+            this.setFace(normalPose);                       // Ставим спокойный вид
 
             LangBox.Visibility = Visibility.Hidden;
             NameBox.Visibility = Visibility.Hidden;
@@ -198,7 +209,63 @@ namespace MonikaOnDesktop
             giftWatcher.Created += GiftWatcher_Created;
             giftWatcher.EnableRaisingEvents = true;
             loadGifts();
+            /*
+            FileSystemWatcher acsWatcher = new FileSystemWatcher();
+            acsWatcher.Path = Monika.giftsPath;
+            acsWatcher.NotifyFilter = NotifyFilters.FileName;
+            acsWatcher.Deleted += AcsWatcher_Deleted;
+            acsWatcher.Created += AcsWatcher_Created;
+            acsWatcher.EnableRaisingEvents = true;*/
         }
+        /*
+        private void AcsWatcher_Deleted(object sender, FileSystemEventArgs e)
+        {
+            string file = e.FullPath;
+            // Assuming you have one file that you care about, pass it off to whatever
+            // handling code you have defined.
+            Debug.WriteLine("Удалили файл:" + file);
+            FileInfo info = new FileInfo(file);
+                if (info.Extension == ".acs")
+                {
+                    string acsName = info.Name.ToLower().Replace(".acs", String.Empty);
+                    string path = AppDomain.CurrentDomain.BaseDirectory + "/acs/" + acsName; // or whatever 
+                    Debug.WriteLine(path);
+                    if (Directory.Exists(path))
+                    {
+                        Debug.WriteLine(path);
+                        DirectoryInfo di = new DirectoryInfo(path);
+                    try { di.Delete(true); } catch { }
+                    }
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        System.Windows.Controls.Image img = (System.Windows.Controls.Image)acs.FindName(acsName);
+
+                        if (img != null)
+                        {
+                            Debug.WriteLine("Имя картинки: " + img.Name);
+                            UnregisterName(img.Name);
+                            acs.Children.Remove(img);
+                        }
+                    });
+                }
+        }
+        private void AcsWatcher_Created(object sender, FileSystemEventArgs e)
+        {
+            string file = e.FullPath;
+            // Assuming you have one file that you care about, pass it off to whatever
+            // handling code you have defined.
+            Debug.WriteLine("Перекинули файл:" + file);
+            FileInfo info = new FileInfo(file);
+            if (info.Exists)
+            {
+                if (info.Extension == ".acs")
+                {
+                    string acsName = info.Name.ToLower().Replace(".acs", String.Empty);
+                    UnpackAcsesoares(acsName);
+                }
+            }
+        }
+        */
         public void loadGifts()
         {
             foreach (string i in Monika.gifts)
@@ -244,12 +311,12 @@ namespace MonikaOnDesktop
                         Language = Lang.Parent.ToString();          // Ставим имя старого языка
                         setLanguage(Language);                      // Реально ставим язык
                         //GoToSecondaryMonitor();
-                        setFace("1esa");                            // Ставим спокойный вид
+                        setFace(normalPose);                            // Ставим спокойный вид
                     }
                     else          //-------- Иначе (Если была нажата кнопка ПРИНЯТЬ)
                     {
 
-                        setFace("1esa");                            // Ставим спокойный вид
+                        setFace(normalPose);                            // Ставим спокойный вид
                         SetAutorunValue(MonikaSettings.Default.AutoStart);  // Ставим значение автозапуска
                         Lang = MonikaSettings.Default.Language;             // Ставим язык
                         Language = Lang.Parent.ToString();                  // Имя языка
@@ -361,8 +428,13 @@ namespace MonikaOnDesktop
             this.applicationRunning = false;
         }       // Когда закрыли программу
         public void Window_Loaded(object sender, RoutedEventArgs e)     // Когда программа проснётся
-        {
-
+        {/*
+            new ToastContentBuilder()
+       .AddArgument("action", "viewConversation")
+       .AddArgument("conversationId", 9813)
+       .AddText("Смотри что я умею!")
+       .AddText("Я научилась отправлять уведомления =)")
+       .Show();*/
             var wpfDpi = PresentationSource.FromVisual(this)?.CompositionTarget?.TransformToDevice.M11;
             this.dpiScale = 1f / (float)wpfDpi.GetValueOrDefault(1);
 
@@ -470,8 +542,8 @@ namespace MonikaOnDesktop
 
                 //_ = checkUpdatesAsync();      // Раскоментировать для включения проверки обновлдений
                 // Blinking and Behaviour logic
-                var eyesOpen = "1esa";
-                var eyesClosed = "1dsa";
+                var eyesOpen = normalPose;
+                var eyesClosed = "1dsc";
                 var random = new Random();
                 this.Dispatcher.Invoke(() =>
                 {
@@ -556,7 +628,8 @@ namespace MonikaOnDesktop
                         }
                     });
                 });
-                Dispatcher.Invoke(() => {
+                Dispatcher.Invoke(() =>
+                {
                     Task.Run(async () =>
                     {
                         var prev = new System.Drawing.Point();
@@ -576,7 +649,7 @@ namespace MonikaOnDesktop
 
                             if (!point.Equals(prev))
                             {
-                               
+
                                 prev = point;
 
                                 var opacity = 1.0;
@@ -638,10 +711,44 @@ namespace MonikaOnDesktop
                     });
                 });
                 await checkUpdatesAsync();
-                
+
             };
             this.BeginAnimation(OpacityProperty, _start);
-            
+        }
+
+        ///<summary>        Image color filter, remove the specified RBG value
+        ///</summary>
+        ///<param name="bitmap">Source for bitmap</param>
+        ///<param name="R">Red filter</param>
+        ///<param name="G">Green filter</param>
+        ///<param name="B">Blue filter</param>
+        ///<param name="Alpha">Alpha</param>
+        ///<returns>Filtered Bitmap</returns>
+        public BitmapSource BitmapFilter(Int32 R, Int32 G, Int32 B, Uri url, Int32 Alpha = 0xff)
+        {
+            BitmapImage bitmap = new BitmapImage();
+            // BitmapImage.UriSource must be in a BeginInit/EndInit block.
+            bitmap.BeginInit();
+            bitmap.UriSource = url;
+            bitmap.EndInit();
+            FormatConvertedBitmap fb = new FormatConvertedBitmap();//Picture pixel format conversion class
+            fb.BeginInit();
+            fb.Source = bitmap;
+            fb.EndInit();
+            var stride = (bitmap.PixelWidth * bitmap.Format.BitsPerPixel + 7) / 8;
+            byte[] buf = new byte[fb.PixelHeight * stride];
+            fb.CopyPixels(Int32Rect.Empty, buf, stride, 0);
+            for (long ic = 0; ic < buf.LongLength; ic += 4)
+            {
+                if (buf[ic] == R && buf[ic + 1] == G && buf[ic + 2] == B && buf[ic + 3] == Alpha)
+                {
+                    buf[ic] = 0x00;
+                    buf[ic + 1] = 0x00;
+                    buf[ic + 2] = 0x00;
+                    buf[ic + 3] = 0x00;//transparency
+                }
+            }
+            return BitmapSource.Create(fb.PixelWidth, fb.PixelHeight, fb.DpiX, fb.DpiY, fb.Format, null, buf, stride);
         }
         public async Task checkUpdatesAsync()
         {
@@ -696,6 +803,13 @@ namespace MonikaOnDesktop
                     readLongXml(giftName, giftsDialogPath, 4);
                     Debug.WriteLine("Подарен подарок:" + giftName);
                 }
+                if (info.Extension == ".costume")
+                {
+                    string costumeNam = info.Name.ToLower().Replace(".costume", String.Empty);
+                    UnpackCostume(costumeNam);
+                    info.Delete();
+                    Monika.saveData();
+                }
             }
         }
         #region
@@ -705,7 +819,6 @@ namespace MonikaOnDesktop
             LangBox.Visibility = Visibility.Visible;
             isSpeaking = true;
         }
-
         private void nameRus_Click(object sender, RoutedEventArgs e)
         {
             Lang = new CultureInfo("ru-RU");
@@ -714,7 +827,6 @@ namespace MonikaOnDesktop
             LangBox.Visibility = Visibility.Hidden;
             NameBox.Visibility = Visibility.Visible;
         }
-
         private void nameEng_Click(object sender, RoutedEventArgs e)
         {
             Lang = new CultureInfo("en-US");
@@ -773,7 +885,7 @@ namespace MonikaOnDesktop
             this.Dispatcher.Invoke(() =>
             {
                 textWindow.Visibility = Visibility.Hidden;
-                setFace("1esa");
+                setFace(normalPose);
             });
             isSpeaking = false;
             //Debug.WriteLine(isSpeaking);
@@ -818,8 +930,8 @@ namespace MonikaOnDesktop
                     await Task.Delay(delay1);
                     this.Dispatcher.Invoke(() =>
                     {
-                        //await Task.Delay(delay1);
-                        textBlock.Text = "";
+                            //await Task.Delay(delay1);
+                            textBlock.Text = "";
                     });
 
                 }
@@ -844,261 +956,666 @@ namespace MonikaOnDesktop
             string eye = faceName[1].ToString();
             string eyebrow = faceName[2].ToString();
             string mouth = faceName[3].ToString();
-            
-            //Debug.Write("Body: " + body + ", Eyes: " + eye + ", Eyesbrow: " + eyebrow + ", Mouth: " + mouth + "\n");
-            if (IsNight)
+
+            RedrawCostume(body, Monika.costumeName);
+            this.Dispatcher.Invoke(() =>
             {
+                switch (body)
+                {
+                    case 1:
+                        this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
+                        this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
+                        this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
+                        this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[10] + ".png"));
+                        this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                        this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                        break;
+                    case 2:
+                        this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
+                        this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
+                        this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
+                        this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[0] + ".png"));
+                        this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[1] + ".png"));
+                        this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                        break;
+                    case 3:
+                        this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
+                        this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
+                        this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
+                        this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"));
+                        this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[6] + ".png"));
+                        this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                        break;
+                    case 4:
+                        this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
+                        this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
+                        this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
+                        this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"));
+                        this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"));
+                        this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                        break;
+                    case 5:
+                        this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[14] + ".png"));
+                        this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[15] + ".png"));
+                        this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[16] + ".png"));
+                        this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[2] + ".png"));
+                        this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[3] + ".png"));
+                        this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[4] + ".png"));
+                        break;
+                    case 6:
+                        this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
+                        this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
+                        this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
+                        this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[7] + ".png"));
+                        this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"));
+                        this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                        break;
+                    case 7:
+                        this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
+                        this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
+                        this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
+                        this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[10] + ".png"));
+                        this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                        this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                        break;
+                    default:
+                        this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
+                        this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
+                        this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
+                        this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"));
+                        this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"));
+                        this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                        break;
+                }
+                if (body == 5) { Monika.leaningWord = "leaning-def-"; } else { Monika.leaningWord = ""; }
+                switch (eye)
+                {
+                    case "e":
+                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[4] + ".png"));
+                        break;
+                    case "w":
+                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[11] + ".png"));
+                        break;
+                    case "s":
+                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[10] + ".png"));
+                        break;
+                    case "t":
+                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[6] + ".png"));
+                        break;
+                    case "c":
+                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[2] + ".png"));
+                        break;
+                    case "r":
+                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[5] + ".png"));
+                        break;
+                    case "l":
+                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[3] + ".png"));
+                        break;
+                    case "h":
+                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[0] + ".png"));
+                        break;
+                    case "d":
+                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[1] + ".png"));
+                        break;
+                    case "k":
+                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[12] + ".png"));
+                        break;
+                    case "n":
+                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[13] + ".png"));
+                        break;
+                    case "f":
+                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[9] + ".png"));
+                        break;
+                    case "m":
+                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[7] + ".png"));
+                        break;
+                    case "g":
+                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[8] + ".png"));
+                        break;
+                    default:
+                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[4] + ".png"));
+                        break;
+                }
+                switch (eyebrow)
+                {
+                    case "u":
+                        this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"));
+                        break;
+                    case "k":
+                        this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[1] + ".png"));
+                        break;
+                    case "s":
+                        this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[2] + ".png"));
+                        break;
+                    case "t":
+                        this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[3] + ".png"));
+                        break;
+                    case "f":
+                        this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[0] + ".png"));
+                        break;
+                    default:
+                        this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"));
+                        break;
+                }
+                switch (mouth)
+                {
+                    case "a":
+                        this.Mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[4] + ".png"));
+                        break;
+                    case "b":
+                        this.Mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[0] + ".png"));
+                        break;
+                    case "c":
+                        this.Mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[5] + ".png"));
+                        break;
+                    case "d":
+                        this.Mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[3] + ".png"));
+                        break;
+                    case "o":
+                        this.Mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[1] + ".png"));
+                        break;
+                    case "u":
+                        this.Mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[6] + ".png"));
+                        break;
+                    case "w":
+                        this.Mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[8] + ".png"));
+                        break;
+                    case "p":
+                        this.Mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[2] + ".png"));
+                        break;
+                    case "t":
+                        this.Mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[7] + ".png"));
+                        break;
+                    default:
+                        this.Mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[4] + ".png"));
+                        break;
+                }
+                if (body == 5) { Monika.leaningWord = "leaning"; } else { Monika.leaningWord = ""; }
+                string hairPath = "hair-" + Monika.leaningWord + "" + Monika.hairType;
+                this.Hair.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/h/" + hairPath + "-front.png"));
+                this.HairBack.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/h/" + hairPath + "-back.png"));
+            });
+        }
+        public void RedrawCostume(int body, string costume)
+        {
+            string pathCost = AppDomain.CurrentDomain.BaseDirectory + "/costumes/";
+            //string pathAcs = AppDomain.CurrentDomain.BaseDirectory + "/acs/";
+
+            try
+            {/*
+                DirectoryInfo acsDir = new DirectoryInfo(pathAcs);
+                if (acsDir.Exists)
+                {
+                    foreach (DirectoryInfo acsDirs in acsDir.GetDirectories())
+                    {
+                        System.Windows.Controls.Image img = new System.Windows.Controls.Image
+                        {
+                            Source = new BitmapImage(new Uri(acsDirs.GetFiles()[0].FullName)),
+                            Name = acsDirs.Name
+                        };
+                        RegisterName(acsDirs.Name, img);
+                        this.acs.Children.Add(img);
+                    }
+                    for(int i = 0;i < acs.Children.Count; i++)
+                    {
+                        System.Windows.Controls.Image img = this.acs.Children[i] as System.Windows.Controls.Image;
+                        this.Dispatcher.Invoke(() =>
+                        {
+                            if (body != 5)
+                            {
+                                img.Source = new BitmapImage(new Uri(acsDir.GetDirectories()[i].GetFiles()[0].FullName));
+                            }
+                            else
+                            {
+                                img.Source = new BitmapImage(new Uri(acsDir.GetDirectories()[i].GetFiles()[1].FullName));
+                            }
+                        });
+                    }
+                }*/
                 this.Dispatcher.Invoke(() =>
                 {
-                    if (body == 5)
-                    {
-                        this.main.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/body/body-" + body + "-n.png"));
-                        this.hairBack.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/hair/hair-leaning-def-def-back-n.png"));
-                        this.hairFront.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/hair/hair-leaning-def-def-front-n.png"));
-                        this.ribbon.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/ribbon/acs-ribbon_def-5-n.png"));
-                        this.arms.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/body/" + body + "-n.png"));
-                        this.eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/eyes/5" + eye + "-n.png"));
-                        this.brow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/brows/5" + eyebrow + "-n.png"));
-                        this.mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/mouth/5" + mouth + "-n.png"));
-                        this.nose.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/face-leaning-def-nose-def-n.png"));
-                    }
-                    else if (body == 1)
-                    {
-                        this.main.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/body/body-" + body + "-n.png"));
-                        this.hairBack.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/hair/hair-def-back-n.png"));
-                        this.hairFront.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/hair/hair-def-front-n.png"));
-                        this.ribbon.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/ribbon/acs-ribbon_def-0-n.png"));
-                        this.arms.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/body/" + body + "-n.png"));
-                        this.eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/eyes/" + eye + "-n.png"));
-                        this.brow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/brows/" + eyebrow + "-n.png"));
-                        this.mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/mouth/" + mouth + "-n.png"));
-                        this.nose.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/face-nose-def-n.png"));
-                    }
-                    else
-                    {
-                        this.main.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/body/body-1-n.png"));
-                        this.hairBack.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/hair/hair-def-back-n.png"));
-                        this.hairFront.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/hair/hair-def-front-n.png"));
-                        this.ribbon.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/ribbon/acs-ribbon_def-0-n.png"));
-                        this.arms.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/body/" + body + "-n.png"));
-                        this.eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/eyes/" + eye + "-n.png"));
-                        this.brow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/brows/" + eyebrow + "-n.png"));
-                        this.mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/mouth/" + mouth + "-n.png"));
-                        this.nose.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/face-nose-def-n.png"));
-                    }
-                });
-            }
-            else
-            {
-                this.Dispatcher.Invoke(() =>
-                {
-                    #region beta
-                    /*
                     switch (body)
                     {
                         case 1:
-                            this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
-                            this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
-                            this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
-                            this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[10] + ".png"));
-                            this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                            this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.UniformBody.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
+                            this.UniformBody1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
+                            this.UniformHand.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[10] + ".png"));
+                            this.UniformHand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.UniformHand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
                             break;
                         case 2:
-                            this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
-                            this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
-                            this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
-                            this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[0] + ".png"));
-                            this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[1] + ".png"));
-                            this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.UniformBody.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
+                            this.UniformBody1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
+                            this.UniformHand.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[0] + ".png"));
+                            this.UniformHand1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[1] + ".png"));
+                            this.UniformHand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
                             break;
                         case 3:
-                            this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
-                            this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
-                            this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
-                            this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"));
-                            this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[6] + ".png"));
-                            this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.UniformBody.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
+                            this.UniformBody1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
+                            this.UniformHand.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[8] + ".png"));
+                            this.UniformHand1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[6] + ".png"));
+                            this.UniformHand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
                             break;
                         case 4:
-                            this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
-                            this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
-                            this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
-                            this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"));
-                            this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"));
-                            this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.UniformBody.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
+                            this.UniformBody1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
+                            this.UniformHand.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[8] + ".png"));
+                            this.UniformHand1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[5] + ".png"));
+                            this.UniformHand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
                             break;
                         case 5:
-                            this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[14] + ".png"));
-                            this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[15] + ".png"));
-                            this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[16] + ".png"));
-                            this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[2] + ".png"));
-                            this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[3] + ".png"));
-                            this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[4] + ".png"));
+                            this.UniformBody.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[14] + ".png"));
+                            this.UniformBody1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[15] + ".png"));
+                            this.UniformHand.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[2] + ".png"));
+                            this.UniformHand1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[3] + ".png"));
+                            this.UniformHand2.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[4] + ".png"));
                             break;
                         case 6:
-                            this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
-                            this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
-                            this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
-                            this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[7] + ".png"));
-                            this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"));
-                            this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.UniformBody.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
+                            this.UniformBody1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
+                            this.UniformHand.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[7] + ".png"));
+                            this.UniformHand1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[5] + ".png"));
+                            this.UniformHand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
                             break;
                         case 7:
-                            this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
-                            this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
-                            this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
-                            this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[10] + ".png"));
-                            this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                            this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.UniformBody.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
+                            this.UniformBody1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
+                            this.UniformHand.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[10] + ".png"));
+                            this.UniformHand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.UniformHand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
                             break;
                         default:
-                            this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
-                            this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
-                            this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
-                            this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"));
-                            this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"));
-                            this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.UniformBody.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
+                            this.UniformBody1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
+                            this.UniformHand.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[5] + ".png"));
+                            this.UniformHand1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[8] + ".png"));
+                            this.UniformHand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
                             break;
-                    }
-                    if (body == 5) { Monika.leaningWord = "leaning-def-"; } else { Monika.leaningWord = ""; }
-                    switch (eye)
-                    {
-                        case "e":
-                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[4] + ".png"));
-                            break;
-                        case "w":
-                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[11] + ".png"));
-                            break;
-                        case "s":
-                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[10] + ".png"));
-                            break;
-                        case "t":
-                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[6] + ".png"));
-                            break;
-                        case "c":
-                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[2] + ".png"));
-                            break;
-                        case "r":
-                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[5] + ".png"));
-                            break;
-                        case "l":
-                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[3] + ".png"));
-                            break;
-                        case "h":
-                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[0] + ".png"));
-                            break;
-                        case "d":
-                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[1] + ".png"));
-                            break;
-                        case "k":
-                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[12] + ".png"));
-                            break;
-                        case "n":
-                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[13] + ".png"));
-                            break;
-                        case "f":
-                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[9] + ".png"));
-                            break;
-                        case "m":
-                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[7] + ".png"));
-                            break;
-                        case "g":
-                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[8] + ".png"));
-                            break;
-                        default:
-                            this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[4] + ".png"));
-                            break;
-                    }
-                    switch (eyebrow)
-                    {
-                        case "u":
-                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"));
-                            break;
-                        case "k":
-                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[1] + ".png"));
-                            break;
-                        case "s":
-                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[2] + ".png"));
-                            break;
-                        case "t":
-                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[3] + ".png"));
-                            break;
-                        case "f":
-                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[0] + ".png"));
-                            break;
-                        default:
-                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"));
-                            break;
-                    }
-                    switch (mouth)
-                    {
-                        case "u":
-                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"));
-                            break;
-                        case "k":
-                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[1] + ".png"));
-                            break;
-                        case "s":
-                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[2] + ".png"));
-                            break;
-                        case "t":
-                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[3] + ".png"));
-                            break;
-                        case "f":
-                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[0] + ".png"));
-                            break;
-                        default:
-                            this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"));
-                            break;
-                    }
-                    if (body == 5) { Monika.leaningWord = "leaning"; } else { Monika.leaningWord = ""; }
-                    string hairPath = "hair-" + Monika.leaningWord + "" + Monika.hairType;
-                    this.Hair.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/h/" + hairPath + "-front.png"));
-                    this.HairBack.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/h/" + hairPath + "-back.png"));
-                    */
-                    #endregion
-                    if (body == 5)
-                    {
-                        this.main.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/body/body-" + body + ".png"));
-                        this.hairBack.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/hair/hair-leaning-def-def-back.png"));
-                        this.hairFront.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/hair/hair-leaning-def-def-front.png"));
-                        this.ribbon.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/ribbon/acs-ribbon_def-5.png"));
-                        this.arms.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/body/" + body + ".png"));
-                        this.eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/eyes/5" + eye + ".png"));
-                        this.brow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/brows/5" + eyebrow + ".png"));
-                        this.mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/mouth/5" + mouth + ".png"));
-                        this.nose.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/face-leaning-def-nose-def.png"));
-
-                    }
-                    else if (body == 1)
-                    {
-                        this.main.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/body/body-" + body + ".png"));
-                        this.hairBack.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/hair/hair-def-back.png"));
-                        this.hairFront.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/hair/hair-def-front.png"));
-                        this.ribbon.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/ribbon/acs-ribbon_def-0.png"));
-                        this.arms.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/body/" + body + ".png"));
-                        this.eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/eyes/" + eye + ".png"));
-                        this.brow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/brows/" + eyebrow + ".png"));
-                        this.mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/mouth/" + mouth + ".png"));
-                        this.nose.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/face-nose-def.png"));
-                    }
-                    else
-                    {
-                        this.main.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/body/body-1.png"));
-                        this.hairBack.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/hair/hair-def-back.png"));
-                        this.hairFront.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/hair/hair-def-front.png"));
-                        this.ribbon.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/ribbon/acs-ribbon_def-0.png"));
-                        this.arms.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/body/" + body + ".png"));
-                        this.eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/eyes/" + eye + ".png"));
-                        this.brow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/brows/" + eyebrow + ".png"));
-                        this.mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/mouth/" + mouth + ".png"));
-                        this.nose.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/face/face-nose-def.png"));
                     }
                 });
             }
-        }
+            catch
+            {
 
+            };
+        }
+        public void _setFace(string faceName)
+        {
+            int body = int.Parse(faceName[0].ToString());
+            string eye = faceName[1].ToString();
+            string eyebrow = faceName[2].ToString();
+            string mouth = faceName[3].ToString();
+
+            RedrawCostume(body, Monika.costumeName);
+            this.Dispatcher.Invoke(() =>
+            {
+                switch (body)
+                {
+                    case 1:
+                        this.Body.Source = BitmapFilter(100, 100, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
+                        this.Body1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
+                        this.Head.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
+                        this.Hand.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[10] + ".png"));
+                        this.Hand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                        this.Hand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                        break;
+                    case 2:
+                        this.Body.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
+                        this.Body1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
+                        this.Head.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
+                        this.Hand.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[0] + ".png"));
+                        this.Hand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[1] + ".png"));
+                        this.Hand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                        break;
+                    case 3:
+                        this.Body.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
+                        this.Body1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
+                        this.Head.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
+                        this.Hand.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"));
+                        this.Hand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[6] + ".png"));
+                        this.Hand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                        break;
+                    case 4:
+                        this.Body.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
+                        this.Body1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
+                        this.Head.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
+                        this.Hand.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"));
+                        this.Hand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"));
+                        this.Hand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                        break;
+                    case 5:
+                        this.Body.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[14] + ".png"));
+                        this.Body1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[15] + ".png"));
+                        this.Head.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[16] + ".png"));
+                        this.Hand.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[2] + ".png"));
+                        this.Hand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[3] + ".png"));
+                        this.Hand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[4] + ".png"));
+                        break;
+                    case 6:
+                        this.Body.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
+                        this.Body1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
+                        this.Head.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
+                        this.Hand.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[7] + ".png"));
+                        this.Hand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"));
+                        this.Hand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                        break;
+                    case 7:
+                        this.Body.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
+                        this.Body1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
+                        this.Head.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
+                        this.Hand.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[10] + ".png"));
+                        this.Hand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                        this.Hand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                        break;
+                    default:
+                        this.Body.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
+                        this.Body1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
+                        this.Head.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
+                        this.Hand.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"));
+                        this.Hand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"));
+                        this.Hand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                        break;
+                }
+                if (body == 5) { Monika.leaningWord = "leaning-def-"; } else { Monika.leaningWord = ""; }
+                switch (eye)
+                {
+                    case "e":
+                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[4] + ".png"));
+                        break;
+                    case "w":
+                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[11] + ".png"));
+                        break;
+                    case "s":
+                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[10] + ".png"));
+                        break;
+                    case "t":
+                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[6] + ".png"));
+                        break;
+                    case "c":
+                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[2] + ".png"));
+                        break;
+                    case "r":
+                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[5] + ".png"));
+                        break;
+                    case "l":
+                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[3] + ".png"));
+                        break;
+                    case "h":
+                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[0] + ".png"));
+                        break;
+                    case "d":
+                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[1] + ".png"));
+                        break;
+                    case "k":
+                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[12] + ".png"));
+                        break;
+                    case "n":
+                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[13] + ".png"));
+                        break;
+                    case "f":
+                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[9] + ".png"));
+                        break;
+                    case "m":
+                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[7] + ".png"));
+                        break;
+                    case "g":
+                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[8] + ".png"));
+                        break;
+                    default:
+                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[4] + ".png"));
+                        break;
+                }
+                switch (eyebrow)
+                {
+                    case "u":
+                        this.EyeBrow.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"));
+                        break;
+                    case "k":
+                        this.EyeBrow.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[1] + ".png"));
+                        break;
+                    case "s":
+                        this.EyeBrow.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[2] + ".png"));
+                        break;
+                    case "t":
+                        this.EyeBrow.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[3] + ".png"));
+                        break;
+                    case "f":
+                        this.EyeBrow.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[0] + ".png"));
+                        break;
+                    default:
+                        this.EyeBrow.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"));
+                        break;
+                }
+                switch (mouth)
+                {
+                    case "a":
+                        this.Mouth.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[4] + ".png"));
+                        break;
+                    case "b":
+                        this.Mouth.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[0] + ".png"));
+                        break;
+                    case "c":
+                        this.Mouth.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[5] + ".png"));
+                        break;
+                    case "d":
+                        this.Mouth.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[3] + ".png"));
+                        break;
+                    case "o":
+                        this.Mouth.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[1] + ".png"));
+                        break;
+                    case "u":
+                        this.Mouth.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[6] + ".png"));
+                        break;
+                    case "w":
+                        this.Mouth.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[8] + ".png"));
+                        break;
+                    case "p":
+                        this.Mouth.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[2] + ".png"));
+                        break;
+                    case "t":
+                        this.Mouth.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[7] + ".png"));
+                        break;
+                    default:
+                        this.Mouth.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[4] + ".png"));
+                        break;
+                }
+                if (body == 5) { Monika.leaningWord = "leaning"; } else { Monika.leaningWord = ""; }
+                string hairPath = "hair-" + Monika.leaningWord + "" + Monika.hairType;
+                this.Hair.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/h/" + hairPath + "-front.png"));
+                this.HairBack.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/h/" + hairPath + "-back.png"));
+            });
+        }
+        public void _RedrawCostume(int body, string costume)
+        {
+            string pathCost = AppDomain.CurrentDomain.BaseDirectory + "/costumes/";
+            //string pathAcs = AppDomain.CurrentDomain.BaseDirectory + "/acs/";
+
+            try
+            {/*
+                DirectoryInfo acsDir = new DirectoryInfo(pathAcs);
+                if (acsDir.Exists)
+                {
+                    foreach (DirectoryInfo acsDirs in acsDir.GetDirectories())
+                    {
+                        System.Windows.Controls.Image img = new System.Windows.Controls.Image
+                        {
+                            Source = BitmapFilter(0xff,0xff,0xff, new Uri(acsDirs.GetFiles()[0].FullName)),
+                            Name = acsDirs.Name
+                        };
+                        RegisterName(acsDirs.Name, img);
+                        this.acs.Children.Add(img);
+                    }
+                    for(int i = 0;i < acs.Children.Count; i++)
+                    {
+                        System.Windows.Controls.Image img = this.acs.Children[i] as System.Windows.Controls.Image;
+                        this.Dispatcher.Invoke(() =>
+                        {
+                            if (body != 5)
+                            {
+                                img.Source = BitmapFilter(0xff,0xff,0xff, new Uri(acsDir.GetDirectories()[i].GetFiles()[0].FullName));
+                            }
+                            else
+                            {
+                                img.Source = BitmapFilter(0xff,0xff,0xff, new Uri(acsDir.GetDirectories()[i].GetFiles()[1].FullName));
+                            }
+                        });
+                    }
+                }*/
+                this.Dispatcher.Invoke(() =>
+                {
+                    switch (body)
+                    {
+                        case 1:
+                            this.UniformBody.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
+                            this.UniformBody1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
+                            this.UniformHand.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[10] + ".png"));
+                            this.UniformHand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.UniformHand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            break;
+                        case 2:
+                            this.UniformBody.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
+                            this.UniformBody1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
+                            this.UniformHand.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[0] + ".png"));
+                            this.UniformHand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[1] + ".png"));
+                            this.UniformHand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            break;
+                        case 3:
+                            this.UniformBody.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
+                            this.UniformBody1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
+                            this.UniformHand.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[8] + ".png"));
+                            this.UniformHand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[6] + ".png"));
+                            this.UniformHand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            break;
+                        case 4:
+                            this.UniformBody.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
+                            this.UniformBody1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
+                            this.UniformHand.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[8] + ".png"));
+                            this.UniformHand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[5] + ".png"));
+                            this.UniformHand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            break;
+                        case 5:
+                            this.UniformBody.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[14] + ".png"));
+                            this.UniformBody1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[15] + ".png"));
+                            this.UniformHand.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[2] + ".png"));
+                            this.UniformHand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[3] + ".png"));
+                            this.UniformHand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[4] + ".png"));
+                            break;
+                        case 6:
+                            this.UniformBody.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
+                            this.UniformBody1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
+                            this.UniformHand.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[7] + ".png"));
+                            this.UniformHand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[5] + ".png"));
+                            this.UniformHand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            break;
+                        case 7:
+                            this.UniformBody.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
+                            this.UniformBody1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
+                            this.UniformHand.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[10] + ".png"));
+                            this.UniformHand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.UniformHand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            break;
+                        default:
+                            this.UniformBody.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
+                            this.UniformBody1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
+                            this.UniformHand.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[5] + ".png"));
+                            this.UniformHand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[8] + ".png"));
+                            this.UniformHand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            break;
+                    }
+                });
+            }
+            catch
+            {
+
+            };
+        }
+        public void UnpackCostume(string name)
+        {
+            string path = AppDomain.CurrentDomain.BaseDirectory + "/costumes/" + name; // or whatever 
+            string costumesPath = AppDomain.CurrentDomain.BaseDirectory + "/costumes/";
+            Monika.costumeName = name;
+            if (!Directory.Exists(costumesPath))
+            {
+                DirectoryInfo di = Directory.CreateDirectory(costumesPath);
+                di.Attributes = FileAttributes.Directory | FileAttributes.Hidden;
+            }
+            else
+            {
+                if (Directory.Exists(path))
+                {
+                    DirectoryInfo di = new DirectoryInfo(path);
+                    di.Delete(true);
+                }
+            }
+            ZipFile.ExtractToDirectory(AppDomain.CurrentDomain.BaseDirectory + "/characters/" + name + ".costume", path);
+            setFace(normalPose);
+        }
+        /*public void UnpackAcsesoares(string name)
+        {
+            string path = AppDomain.CurrentDomain.BaseDirectory + "/acs/" + name; // or whatever 
+            string costumesPath = AppDomain.CurrentDomain.BaseDirectory + "/acs/";
+            if (!Directory.Exists(costumesPath))
+            {
+                DirectoryInfo di = Directory.CreateDirectory(costumesPath);
+                di.Attributes = FileAttributes.Directory | FileAttributes.Hidden;
+            }
+            else
+            {
+                if (Directory.Exists(path))
+                {
+                    DirectoryInfo di = new DirectoryInfo(path);
+                    di.Delete(true);
+                }
+            }
+            ZipFile.ExtractToDirectory(AppDomain.CurrentDomain.BaseDirectory + "/characters/" + name + ".acs", path);
+            setFace(normalPose);
+        }*/
+        public void DrawFilter()
+        {
+            List<System.Windows.Controls.Image> images = new List<System.Windows.Controls.Image>();
+            for(int i = 0; i < main.Children.Count; i++)
+            {
+                if(main.Children[i].GetType().Name == "Image")
+                {
+                    images.Add((System.Windows.Controls.Image)main.Children[i]);
+                }
+            }
+            int outputImageWidth = (int)Body.Width;
+            int outputImageHeight = (int)Body.Height;
+
+
+            //List<System.Drawing.Bitmap> images = new List<System.Drawing.Bitmap>();
+            System.Drawing.Bitmap finalImage = null;
+            finalImage = new System.Drawing.Bitmap(outputImageWidth, outputImageHeight);
+            //get a graphics object from the image so we can draw on it
+            using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(finalImage))
+            {
+                //set background color
+                g.Clear(System.Drawing.Color.Black);
+
+                //go through each image and draw it on the final image
+                int offset = 0;
+                for (int i = 0; i < images.Count; i++)
+                {
+                        g.DrawImage(new System.Drawing.Bitmap(images[i].Source.ToString()),
+                            new System.Drawing.Rectangle(0, 0, outputImageWidth, outputImageHeight));
+                       offset += outputImageHeight;
+                    
+                }
+            }
+
+            MemoryStream ms = new MemoryStream();
+            ((System.Drawing.Bitmap)finalImage).Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
+            BitmapImage image = new BitmapImage();
+            image.BeginInit();
+            ms.Seek(0, SeekOrigin.Begin);
+            image.StreamSource = ms;
+            image.EndInit();
+            Filter.Source = image;
+
+
+        }
         Expression[][] exe;
         public void Menu(string question, string[] q, Expression[][] a)
         {
@@ -1111,16 +1628,16 @@ namespace MonikaOnDesktop
                 this.ButtonsGrid.Children.Clear();
                 for (int i = 0; i < q.Length; i++)
                 {
-                    RowDefinition row = new RowDefinition();
+                    System.Windows.Controls.RowDefinition row = new System.Windows.Controls.RowDefinition();
                     ButtonsGrid.RowDefinitions.Add(row);
                     var text = new OutlinedTextBlock
                     {
                         Text = q[i],
-                        FontFamily = new FontFamily("Comic Sans MS"),
+                        FontFamily = new System.Windows.Media.FontFamily("Comic Sans MS"),
                         TextWrapping = TextWrapping.Wrap,
                         StrokeThickness = 1.5,
-                        Stroke = new SolidColorBrush(Color.FromArgb(255, 0, 0, 0)),
-                        Fill = new SolidColorBrush(Color.FromArgb(255, 255, 255, 255))
+                        Stroke = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 0, 0, 0)),
+                        Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 255, 255, 255))
                     };
                     switch (Monika.Scaler)
                     {
@@ -1167,7 +1684,7 @@ namespace MonikaOnDesktop
                     }
                     button.Click += Button_ClickAsync;
 
-                    Grid.SetRow(button, i);
+                    System.Windows.Controls.Grid.SetRow(button, i);
                     this.ButtonsGrid.Children.Add(button);
                 }
                 exe = a;
@@ -1467,7 +1984,7 @@ namespace MonikaOnDesktop
                     this.Dispatcher.Invoke(() =>
                     {
                         textWindow.Visibility = Visibility.Hidden;
-                        setFace("1esa");
+                        setFace(normalPose);
                     });
                     dialogNum = 0;
                     Monika.saveData();
@@ -1852,7 +2369,6 @@ namespace MonikaOnDesktop
                 }
             });
         }
-
         public void SetupScale(int scaler)
         {
             this.Width = 8 * scaler;
@@ -1927,7 +2443,7 @@ namespace MonikaOnDesktop
             double ratio = 96.0 / (int)typeof(SystemParameters).GetProperty("Dpi", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null, null);
             Left = (rightWorkingArea.X + rightWorkingArea.Width - ActualWidth / ratio - BorderThickness.Left - BorderThickness.Right) * ratio;
             Top = (rightWorkingArea.Y + rightWorkingArea.Height - ActualHeight / ratio - BorderThickness.Top - BorderThickness.Bottom) * ratio;
-            
+
             /*
             //this.Left = workingArea.Right - this.Width;
             //this.Top = workingArea.Bottom - this.Height;
@@ -1994,6 +2510,7 @@ namespace MonikaOnDesktop
         {
             return firstFloat * by + secondFloat * (1 - by);
         }
+
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -2109,7 +2626,6 @@ namespace MonikaOnDesktop
 
             }
         }
-
         private void about_Click(object sender, RoutedEventArgs e)
         {
             AboutWindow about = new AboutWindow();
