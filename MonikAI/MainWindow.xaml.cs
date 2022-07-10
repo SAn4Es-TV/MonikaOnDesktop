@@ -40,6 +40,8 @@ using System.Drawing;
 using Windows.UI.Xaml.Controls;
 using Newtonsoft.Json.Linq;
 using System.Windows.Media.Media3D;
+using System.Drawing.Imaging;
+using System.Threading.Channels;
 
 namespace MonikaOnDesktop
 {
@@ -91,11 +93,16 @@ namespace MonikaOnDesktop
 
         public string lastProcess;                  // Имя прошлого процесса
         public string normalPose = "1esc";
+        const string name = "MonikaStartUp";
 
         CharacterModel Monika = new CharacterModel(AppDomain.CurrentDomain.BaseDirectory + "/characters/monika.chr", AppDomain.CurrentDomain.BaseDirectory + "/characters/"); // Персонаж Моники
         private Settings settingsWindow;            // Окно настроек
 
         private NotifyIcon NI = new NotifyIcon();
+
+        public float[] nightFilter = { 0.6861919617166911f, 0.387275212f, 0.27662517f };
+        public float[] dayFilter = { 1f, 1f, 1f };
+        public float[] mainFilter = { 1f, 1f, 1f };
         #endregion
         public MainWindow()     // Код главного окна
         {
@@ -136,6 +143,7 @@ namespace MonikaOnDesktop
             #endregion
 
             InitializeComponent();                      // Инициализация ЮИ (Юзер Интерфейс)(Вроде для этого)
+            mainFilter = nightFilter;
             AllowsTransparency = true;
             DirectoryInfo dirInfo = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory + "/characters");
             if (!dirInfo.Exists)
@@ -217,39 +225,322 @@ namespace MonikaOnDesktop
             acsWatcher.Created += AcsWatcher_Created;
             acsWatcher.EnableRaisingEvents = true;*/
         }
-        /*
-        private void AcsWatcher_Deleted(object sender, FileSystemEventArgs e)
+        public void Window_Loaded(object sender, RoutedEventArgs e)     // Когда программа проснётся
         {
-            string file = e.FullPath;
-            // Assuming you have one file that you care about, pass it off to whatever
-            // handling code you have defined.
-            Debug.WriteLine("Удалили файл:" + file);
-            FileInfo info = new FileInfo(file);
-                if (info.Extension == ".acs")
-                {
-                    string acsName = info.Name.ToLower().Replace(".acs", String.Empty);
-                    string path = AppDomain.CurrentDomain.BaseDirectory + "/acs/" + acsName; // or whatever 
-                    Debug.WriteLine(path);
-                    if (Directory.Exists(path))
-                    {
-                        Debug.WriteLine(path);
-                        DirectoryInfo di = new DirectoryInfo(path);
-                    try { di.Delete(true); } catch { }
-                    }
-                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        System.Windows.Controls.Image img = (System.Windows.Controls.Image)acs.FindName(acsName);
+            if (IsNight)
+                mainFilter = nightFilter;
+            else
+                mainFilter = dayFilter;
+            /*
+            new ToastContentBuilder()
+       .AddArgument("action", "viewConversation")
+       .AddArgument("conversationId", 9813)
+       .AddText("Смотри что я умею!")
+       .AddText("Я научилась отправлять уведомления =)")
+       .Show();*/
+            var wpfDpi = PresentationSource.FromVisual(this)?.CompositionTarget?.TransformToDevice.M11;
+            this.dpiScale = 1f / (float)wpfDpi.GetValueOrDefault(1);
 
-                        if (img != null)
+            Monika.loadData(); // Грузим данные 
+            SetupScale(Monika.Scaler);  // Ставим размер окна
+            Lang = MonikaSettings.Default.Language;
+            _start = new DoubleAnimation();
+            _start.From = 0;
+            _start.To = 1;
+            _start.RepeatBehavior = new RepeatBehavior(1);
+            _start.Duration = new Duration(TimeSpan.FromMilliseconds(4000));
+            _start.Completed += async (sender, args) =>
+            {
+                //RegistryKey reg = Registry.CurrentUser.CreateSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Run\\");
+                RegistryKey WN = Registry.CurrentUser.OpenSubKey("MonikaOnDesktop", true);
+
+                if (firsLaunch && Monika.pcName != Environment.MachineName)     // Если Это первый запуск
+                {
+                    _ = FirstLaunch();
+                }
+                else if (!firsLaunch && Monika.pcName != Environment.MachineName) // Если сменили ПК
+                {
+                    Monika.pcName = Environment.MachineName;
+                    isSpeaking = true;
+                    switch (Language.Substring(0, 2))
+                    {
+                        case "ru":
+                            _ = this.Say(true, new[]
+                    {
+                        new Expression("[player]...", "1esa"), // What?
+                        new Expression("Я чуствую себя как-то по другому..", "1esa"), // Really?!
+                        new Expression("Ты.. Сменил компьютер?", "1esa"), // Really?!
+                        new Expression("Или.. Переустановил систему?", "1esa"), // Really?!
+                        new Expression("В любом случае, ты спасибо тебе, что сохранил мой файл", "1esa")
+                    });
+                            break;
+                        case "en":
+                            _ = this.Say(true, new[]
+{
+                        new Expression("[player]...", "1 esa"),
+                        new Expression("I feel somehow different..", "1 esa"),
+                        new Expression("You.. Changed computer?", "1 esa"),
+                        new Expression("Or.. Reinstalled the system?", "1 esa"),
+                        new Expression("Anyway, thank you for saving my file", "1 esa")
+                    });
+                            break;
+                        default:
+                            _ = this.Say(true, new[]
+                    {
+                        new Expression("[player]...", "1 esa"),
+                        new Expression("I feel somehow different..", "1 esa"),
+                        new Expression("You.. Changed computer?", "1 esa"),
+                        new Expression("Or.. Reinstalled the system?", "1 esa"),
+                        new Expression("Anyway, thank you for saving my file", "1 esa")
+                    });
+                            break;
+                    }
+                    isSpeaking = false;
+                }
+                // No idea where the date comes from, someone mentioned it in the spreadsheet. Seems legit.
+                else if (!firsLaunch && Monika.pcName == Environment.MachineName && IsBDay) // День рождения
+                {
+                    isSpeaking = true;
+                    switch (Language.Substring(0, 2))
+                    {
+                        case "ru":
+                            // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
+                            _ = this.Say(true, new[]
+                    {
+                        new Expression("Эй [player], угадай какой сегодня день", "1eub"), // What?
+                        new Expression("Сегодня мой день рождения!", "1sub"), // Really?!
+                        new Expression("С днём рождения меня!", "2hub") // To you too, Monika! 
+                    });
+                            break;
+                        case "en":
+                            // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
+                            _ = this.Say(true, new[]
+                    {
+                        new Expression("Hey [player], guess what", "1eub"), // What?
+                        new Expression("It's my birthday today!", "1sub"), // Really?!
+                        new Expression("Happy Birthday to me!", "2hub") // To you too, Monika! 
+                    });
+                            break;
+                        default:
+                            // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
+                            _ = this.Say(true, new[]
+                    {
+                        new Expression("Hey [player], guess what", "1eub"), // What?
+                        new Expression("It's my birthday today!", "1sub"), // Really?!
+                        new Expression("Happy Birthday to me!", "2hub") // To you too, Monika! 
+                    });
+                            break;
+                    }
+                    isSpeaking = false;
+                }
+                else // Просто привет
+                {
+                    Monika.pcName = Environment.MachineName;
+                    Debug.WriteLine("Просто запуск");
+                    //showText();
+                    readXml(null, false, greetingsDialogPath, 0);
+                    //readIdleXml();
+                    //readGreetingsTxt();
+                }
+
+                // Blinking and Behaviour logic
+                var eyesOpen = normalPose;
+                var eyesClosed = "1dsc";
+                var random = new Random();
+                this.Dispatcher.Invoke(() =>
+                {
+                    Task.Run(() =>
+                    {
+                        HttpListener listener = new HttpListener();
+                        // установка адресов прослушки
+                        listener.Prefixes.Add("http://localhost:2005/");
+                        listener.Start();
+                        //Console.WriteLine("Ожидание подключений...");
+                        var nextBlink = DateTime.Now + TimeSpan.FromSeconds(random.Next(7, 50));
+                        Debug.WriteLine(this.applicationRunning);
+                        while (this.applicationRunning)
                         {
-                            Debug.WriteLine("Имя картинки: " + img.Name);
-                            UnregisterName(img.Name);
-                            acs.Children.Remove(img);
+                            // метод GetContext блокирует текущий поток, ожидая получение запроса 
+                            HttpListenerContext context = listener.GetContext();
+                            HttpListenerRequest request = context.Request;
+                            string query = context.Request.QueryString["myurl"];
+                            // получаем объект ответа
+                            //Debug.WriteLine(query);
+                            //readSitesTxt(formatURL(query));
+                            // Check if currently speaking, only blink if not in dialog
+                            if (!isSpeaking)
+                            {
+                                Debug.WriteLine("Открыт сайт: " + formatURL(query));
+                                //readLongXml(formatURL(query), sitesDialogPath, 1);
+                            }
+                            if (!isSpeaking)
+                            {
+                                Debug.WriteLine("Введён запрос Google: " + formatURL(query));
+                                readLongXml(formatURL(query), googleDialogPath, 2);
+                            }
+                            if (!isSpeaking)
+                            {
+                                Debug.WriteLine("Введён запрос Youtube: " + formatURL(query));
+                                //readLongXml(formatURL(query), youtubeDialogPath, 3);
+                            }
+                            //readSitesTxt(formatURL(query));
+                            //readGoogleTxt(formatURL(query));
+                            //readYoutubeTxt(formatURL(query));
+
+                            Task.Delay(250).Wait();
                         }
                     });
-                }
+                });
+                var randomDialog = new Random();
+                this.Dispatcher.Invoke(() =>
+                {
+                    Task.Run(() =>
+                    {
+                        var nextGialog = DateTime.Now + TimeSpan.FromSeconds(randomDialog.Next(Monika.idleRandomFrom, Monika.idleRandomTo));
+                        while (this.applicationRunning)
+                        {
+
+                            if (DateTime.Now >= nextGialog)
+                            {
+                                // Check if currently speaking, only blink if not in dialog
+                                if (!isSpeaking)
+                                {
+                                    readXml(null, false, idleDialogPath, 0);
+                                    //readIdleTxt();
+                                }
+
+                                nextGialog = DateTime.Now + TimeSpan.FromSeconds(randomDialog.Next(Monika.idleRandomFrom, Monika.idleRandomTo));
+                            }
+
+                            Task.Delay(250).Wait();
+                        }
+                    });
+                });
+                Dispatcher.Invoke(() =>
+                {
+                    Task.Run(() =>
+                    {
+                        var nextBlink = DateTime.Now + TimeSpan.FromSeconds(random.Next(7, 50));
+                        Debug.WriteLine(nextBlink);
+                        while (this.applicationRunning)
+                        {
+                            if (DateTime.Now >= nextBlink)
+                            {
+                                // Check if currently speaking, only blink if not in dialog
+                                if (!isSpeaking)
+                                {
+                                    consoleWrite("Моргнули", true);
+                                    this.setFace(eyesClosed);
+                                    Debug.WriteLine("Закрываем глаза");
+                                    Task.Delay(15).Wait();
+                                    this.setFace(eyesOpen);
+                                    Debug.WriteLine("Открываем глаза");
+                                }
+                                else
+                                {
+                                    Debug.WriteLine("Диалог");
+                                }
+
+                                nextBlink = DateTime.Now + TimeSpan.FromSeconds(random.Next(7, 50));
+                                Debug.WriteLine(nextBlink);
+                            }
+                        }
+                    });
+                });
+                Dispatcher.Invoke(() =>
+                {
+                    Task.Run(async () =>
+                    {
+                        var prev = new System.Drawing.Point();
+
+                        var rectangle = new System.Drawing.Rectangle();
+                        await this.Dispatcher.InvokeAsync(() =>
+                        {
+                            rectangle = new System.Drawing.Rectangle((int)this.Left, (int)this.Top, (int)this.Width,
+                                (int)this.Height);
+                        });
+                        while (true)
+                        {
+                            var point = new System.Drawing.Point();
+                            MainWindow.GetCursorPos(ref point);
+                            point.X = (int)(point.X * this.dpiScale);
+                            point.Y = (int)(point.Y * this.dpiScale);
+
+                            if (!point.Equals(prev))
+                            {
+
+                                prev = point;
+
+                                var opacity = 1.0;
+                                const double MIN_OP = 0.125;
+                                const double FADE = 175;
+                                if (rectangle.Contains(point))
+                                {
+                                    opacity = MIN_OP;
+                                }
+                                else
+                                {
+                                    if (point.Y <= rectangle.Bottom)
+                                    {
+                                        if (point.Y >= rectangle.Y)
+                                        {
+                                            if (point.X < rectangle.X && rectangle.X - point.X < FADE)
+                                            {
+                                                opacity = MainWindow.Lerp(1.0, MIN_OP, (rectangle.X - point.X) / FADE);
+                                            }
+                                            else if (point.X > rectangle.Right && point.X - rectangle.Right < FADE)
+                                            {
+                                                opacity = MainWindow.Lerp(1.0, MIN_OP,
+                                                    (point.X - rectangle.Right) / FADE);
+                                            }
+                                        }
+                                        else if (point.Y < rectangle.Y)
+                                        {
+                                            if (point.X >= rectangle.X && point.X <= rectangle.Right)
+                                            {
+                                                if (rectangle.Y - point.Y < FADE)
+                                                {
+                                                    opacity = MainWindow.Lerp(1.0, MIN_OP,
+                                                        (rectangle.Y - point.Y) / FADE);
+                                                }
+                                            }
+                                            else if (rectangle.X > point.X || rectangle.Right < point.X)
+                                            {
+                                                var distance =
+                                                    Math.Sqrt(
+                                                        Math.Pow(
+                                                            (point.X < rectangle.X ? rectangle.X : rectangle.Right) -
+                                                            point.X, 2) +
+                                                        Math.Pow(rectangle.Y - point.Y, 2));
+                                                if (distance < FADE)
+                                                {
+                                                    opacity = MainWindow.Lerp(1.0, MIN_OP, distance / FADE);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                //Debug.WriteLine("opacity: " + opacity);
+                                if (Monika.isMouse)
+                                {
+                                    Dispatcher.Invoke(() => { mainApp.Opacity = opacity; });
+                                }
+                            }
+                        }
+                    });
+                });
+                //await checkUpdatesAsync();
+
+            };
+            this.BeginAnimation(OpacityProperty, _start);
         }
-        private void AcsWatcher_Created(object sender, FileSystemEventArgs e)
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            MonikaSettings.Default.isColdShutdown = true;
+            Monika.saveData();
+            this.applicationRunning = false;
+        }       // Когда закрыли программу
+        private void GiftWatcher_Created(object sender, FileSystemEventArgs e)
         {
             string file = e.FullPath;
             // Assuming you have one file that you care about, pass it off to whatever
@@ -258,22 +549,32 @@ namespace MonikaOnDesktop
             FileInfo info = new FileInfo(file);
             if (info.Exists)
             {
-                if (info.Extension == ".acs")
+                if (info.Extension == ".gift")
                 {
-                    string acsName = info.Name.ToLower().Replace(".acs", String.Empty);
-                    UnpackAcsesoares(acsName);
+                    string giftName = info.Name.ToLower().Replace(".gift", String.Empty);
+                    //getGift(giftName);
+                    info.Delete();
+                    readLongXml(giftName, giftsDialogPath, 4);
+                    Debug.WriteLine("Подарен подарок:" + giftName);
+                }
+                if (info.Extension == ".costume")
+                {
+                    string costumeNam = info.Name.ToLower().Replace(".costume", String.Empty);
+                    UnpackCostume(costumeNam);
+                    info.Delete();
+                    Monika.saveData();
                 }
             }
         }
-        */
         public void loadGifts()
         {
             foreach (string i in Monika.gifts)
             {
                 string[] gift = i.Split(" | ");
+                BitmapImage bitmapImage = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/gifts/" + gift[1]), mainFilter));
                 System.Windows.Controls.Image img = new System.Windows.Controls.Image
                 {
-                    Source = new BitmapImage(new Uri(AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/gifts/" + gift[1])),
+                    Source = bitmapImage,
                     Name = gift[0]
                 };
                 RegisterName(gift[0], img);
@@ -404,352 +705,6 @@ namespace MonikaOnDesktop
                 Environment.Exit(0);
             }
         }
-        private void Window_Closed(object sender, EventArgs e)
-        {
-            MonikaSettings.Default.isColdShutdown = true;
-            #region
-            /*
-            RegistryKey currentUserKey = Registry.CurrentUser;
-            RegistryKey monika = currentUserKey.CreateSubKey("MonikaOnDesktop");
-            monika.SetValue("isColdShutdown", MonikaSettings.Default.isColdShutdown);
-            monika.SetValue("Language", MonikaSettings.Default.Language);
-            monika.SetValue("FirstLaunch", MonikaSettings.Default.FirstLaunch);
-            monika.SetValue("UserName", MonikaSettings.Default.UserName);
-            monika.SetValue("Scaler", MonikaSettings.Default.Scaler);
-            monika.SetValue("NightEnd", MonikaSettings.Default.NightEnd);
-            monika.SetValue("NightStart", MonikaSettings.Default.NightStart);
-            monika.SetValue("idleRandom", MonikaSettings.Default.idleRandom);
-            monika.SetValue("screenNum", MonikaSettings.Default.screenNum);
-            monika.SetValue("AutoStart", MonikaSettings.Default.AutoStart);
-            monika.Close();
-            */
-            #endregion
-            Monika.saveData();
-            this.applicationRunning = false;
-        }       // Когда закрыли программу
-        public void Window_Loaded(object sender, RoutedEventArgs e)     // Когда программа проснётся
-        {/*
-            new ToastContentBuilder()
-       .AddArgument("action", "viewConversation")
-       .AddArgument("conversationId", 9813)
-       .AddText("Смотри что я умею!")
-       .AddText("Я научилась отправлять уведомления =)")
-       .Show();*/
-            var wpfDpi = PresentationSource.FromVisual(this)?.CompositionTarget?.TransformToDevice.M11;
-            this.dpiScale = 1f / (float)wpfDpi.GetValueOrDefault(1);
-
-            Monika.loadData(); // Грузим данные 
-            SetupScale(Monika.Scaler);  // Ставим размер окна
-            Lang = MonikaSettings.Default.Language;
-            _start = new DoubleAnimation();
-            _start.From = 0;
-            _start.To = 1;
-            _start.RepeatBehavior = new RepeatBehavior(1);
-            _start.Duration = new Duration(TimeSpan.FromMilliseconds(4000));
-            _start.Completed += async (sender, args) =>
-            {
-                //RegistryKey reg = Registry.CurrentUser.CreateSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Run\\");
-                RegistryKey WN = Registry.CurrentUser.OpenSubKey("MonikaOnDesktop", true);
-
-                if (firsLaunch && Monika.pcName != Environment.MachineName)     // Если Это первый запуск
-                {
-                    _ = FirstLaunch();
-                }
-                else if (!firsLaunch && Monika.pcName != Environment.MachineName) // Если сменили ПК
-                {
-                    Monika.pcName = Environment.MachineName;
-                    isSpeaking = true;
-                    switch (Language.Substring(0, 2))
-                    {
-                        case "ru":
-                            _ = this.Say(true, new[]
-                    {
-                        new Expression("[player]...", "1esa"), // What?
-                        new Expression("Я чуствую себя как-то по другому..", "1esa"), // Really?!
-                        new Expression("Ты.. Сменил компьютер?", "1esa"), // Really?!
-                        new Expression("Или.. Переустановил систему?", "1esa"), // Really?!
-                        new Expression("В любом случае, ты спасибо тебе, что сохранил мой файл", "1esa")
-                    });
-                            break;
-                        case "en":
-                            _ = this.Say(true, new[]
-{
-                        new Expression("[player]...", "1 esa"),
-                        new Expression("I feel somehow different..", "1 esa"),
-                        new Expression("You.. Changed computer?", "1 esa"),
-                        new Expression("Or.. Reinstalled the system?", "1 esa"),
-                        new Expression("Anyway, thank you for saving my file", "1 esa")
-                    });
-                            break;
-                        default:
-                            _ = this.Say(true, new[]
-                    {
-                        new Expression("[player]...", "1 esa"),
-                        new Expression("I feel somehow different..", "1 esa"),
-                        new Expression("You.. Changed computer?", "1 esa"),
-                        new Expression("Or.. Reinstalled the system?", "1 esa"),
-                        new Expression("Anyway, thank you for saving my file", "1 esa")
-                    });
-                            break;
-                    }
-                    isSpeaking = false;
-                }
-                // No idea where the date comes from, someone mentioned it in the spreadsheet. Seems legit.
-                else if (!firsLaunch && Monika.pcName == Environment.MachineName && IsBDay) // День рождения
-                {
-                    isSpeaking = true;
-                    switch (Language.Substring(0, 2))
-                    {
-                        case "ru":
-                            // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
-                            _ = this.Say(true, new[]
-                    {
-                        new Expression("Эй [player], угадай какой сегодня день", "1eub"), // What?
-                        new Expression("Сегодня мой день рождения!", "1sub"), // Really?!
-                        new Expression("С днём рождения меня!", "2hub") // To you too, Monika! 
-                    });
-                            break;
-                        case "en":
-                            // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
-                            _ = this.Say(true, new[]
-                    {
-                        new Expression("Hey [player], guess what", "1eub"), // What?
-                        new Expression("It's my birthday today!", "1sub"), // Really?!
-                        new Expression("Happy Birthday to me!", "2hub") // To you too, Monika! 
-                    });
-                            break;
-                        default:
-                            // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
-                            _ = this.Say(true, new[]
-                    {
-                        new Expression("Hey [player], guess what", "1eub"), // What?
-                        new Expression("It's my birthday today!", "1sub"), // Really?!
-                        new Expression("Happy Birthday to me!", "2hub") // To you too, Monika! 
-                    });
-                            break;
-                    }
-                    isSpeaking = false;
-                }
-                else // Просто привет
-                {
-                    Monika.pcName = Environment.MachineName;
-                    Debug.WriteLine("Просто запуск");
-                    //showText();
-                    readXml(null, false, greetingsDialogPath, 0);
-                    //readIdleXml();
-                    //readGreetingsTxt();
-                }
-
-                //_ = checkUpdatesAsync();      // Раскоментировать для включения проверки обновлдений
-                // Blinking and Behaviour logic
-                var eyesOpen = normalPose;
-                var eyesClosed = "1dsc";
-                var random = new Random();
-                this.Dispatcher.Invoke(() =>
-                {
-                    Task.Run(async () =>
-                    {
-                        HttpListener listener = new HttpListener();
-                        // установка адресов прослушки
-                        listener.Prefixes.Add("http://localhost:2005/");
-                        listener.Start();
-                        //Console.WriteLine("Ожидание подключений...");
-                        var nextBlink = DateTime.Now + TimeSpan.FromSeconds(random.Next(7, 50));
-                        while (this.applicationRunning)
-                        {
-                            // метод GetContext блокирует текущий поток, ожидая получение запроса 
-                            HttpListenerContext context = listener.GetContext();
-                            HttpListenerRequest request = context.Request;
-                            string query = context.Request.QueryString["myurl"];
-                            // получаем объект ответа
-                            //Debug.WriteLine(query);
-                            //readSitesTxt(formatURL(query));
-                            // Check if currently speaking, only blink if not in dialog
-                            if (!isSpeaking)
-                            {
-                                Debug.WriteLine("Открыт сайт: " + formatURL(query));
-                                //readLongXml(formatURL(query), sitesDialogPath, 1);
-                            }
-                            if (!isSpeaking)
-                            {
-                                Debug.WriteLine("Введён запрос Google: " + formatURL(query));
-                                readLongXml(formatURL(query), googleDialogPath, 2);
-                            }
-                            if (!isSpeaking)
-                            {
-                                Debug.WriteLine("Введён запрос Youtube: " + formatURL(query));
-                                //readLongXml(formatURL(query), youtubeDialogPath, 3);
-                            }
-                            //readSitesTxt(formatURL(query));
-                            //readGoogleTxt(formatURL(query));
-                            //readYoutubeTxt(formatURL(query));
-                            if (DateTime.Now >= nextBlink)
-                            {
-                                // Check if currently speaking, only blink if not in dialog
-                                if (!isSpeaking)
-                                {
-                                    consoleWrite("Моргнули", true);
-                                    this.setFace(eyesClosed);
-                                    Debug.WriteLine("Закрываем глаза");
-                                    Task.Delay(200).Wait();
-                                    this.setFace(eyesOpen);
-                                    Debug.WriteLine("Открываем глаза");
-                                }
-
-                                nextBlink = DateTime.Now + TimeSpan.FromSeconds(random.Next(7, 50));
-                            }
-
-                            Task.Delay(250).Wait();
-                        }
-                    });
-                });
-                var randomDialog = new Random();
-                this.Dispatcher.Invoke(() =>
-                {
-                    Task.Run(() =>
-                    {
-                        var nextGialog = DateTime.Now + TimeSpan.FromSeconds(randomDialog.Next(Monika.idleRandomFrom, Monika.idleRandomTo));
-                        while (this.applicationRunning)
-                        {
-
-                            if (DateTime.Now >= nextGialog)
-                            {
-                                // Check if currently speaking, only blink if not in dialog
-                                if (!isSpeaking)
-                                {
-                                    readXml(null, false, idleDialogPath, 0);
-                                    //readIdleTxt();
-                                }
-
-                                nextGialog = DateTime.Now + TimeSpan.FromSeconds(randomDialog.Next(Monika.idleRandomFrom, Monika.idleRandomTo));
-                            }
-
-                            Task.Delay(250).Wait();
-                        }
-                    });
-                });
-                Dispatcher.Invoke(() =>
-                {
-                    Task.Run(async () =>
-                    {
-                        var prev = new System.Drawing.Point();
-
-                        var rectangle = new System.Drawing.Rectangle();
-                        await this.Dispatcher.InvokeAsync(() =>
-                        {
-                            rectangle = new System.Drawing.Rectangle((int)this.Left, (int)this.Top, (int)this.Width,
-                                (int)this.Height);
-                        });
-                        while (true)
-                        {
-                            var point = new System.Drawing.Point();
-                            MainWindow.GetCursorPos(ref point);
-                            point.X = (int)(point.X * this.dpiScale);
-                            point.Y = (int)(point.Y * this.dpiScale);
-
-                            if (!point.Equals(prev))
-                            {
-
-                                prev = point;
-
-                                var opacity = 1.0;
-                                const double MIN_OP = 0.125;
-                                const double FADE = 175;
-                                if (rectangle.Contains(point))
-                                {
-                                    opacity = MIN_OP;
-                                }
-                                else
-                                {
-                                    if (point.Y <= rectangle.Bottom)
-                                    {
-                                        if (point.Y >= rectangle.Y)
-                                        {
-                                            if (point.X < rectangle.X && rectangle.X - point.X < FADE)
-                                            {
-                                                opacity = MainWindow.Lerp(1.0, MIN_OP, (rectangle.X - point.X) / FADE);
-                                            }
-                                            else if (point.X > rectangle.Right && point.X - rectangle.Right < FADE)
-                                            {
-                                                opacity = MainWindow.Lerp(1.0, MIN_OP,
-                                                    (point.X - rectangle.Right) / FADE);
-                                            }
-                                        }
-                                        else if (point.Y < rectangle.Y)
-                                        {
-                                            if (point.X >= rectangle.X && point.X <= rectangle.Right)
-                                            {
-                                                if (rectangle.Y - point.Y < FADE)
-                                                {
-                                                    opacity = MainWindow.Lerp(1.0, MIN_OP,
-                                                        (rectangle.Y - point.Y) / FADE);
-                                                }
-                                            }
-                                            else if (rectangle.X > point.X || rectangle.Right < point.X)
-                                            {
-                                                var distance =
-                                                    Math.Sqrt(
-                                                        Math.Pow(
-                                                            (point.X < rectangle.X ? rectangle.X : rectangle.Right) -
-                                                            point.X, 2) +
-                                                        Math.Pow(rectangle.Y - point.Y, 2));
-                                                if (distance < FADE)
-                                                {
-                                                    opacity = MainWindow.Lerp(1.0, MIN_OP, distance / FADE);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                //Debug.WriteLine("opacity: " + opacity);
-                                if (Monika.isMouse)
-                                {
-                                    Dispatcher.Invoke(() => { mainApp.Opacity = opacity; });
-                                }
-                            }
-                        }
-                    });
-                });
-                await checkUpdatesAsync();
-
-            };
-            this.BeginAnimation(OpacityProperty, _start);
-        }
-
-        ///<summary>        Image color filter, remove the specified RBG value
-        ///</summary>
-        ///<param name="bitmap">Source for bitmap</param>
-        ///<param name="R">Red filter</param>
-        ///<param name="G">Green filter</param>
-        ///<param name="B">Blue filter</param>
-        ///<param name="Alpha">Alpha</param>
-        ///<returns>Filtered Bitmap</returns>
-        public BitmapSource BitmapFilter(Int32 R, Int32 G, Int32 B, Uri url, Int32 Alpha = 0xff)
-        {
-            BitmapImage bitmap = new BitmapImage();
-            // BitmapImage.UriSource must be in a BeginInit/EndInit block.
-            bitmap.BeginInit();
-            bitmap.UriSource = url;
-            bitmap.EndInit();
-            FormatConvertedBitmap fb = new FormatConvertedBitmap();//Picture pixel format conversion class
-            fb.BeginInit();
-            fb.Source = bitmap;
-            fb.EndInit();
-            var stride = (bitmap.PixelWidth * bitmap.Format.BitsPerPixel + 7) / 8;
-            byte[] buf = new byte[fb.PixelHeight * stride];
-            fb.CopyPixels(Int32Rect.Empty, buf, stride, 0);
-            for (long ic = 0; ic < buf.LongLength; ic += 4)
-            {
-                if (buf[ic] == R && buf[ic + 1] == G && buf[ic + 2] == B && buf[ic + 3] == Alpha)
-                {
-                    buf[ic] = 0x00;
-                    buf[ic + 1] = 0x00;
-                    buf[ic + 2] = 0x00;
-                    buf[ic + 3] = 0x00;//transparency
-                }
-            }
-            return BitmapSource.Create(fb.PixelWidth, fb.PixelHeight, fb.DpiX, fb.DpiY, fb.Format, null, buf, stride);
-        }
         public async Task checkUpdatesAsync()
         {
             await SolicenTEAM.Updater.CheckUpdate("SAn4Es-TV", "MonikaOnDesktop");  // Проверяем наличие обновления
@@ -784,32 +739,6 @@ namespace MonikaOnDesktop
                 }
                 readXml(null, false, updateDialogPath, 2);
                 Debug.WriteLine("endOfDialog");
-            }
-        }
-        private void GiftWatcher_Created(object sender, FileSystemEventArgs e)
-        {
-            string file = e.FullPath;
-            // Assuming you have one file that you care about, pass it off to whatever
-            // handling code you have defined.
-            Debug.WriteLine("Перекинули файл:" + file);
-            FileInfo info = new FileInfo(file);
-            if (info.Exists)
-            {
-                if (info.Extension == ".gift")
-                {
-                    string giftName = info.Name.ToLower().Replace(".gift", String.Empty);
-                    //getGift(giftName);
-                    info.Delete();
-                    readLongXml(giftName, giftsDialogPath, 4);
-                    Debug.WriteLine("Подарен подарок:" + giftName);
-                }
-                if (info.Extension == ".costume")
-                {
-                    string costumeNam = info.Name.ToLower().Replace(".costume", String.Empty);
-                    UnpackCostume(costumeNam);
-                    info.Delete();
-                    Monika.saveData();
-                }
             }
         }
         #region
@@ -905,7 +834,7 @@ namespace MonikaOnDesktop
                 try
                 {
                     string newText = ex.Text.Replace("[player]", playerName).Replace("{PlayerName}", playerName); //замена
-                    consoleWrite(newText, true);
+                    //consoleWrite(newText, true);
                     setFace(ex.Face);
                     for (int i = 0; i < newText.Length; i++)
                     {
@@ -930,8 +859,8 @@ namespace MonikaOnDesktop
                     await Task.Delay(delay1);
                     this.Dispatcher.Invoke(() =>
                     {
-                            //await Task.Delay(delay1);
-                            textBlock.Text = "";
+                        //await Task.Delay(delay1);
+                        textBlock.Text = "";
                     });
 
                 }
@@ -950,579 +879,281 @@ namespace MonikaOnDesktop
             }
 
         }
-        public void setFace(string faceName)
+        public async void setFace(string faceName)
         {
+            if (IsNight)
+                mainFilter = nightFilter;
+            else
+                mainFilter = dayFilter;
+
             int body = int.Parse(faceName[0].ToString());
             string eye = faceName[1].ToString();
             string eyebrow = faceName[2].ToString();
             string mouth = faceName[3].ToString();
 
             RedrawCostume(body, Monika.costumeName);
-            this.Dispatcher.Invoke(() =>
-            {
-                switch (body)
-                {
-                    case 1:
-                        this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
-                        this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
-                        this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
-                        this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[10] + ".png"));
-                        this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                        this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                        break;
-                    case 2:
-                        this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
-                        this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
-                        this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
-                        this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[0] + ".png"));
-                        this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[1] + ".png"));
-                        this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                        break;
-                    case 3:
-                        this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
-                        this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
-                        this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
-                        this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"));
-                        this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[6] + ".png"));
-                        this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                        break;
-                    case 4:
-                        this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
-                        this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
-                        this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
-                        this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"));
-                        this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"));
-                        this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                        break;
-                    case 5:
-                        this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[14] + ".png"));
-                        this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[15] + ".png"));
-                        this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[16] + ".png"));
-                        this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[2] + ".png"));
-                        this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[3] + ".png"));
-                        this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[4] + ".png"));
-                        break;
-                    case 6:
-                        this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
-                        this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
-                        this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
-                        this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[7] + ".png"));
-                        this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"));
-                        this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                        break;
-                    case 7:
-                        this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
-                        this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
-                        this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
-                        this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[10] + ".png"));
-                        this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                        this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                        break;
-                    default:
-                        this.Body.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
-                        this.Body1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
-                        this.Head.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
-                        this.Hand.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"));
-                        this.Hand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"));
-                        this.Hand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                        break;
-                }
-                if (body == 5) { Monika.leaningWord = "leaning-def-"; } else { Monika.leaningWord = ""; }
-                switch (eye)
-                {
-                    case "e":
-                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[4] + ".png"));
-                        break;
-                    case "w":
-                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[11] + ".png"));
-                        break;
-                    case "s":
-                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[10] + ".png"));
-                        break;
-                    case "t":
-                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[6] + ".png"));
-                        break;
-                    case "c":
-                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[2] + ".png"));
-                        break;
-                    case "r":
-                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[5] + ".png"));
-                        break;
-                    case "l":
-                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[3] + ".png"));
-                        break;
-                    case "h":
-                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[0] + ".png"));
-                        break;
-                    case "d":
-                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[1] + ".png"));
-                        break;
-                    case "k":
-                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[12] + ".png"));
-                        break;
-                    case "n":
-                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[13] + ".png"));
-                        break;
-                    case "f":
-                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[9] + ".png"));
-                        break;
-                    case "m":
-                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[7] + ".png"));
-                        break;
-                    case "g":
-                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[8] + ".png"));
-                        break;
-                    default:
-                        this.Eyes.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[4] + ".png"));
-                        break;
-                }
-                switch (eyebrow)
-                {
-                    case "u":
-                        this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"));
-                        break;
-                    case "k":
-                        this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[1] + ".png"));
-                        break;
-                    case "s":
-                        this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[2] + ".png"));
-                        break;
-                    case "t":
-                        this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[3] + ".png"));
-                        break;
-                    case "f":
-                        this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[0] + ".png"));
-                        break;
-                    default:
-                        this.EyeBrow.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"));
-                        break;
-                }
-                switch (mouth)
-                {
-                    case "a":
-                        this.Mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[4] + ".png"));
-                        break;
-                    case "b":
-                        this.Mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[0] + ".png"));
-                        break;
-                    case "c":
-                        this.Mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[5] + ".png"));
-                        break;
-                    case "d":
-                        this.Mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[3] + ".png"));
-                        break;
-                    case "o":
-                        this.Mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[1] + ".png"));
-                        break;
-                    case "u":
-                        this.Mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[6] + ".png"));
-                        break;
-                    case "w":
-                        this.Mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[8] + ".png"));
-                        break;
-                    case "p":
-                        this.Mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[2] + ".png"));
-                        break;
-                    case "t":
-                        this.Mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[7] + ".png"));
-                        break;
-                    default:
-                        this.Mouth.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[4] + ".png"));
-                        break;
-                }
-                if (body == 5) { Monika.leaningWord = "leaning"; } else { Monika.leaningWord = ""; }
-                string hairPath = "hair-" + Monika.leaningWord + "" + Monika.hairType;
-                this.Hair.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/h/" + hairPath + "-front.png"));
-                this.HairBack.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/h/" + hairPath + "-back.png"));
-            });
-        }
-        public void RedrawCostume(int body, string costume)
-        {
-            string pathCost = AppDomain.CurrentDomain.BaseDirectory + "/costumes/";
-            //string pathAcs = AppDomain.CurrentDomain.BaseDirectory + "/acs/";
-
             try
-            {/*
-                DirectoryInfo acsDir = new DirectoryInfo(pathAcs);
-                if (acsDir.Exists)
-                {
-                    foreach (DirectoryInfo acsDirs in acsDir.GetDirectories())
-                    {
-                        System.Windows.Controls.Image img = new System.Windows.Controls.Image
-                        {
-                            Source = new BitmapImage(new Uri(acsDirs.GetFiles()[0].FullName)),
-                            Name = acsDirs.Name
-                        };
-                        RegisterName(acsDirs.Name, img);
-                        this.acs.Children.Add(img);
-                    }
-                    for(int i = 0;i < acs.Children.Count; i++)
-                    {
-                        System.Windows.Controls.Image img = this.acs.Children[i] as System.Windows.Controls.Image;
-                        this.Dispatcher.Invoke(() =>
-                        {
-                            if (body != 5)
-                            {
-                                img.Source = new BitmapImage(new Uri(acsDir.GetDirectories()[i].GetFiles()[0].FullName));
-                            }
-                            else
-                            {
-                                img.Source = new BitmapImage(new Uri(acsDir.GetDirectories()[i].GetFiles()[1].FullName));
-                            }
-                        });
-                    }
-                }*/
+            {
                 this.Dispatcher.Invoke(() =>
                 {
                     switch (body)
                     {
                         case 1:
-                            this.UniformBody.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
-                            this.UniformBody1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
-                            this.UniformHand.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[10] + ".png"));
-                            this.UniformHand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                            this.UniformHand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            //var bitmap = new Bitmap("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png");
+                            //this.Body.Source = BitmapMagic.BitmapToImageSource(bitmap);
+                            this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"), mainFilter));
+                            this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"), mainFilter));
+                            this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"), mainFilter));
+                            this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[10] + ".png"), mainFilter));
+                            this.Hand1.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
+                            this.Hand2.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
                             break;
                         case 2:
-                            this.UniformBody.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
-                            this.UniformBody1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
-                            this.UniformHand.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[0] + ".png"));
-                            this.UniformHand1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[1] + ".png"));
-                            this.UniformHand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"), mainFilter));
+                            this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"), mainFilter));
+                            this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"), mainFilter));
+                            this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[0] + ".png"), mainFilter));
+                            this.Hand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[1] + ".png"), mainFilter));
+                            this.Hand2.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
                             break;
                         case 3:
-                            this.UniformBody.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
-                            this.UniformBody1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
-                            this.UniformHand.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[8] + ".png"));
-                            this.UniformHand1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[6] + ".png"));
-                            this.UniformHand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"), mainFilter));
+                            this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"), mainFilter));
+                            this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"), mainFilter));
+                            this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"), mainFilter));
+                            this.Hand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[6] + ".png"), mainFilter));
+                            this.Hand2.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
                             break;
                         case 4:
-                            this.UniformBody.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
-                            this.UniformBody1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
-                            this.UniformHand.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[8] + ".png"));
-                            this.UniformHand1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[5] + ".png"));
-                            this.UniformHand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"), mainFilter));
+                            this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"), mainFilter));
+                            this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"), mainFilter));
+                            this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"), mainFilter));
+                            this.Hand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"), mainFilter));
+                            this.Hand2.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
                             break;
                         case 5:
-                            this.UniformBody.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[14] + ".png"));
-                            this.UniformBody1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[15] + ".png"));
-                            this.UniformHand.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[2] + ".png"));
-                            this.UniformHand1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[3] + ".png"));
-                            this.UniformHand2.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[4] + ".png"));
+                            this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[14] + ".png"), mainFilter));
+                            this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[15] + ".png"), mainFilter));
+                            this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[16] + ".png"), mainFilter));
+                            this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[2] + ".png"), mainFilter));
+                            this.Hand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[3] + ".png"), mainFilter));
+                            this.Hand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[4] + ".png"), mainFilter));
                             break;
                         case 6:
-                            this.UniformBody.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
-                            this.UniformBody1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
-                            this.UniformHand.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[7] + ".png"));
-                            this.UniformHand1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[5] + ".png"));
-                            this.UniformHand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"), mainFilter));
+                            this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"), mainFilter));
+                            this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"), mainFilter));
+                            this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[7] + ".png"), mainFilter));
+                            this.Hand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"), mainFilter));
+                            this.Hand2.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
                             break;
                         case 7:
-                            this.UniformBody.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
-                            this.UniformBody1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
-                            this.UniformHand.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[10] + ".png"));
-                            this.UniformHand1.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                            this.UniformHand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"), mainFilter));
+                            this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"), mainFilter));
+                            this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"), mainFilter));
+                            this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[10] + ".png"), mainFilter));
+                            this.Hand1.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
+                            this.Hand2.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
                             break;
                         default:
-                            this.UniformBody.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
-                            this.UniformBody1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
-                            this.UniformHand.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[5] + ".png"));
-                            this.UniformHand1.Source = new BitmapImage(new Uri(pathCost + costume + "/" + Monika.body[8] + ".png"));
-                            this.UniformHand2.Source = new BitmapImage(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"), mainFilter));
+                            this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"), mainFilter));
+                            this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"), mainFilter));
+                            this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"), mainFilter));
+                            this.Hand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"), mainFilter));
+                            this.Hand2.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
                             break;
                     }
+                    if (body == 5) { Monika.leaningWord = "leaning-def-"; } else { Monika.leaningWord = ""; }
+                    switch (eye)
+                    {
+                        case "e":
+                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[4] + ".png"), mainFilter));
+                            break;
+                        case "w":
+                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[11] + ".png"), mainFilter));
+                            break;
+                        case "s":
+                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[10] + ".png"), mainFilter));
+                            break;
+                        case "t":
+                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[6] + ".png"), mainFilter));
+                            break;
+                        case "c":
+                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[2] + ".png"), mainFilter));
+                            break;
+                        case "r":
+                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[5] + ".png"), mainFilter));
+                            break;
+                        case "l":
+                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[3] + ".png"), mainFilter));
+                            break;
+                        case "h":
+                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[0] + ".png"), mainFilter));
+                            break;
+                        case "d":
+                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[1] + ".png"), mainFilter));
+                            break;
+                        case "k":
+                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[12] + ".png"), mainFilter));
+                            break;
+                        case "n":
+                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[13] + ".png"), mainFilter));
+                            break;
+                        case "f":
+                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[9] + ".png"), mainFilter));
+                            break;
+                        case "m":
+                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[7] + ".png"), mainFilter));
+                            break;
+                        case "g":
+                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[8] + ".png"), mainFilter));
+                            break;
+                        default:
+                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[4] + ".png"), mainFilter));
+                            break;
+                    }
+                    switch (eyebrow)
+                    {
+                        case "u":
+                            this.EyeBrow.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"), mainFilter));
+                            break;
+                        case "k":
+                            this.EyeBrow.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[1] + ".png"), mainFilter));
+                            break;
+                        case "s":
+                            this.EyeBrow.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[2] + ".png"), mainFilter));
+                            break;
+                        case "t":
+                            this.EyeBrow.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[3] + ".png"), mainFilter));
+                            break;
+                        case "f":
+                            this.EyeBrow.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[0] + ".png"), mainFilter));
+                            break;
+                        default:
+                            this.EyeBrow.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"), mainFilter));
+                            break;
+                    }
+                    switch (mouth)
+                    {
+                        case "a":
+                            this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[4] + ".png"), mainFilter));
+                            break;
+                        case "b":
+                            this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[0] + ".png"), mainFilter));
+                            break;
+                        case "c":
+                            this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[5] + ".png"), mainFilter));
+                            break;
+                        case "d":
+                            this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[3] + ".png"), mainFilter));
+                            break;
+                        case "o":
+                            this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[1] + ".png"), mainFilter));
+                            break;
+                        case "u":
+                            this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[6] + ".png"), mainFilter));
+                            break;
+                        case "w":
+                            this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[8] + ".png"), mainFilter));
+                            break;
+                        case "p":
+                            this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[2] + ".png"), mainFilter));
+                            break;
+                        case "t":
+                            this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[7] + ".png"), mainFilter));
+                            break;
+                        default:
+                            this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[4] + ".png"), mainFilter));
+                            break;
+                    }
+                    if (body == 5) { Monika.leaningWord = "-leaning"; } else { Monika.leaningWord = ""; }
+                    string hairPath = "hair" + Monika.leaningWord + "-" + Monika.hairType;
+                    string nosePath = "face" + Monika.leaningWord + "-nose-def.png";
+                    this.Face.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/face/" + nosePath), mainFilter));
+                    this.Hair.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/h/" + hairPath + "-front.png"), mainFilter));
+                    this.HairBack.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/h/" + hairPath + "-back.png"), mainFilter));
+
+                    this.table1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/t/chair-def.png"), mainFilter));
+                    this.table2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/t/table-def.png"), mainFilter));
+                    this.table3.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/t/table-def-s.png"), mainFilter));
                 });
             }
             catch
             {
-
-            };
+            }
         }
-        public void _setFace(string faceName)
-        {
-            int body = int.Parse(faceName[0].ToString());
-            string eye = faceName[1].ToString();
-            string eyebrow = faceName[2].ToString();
-            string mouth = faceName[3].ToString();
-
-            RedrawCostume(body, Monika.costumeName);
-            this.Dispatcher.Invoke(() =>
-            {
-                switch (body)
-                {
-                    case 1:
-                        this.Body.Source = BitmapFilter(100, 100, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
-                        this.Body1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
-                        this.Head.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
-                        this.Hand.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[10] + ".png"));
-                        this.Hand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                        this.Hand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                        break;
-                    case 2:
-                        this.Body.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
-                        this.Body1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
-                        this.Head.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
-                        this.Hand.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[0] + ".png"));
-                        this.Hand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[1] + ".png"));
-                        this.Hand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                        break;
-                    case 3:
-                        this.Body.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
-                        this.Body1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
-                        this.Head.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
-                        this.Hand.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"));
-                        this.Hand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[6] + ".png"));
-                        this.Hand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                        break;
-                    case 4:
-                        this.Body.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
-                        this.Body1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
-                        this.Head.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
-                        this.Hand.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"));
-                        this.Hand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"));
-                        this.Hand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                        break;
-                    case 5:
-                        this.Body.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[14] + ".png"));
-                        this.Body1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[15] + ".png"));
-                        this.Head.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[16] + ".png"));
-                        this.Hand.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[2] + ".png"));
-                        this.Hand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[3] + ".png"));
-                        this.Hand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[4] + ".png"));
-                        break;
-                    case 6:
-                        this.Body.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
-                        this.Body1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
-                        this.Head.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
-                        this.Hand.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[7] + ".png"));
-                        this.Hand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"));
-                        this.Hand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                        break;
-                    case 7:
-                        this.Body.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
-                        this.Body1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
-                        this.Head.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
-                        this.Hand.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[10] + ".png"));
-                        this.Hand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                        this.Hand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                        break;
-                    default:
-                        this.Body.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"));
-                        this.Body1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"));
-                        this.Head.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"));
-                        this.Hand.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"));
-                        this.Hand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"));
-                        this.Hand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                        break;
-                }
-                if (body == 5) { Monika.leaningWord = "leaning-def-"; } else { Monika.leaningWord = ""; }
-                switch (eye)
-                {
-                    case "e":
-                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[4] + ".png"));
-                        break;
-                    case "w":
-                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[11] + ".png"));
-                        break;
-                    case "s":
-                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[10] + ".png"));
-                        break;
-                    case "t":
-                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[6] + ".png"));
-                        break;
-                    case "c":
-                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[2] + ".png"));
-                        break;
-                    case "r":
-                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[5] + ".png"));
-                        break;
-                    case "l":
-                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[3] + ".png"));
-                        break;
-                    case "h":
-                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[0] + ".png"));
-                        break;
-                    case "d":
-                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[1] + ".png"));
-                        break;
-                    case "k":
-                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[12] + ".png"));
-                        break;
-                    case "n":
-                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[13] + ".png"));
-                        break;
-                    case "f":
-                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[9] + ".png"));
-                        break;
-                    case "m":
-                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[7] + ".png"));
-                        break;
-                    case "g":
-                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[8] + ".png"));
-                        break;
-                    default:
-                        this.Eyes.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[4] + ".png"));
-                        break;
-                }
-                switch (eyebrow)
-                {
-                    case "u":
-                        this.EyeBrow.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"));
-                        break;
-                    case "k":
-                        this.EyeBrow.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[1] + ".png"));
-                        break;
-                    case "s":
-                        this.EyeBrow.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[2] + ".png"));
-                        break;
-                    case "t":
-                        this.EyeBrow.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[3] + ".png"));
-                        break;
-                    case "f":
-                        this.EyeBrow.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[0] + ".png"));
-                        break;
-                    default:
-                        this.EyeBrow.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"));
-                        break;
-                }
-                switch (mouth)
-                {
-                    case "a":
-                        this.Mouth.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[4] + ".png"));
-                        break;
-                    case "b":
-                        this.Mouth.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[0] + ".png"));
-                        break;
-                    case "c":
-                        this.Mouth.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[5] + ".png"));
-                        break;
-                    case "d":
-                        this.Mouth.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[3] + ".png"));
-                        break;
-                    case "o":
-                        this.Mouth.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[1] + ".png"));
-                        break;
-                    case "u":
-                        this.Mouth.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[6] + ".png"));
-                        break;
-                    case "w":
-                        this.Mouth.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[8] + ".png"));
-                        break;
-                    case "p":
-                        this.Mouth.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[2] + ".png"));
-                        break;
-                    case "t":
-                        this.Mouth.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[7] + ".png"));
-                        break;
-                    default:
-                        this.Mouth.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[4] + ".png"));
-                        break;
-                }
-                if (body == 5) { Monika.leaningWord = "leaning"; } else { Monika.leaningWord = ""; }
-                string hairPath = "hair-" + Monika.leaningWord + "" + Monika.hairType;
-                this.Hair.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/h/" + hairPath + "-front.png"));
-                this.HairBack.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/h/" + hairPath + "-back.png"));
-            });
-        }
-        public void _RedrawCostume(int body, string costume)
+        public void RedrawCostume(int body, string costume)
         {
             string pathCost = AppDomain.CurrentDomain.BaseDirectory + "/costumes/";
-            //string pathAcs = AppDomain.CurrentDomain.BaseDirectory + "/acs/";
 
             try
-            {/*
-                DirectoryInfo acsDir = new DirectoryInfo(pathAcs);
-                if (acsDir.Exists)
-                {
-                    foreach (DirectoryInfo acsDirs in acsDir.GetDirectories())
-                    {
-                        System.Windows.Controls.Image img = new System.Windows.Controls.Image
-                        {
-                            Source = BitmapFilter(0xff,0xff,0xff, new Uri(acsDirs.GetFiles()[0].FullName)),
-                            Name = acsDirs.Name
-                        };
-                        RegisterName(acsDirs.Name, img);
-                        this.acs.Children.Add(img);
-                    }
-                    for(int i = 0;i < acs.Children.Count; i++)
-                    {
-                        System.Windows.Controls.Image img = this.acs.Children[i] as System.Windows.Controls.Image;
-                        this.Dispatcher.Invoke(() =>
-                        {
-                            if (body != 5)
-                            {
-                                img.Source = BitmapFilter(0xff,0xff,0xff, new Uri(acsDir.GetDirectories()[i].GetFiles()[0].FullName));
-                            }
-                            else
-                            {
-                                img.Source = BitmapFilter(0xff,0xff,0xff, new Uri(acsDir.GetDirectories()[i].GetFiles()[1].FullName));
-                            }
-                        });
-                    }
-                }*/
+            {
                 this.Dispatcher.Invoke(() =>
                 {
                     switch (body)
                     {
                         case 1:
-                            this.UniformBody.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
-                            this.UniformBody1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
-                            this.UniformHand.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[10] + ".png"));
-                            this.UniformHand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                            this.UniformHand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"), mainFilter));
+                            this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"), mainFilter));
+                            this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[10] + ".png"), mainFilter));
+                            this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
+                            this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
                             break;
                         case 2:
-                            this.UniformBody.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
-                            this.UniformBody1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
-                            this.UniformHand.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[0] + ".png"));
-                            this.UniformHand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[1] + ".png"));
-                            this.UniformHand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"), mainFilter));
+                            this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"), mainFilter));
+                            this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[0] + ".png"), mainFilter));
+                            this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[1] + ".png"), mainFilter));
+                            this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
                             break;
                         case 3:
-                            this.UniformBody.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
-                            this.UniformBody1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
-                            this.UniformHand.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[8] + ".png"));
-                            this.UniformHand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[6] + ".png"));
-                            this.UniformHand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"), mainFilter));
+                            this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"), mainFilter));
+                            this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[8] + ".png"), mainFilter));
+                            this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[6] + ".png"), mainFilter));
+                            this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
                             break;
                         case 4:
-                            this.UniformBody.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
-                            this.UniformBody1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
-                            this.UniformHand.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[8] + ".png"));
-                            this.UniformHand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[5] + ".png"));
-                            this.UniformHand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"), mainFilter));
+                            this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"), mainFilter));
+                            this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[8] + ".png"), mainFilter));
+                            this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[5] + ".png"), mainFilter));
+                            this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
                             break;
                         case 5:
-                            this.UniformBody.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[14] + ".png"));
-                            this.UniformBody1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[15] + ".png"));
-                            this.UniformHand.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[2] + ".png"));
-                            this.UniformHand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[3] + ".png"));
-                            this.UniformHand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[4] + ".png"));
+                            this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[14] + ".png"), mainFilter));
+                            this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[15] + ".png"), mainFilter));
+                            this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[2] + ".png"), mainFilter));
+                            this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[3] + ".png"), mainFilter));
+                            this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[4] + ".png"), mainFilter));
                             break;
                         case 6:
-                            this.UniformBody.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
-                            this.UniformBody1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
-                            this.UniformHand.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[7] + ".png"));
-                            this.UniformHand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[5] + ".png"));
-                            this.UniformHand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"), mainFilter));
+                            this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"), mainFilter));
+                            this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[7] + ".png"), mainFilter));
+                            this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[5] + ".png"), mainFilter));
+                            this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
                             break;
                         case 7:
-                            this.UniformBody.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
-                            this.UniformBody1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
-                            this.UniformHand.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[10] + ".png"));
-                            this.UniformHand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
-                            this.UniformHand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"), mainFilter));
+                            this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"), mainFilter));
+                            this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[10] + ".png"), mainFilter));
+                            this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
+                            this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
                             break;
                         default:
-                            this.UniformBody.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"));
-                            this.UniformBody1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"));
-                            this.UniformHand.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[5] + ".png"));
-                            this.UniformHand1.Source = BitmapFilter(100, 0xff, 0xff, new Uri(pathCost + costume + "/" + Monika.body[8] + ".png"));
-                            this.UniformHand2.Source = BitmapFilter(100, 0xff, 0xff, new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"));
+                            this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"), mainFilter));
+                            this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"), mainFilter));
+                            this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[5] + ".png"), mainFilter));
+                            this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[8] + ".png"), mainFilter));
+                            this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
                             break;
                     }
+                    if (body == 5) { Monika.leaningWord = "5"; } else { Monika.leaningWord = "0"; }
+                    string ribbonPath = "acs-ribbon_def-" + Monika.leaningWord + ".png";
+                    this.Ribbon_back.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/ribbon/" + ribbonPath), mainFilter));
                 });
             }
             catch
@@ -1550,71 +1181,6 @@ namespace MonikaOnDesktop
             }
             ZipFile.ExtractToDirectory(AppDomain.CurrentDomain.BaseDirectory + "/characters/" + name + ".costume", path);
             setFace(normalPose);
-        }
-        /*public void UnpackAcsesoares(string name)
-        {
-            string path = AppDomain.CurrentDomain.BaseDirectory + "/acs/" + name; // or whatever 
-            string costumesPath = AppDomain.CurrentDomain.BaseDirectory + "/acs/";
-            if (!Directory.Exists(costumesPath))
-            {
-                DirectoryInfo di = Directory.CreateDirectory(costumesPath);
-                di.Attributes = FileAttributes.Directory | FileAttributes.Hidden;
-            }
-            else
-            {
-                if (Directory.Exists(path))
-                {
-                    DirectoryInfo di = new DirectoryInfo(path);
-                    di.Delete(true);
-                }
-            }
-            ZipFile.ExtractToDirectory(AppDomain.CurrentDomain.BaseDirectory + "/characters/" + name + ".acs", path);
-            setFace(normalPose);
-        }*/
-        public void DrawFilter()
-        {
-            List<System.Windows.Controls.Image> images = new List<System.Windows.Controls.Image>();
-            for(int i = 0; i < main.Children.Count; i++)
-            {
-                if(main.Children[i].GetType().Name == "Image")
-                {
-                    images.Add((System.Windows.Controls.Image)main.Children[i]);
-                }
-            }
-            int outputImageWidth = (int)Body.Width;
-            int outputImageHeight = (int)Body.Height;
-
-
-            //List<System.Drawing.Bitmap> images = new List<System.Drawing.Bitmap>();
-            System.Drawing.Bitmap finalImage = null;
-            finalImage = new System.Drawing.Bitmap(outputImageWidth, outputImageHeight);
-            //get a graphics object from the image so we can draw on it
-            using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(finalImage))
-            {
-                //set background color
-                g.Clear(System.Drawing.Color.Black);
-
-                //go through each image and draw it on the final image
-                int offset = 0;
-                for (int i = 0; i < images.Count; i++)
-                {
-                        g.DrawImage(new System.Drawing.Bitmap(images[i].Source.ToString()),
-                            new System.Drawing.Rectangle(0, 0, outputImageWidth, outputImageHeight));
-                       offset += outputImageHeight;
-                    
-                }
-            }
-
-            MemoryStream ms = new MemoryStream();
-            ((System.Drawing.Bitmap)finalImage).Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
-            BitmapImage image = new BitmapImage();
-            image.BeginInit();
-            ms.Seek(0, SeekOrigin.Begin);
-            image.StreamSource = ms;
-            image.EndInit();
-            Filter.Source = image;
-
-
         }
         Expression[][] exe;
         public void Menu(string question, string[] q, Expression[][] a)
@@ -1813,7 +1379,7 @@ namespace MonikaOnDesktop
             #region
             string s1 = mainXml.Replace("\t", String.Empty);
             string s2 = s1.Replace("\n", String.Empty);
-            Debug.WriteLine(s1);
+            //Debug.WriteLine(s1);
             XmlDocument xDoc = new XmlDocument();
             //string path = testXml;
             //xDoc.Load(path);
@@ -1905,7 +1471,7 @@ namespace MonikaOnDesktop
                     }
                     Menu(dm[num].Node.ChildNodes[u - 1].InnerText.Substring(5), q, ex);
                     dialogNum = u + 1;
-                    Debug.WriteLine("u = " + dialogNum + " count = " + (dm[num].Node.ChildNodes.Count - 1));
+                    //Debug.WriteLine("u = " + dialogNum + " count = " + (dm[num].Node.ChildNodes.Count - 1));
                     //Debug.WriteLine(dialogNum);
                     break;
                 }
@@ -1975,12 +1541,12 @@ namespace MonikaOnDesktop
                     {
                         Debug.WriteLine("ОШИБКА");
                     }
-                    Debug.WriteLine("u = " + dialogNum + " count = " + (dm[num].Node.ChildNodes.Count - 1));
+                    //Debug.WriteLine("u = " + dialogNum + " count = " + (dm[num].Node.ChildNodes.Count - 1));
                 }
                 if (u >= dm[num].Node.ChildNodes.Count - 1)
                 {
                     isSpeaking = false;
-                    Debug.WriteLine("Конец диалога");
+                    //Debug.WriteLine("Конец диалога");
                     this.Dispatcher.Invoke(() =>
                     {
                         textWindow.Visibility = Visibility.Hidden;
@@ -2054,7 +1620,7 @@ namespace MonikaOnDesktop
             string mainXml = mainxml.Replace("<Mains>\n\t\t</Dialog>\n\t</Main>", "<Mains>").Replace("\n\t\t\t\t</Answer>\n\t\t\t</Menu>\n\t\t\t\t\t<Text>", "\n\t\t\t\t\t<Text>").Replace("\n\t\t\t\t</Answer>\n\t\t\t</Menu>\n\t\t\t\t<Answer", "\n\t\t\t\t<Answer").Replace("</Text>\n\t\t\t\t<Answer", "</Text>\n\t\t\t\t</Answer>\n\t\t\t\t<Answer");
 
             //Console.Write("XML Example:\n" + mainXml);
-            Console.WriteLine("Print dialogues:\n");
+            //Console.WriteLine("Print dialogues:\n");
             #endregion
             #region
             string s1 = mainXml.Replace("\t", String.Empty);
@@ -2355,20 +1921,6 @@ namespace MonikaOnDesktop
                 Debug.WriteLine(e.Message);
             }
         }
-        public void consoleWrite(string text, bool time)
-        {
-            this.Dispatcher.Invoke(() =>
-            {
-                if (time)
-                {
-                    Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss") + "--> " + text);
-                }
-                else
-                {
-                    Debug.WriteLine(text);
-                }
-            });
-        }
         public void SetupScale(int scaler)
         {
             this.Width = 8 * scaler;
@@ -2384,29 +1936,6 @@ namespace MonikaOnDesktop
             //Left = primaryMonitorArea.Right - this.Width;
             //Top = primaryMonitorArea.Bottom - this.Height;
             GoToSecondaryMonitor();
-        }
-        public void dsa()
-        {
-            bool useScreen = false;
-            Screen workingScreen = Screen.PrimaryScreen;
-            var workingRectangle = Screen.PrimaryScreen.WorkingArea;
-            foreach (Screen screen in Screen.AllScreens)
-            {
-                if (useScreen)
-                {
-                    if (screen.Primary)
-                    {
-                        workingScreen = screen;
-                    }
-                }
-                else
-                {
-                    if (!screen.Primary)
-                    {
-                        workingScreen = screen;
-                    }
-                }
-            }
         }
         public void GoToSecondaryMonitor()
         {
@@ -2460,7 +1989,6 @@ namespace MonikaOnDesktop
             }*/
         }
 
-        const string name = "MonikaStartUp";
         public bool SetAutorunValue(bool autorun)
         {
             //string ExePath = System.Windows.Forms.Application.ExecutablePath;
@@ -2511,13 +2039,32 @@ namespace MonikaOnDesktop
             return firstFloat * by + secondFloat * (1 - by);
         }
 
+        public void consoleWrite(string text, bool time)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                if (time)
+                {
+                    Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss") + "--> " + text);
+                }
+                else
+                {
+                    Debug.WriteLine(text);
+                }
+            });
+        }
+        private void about_Click(object sender, RoutedEventArgs e)
+        {
+            AboutWindow about = new AboutWindow();
+            about.Show();
+
+        }
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool GetCursorPos(ref System.Drawing.Point lpPoint);
 
         public static List<CultureInfo> m_Languages = new List<CultureInfo>();
-        private int plushieCount;
 
         public static List<CultureInfo> Languages
         {
@@ -2625,12 +2172,6 @@ namespace MonikaOnDesktop
                     break;
 
             }
-        }
-        private void about_Click(object sender, RoutedEventArgs e)
-        {
-            AboutWindow about = new AboutWindow();
-            about.Show();
-
         }
     }
 

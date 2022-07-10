@@ -128,6 +128,8 @@
     <None Remove="assets\monika\c\vday_lingerie\body-def-1.png" />
     <None Remove="assets\monika\c\vday_lingerie\body-leaning-def-0.png" />
     <None Remove="assets\monika\c\vday_lingerie\body-leaning-def-1.png" />
+    <None Remove="assets\monika\face-leaning-nose-def.png" />
+    <None Remove="assets\monika\face-nose-def.png" />
     <None Remove="assets\monika\face\brows\5f-n.png" />
     <None Remove="assets\monika\face\brows\5f.png" />
     <None Remove="assets\monika\face\brows\5k-n.png" />
@@ -188,6 +190,7 @@
     <None Remove="assets\monika\face\eyes\w.png" />
     <None Remove="assets\monika\face\face-leaning-def-nose-def-n.png" />
     <None Remove="assets\monika\face\face-leaning-def-nose-def.png" />
+    <None Remove="assets\monika\face\face-leaning-nose-def.png" />
     <None Remove="assets\monika\face\face-nose-def-n.png" />
     <None Remove="assets\monika\face\face-nose-def.png" />
     <None Remove="assets\monika\face\mouth\5a-n.png" />
@@ -614,6 +617,12 @@
     <Resource Include="assets\monika\c\vday_lingerie\body-leaning-def-1.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="assets\monika\face-leaning-nose-def.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face-nose-def.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="assets\monika\face\brows\5f-n.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
@@ -792,6 +801,9 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="assets\monika\face\face-leaning-def-nose-def.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\monika\face\face-leaning-nose-def.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="assets\monika\face\face-nose-def-n.png">

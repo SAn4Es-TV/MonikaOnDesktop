@@ -77,7 +77,7 @@
                 <Image x:Name="UniformBody" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/null.png" StretchDirection="Both" Stretch="Uniform"/>
                 <Image x:Name="UniformBody1" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/null.png" StretchDirection="Both" Stretch="Uniform"/>
                 <Image x:Name="Head" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/b/body-def-head.png" StretchDirection="Both" Stretch="Uniform"/>
-                <Image x:Name="Face" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/face/face-nose-def.png" StretchDirection="Both" Stretch="Uniform"/>
+                <Image x:Name="Face" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/null.png" StretchDirection="Both" Stretch="Uniform"/>
                 <Image x:Name="Hair" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/h/hair-def-front.png" StretchDirection="Both" Stretch="Uniform"/>
                 <Image x:Name="Eyes" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/fe/face-eyes-normal.png" StretchDirection="Both" Stretch="Uniform"/>
                 <Image x:Name="EyeBrow" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/fb/face-eyebrows-up.png" StretchDirection="Both" Stretch="Uniform"/>
@@ -106,7 +106,6 @@
         <Grid x:Name="gifts">
 
         </Grid>
-        <Image x:Name="Filter" Margin="0,-0,0,0" StretchDirection="Both" Stretch="Uniform"/>
         <Image x:Name="textWindow" Margin="50,390,50,20" Stretch="Fill" Source="pack://application:,,,/assets/gui/textbox.png" Visibility="Hidden"/>
         <local:OutlinedTextBlock x:Name="textBlock" FontFamily="Comic Sans MS" Margin="70,410,70,40" Text="Текстовый текст" TextWrapping="Wrap" StrokeThickness="1.5" Stroke="{StaticResource outlineColor}" Fill="{StaticResource mainColor}">
             <!--<TextBlock.Effect>

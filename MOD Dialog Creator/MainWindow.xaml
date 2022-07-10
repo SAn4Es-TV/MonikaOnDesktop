@@ -1,0 +1,45 @@
+﻿<Window x:Class="MOD_Dialog_Creator.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MOD_Dialog_Creator"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid>
+            <Image Source="/Assets/monikaroomdaylight.jpg"/>
+            <Grid x:Name="monika" IsHitTestVisible="False">
+                <Grid x:Name="table">
+                    <Image x:Name="table1" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/t/chair-def.png" StretchDirection="Both" Stretch="Uniform"/>
+                </Grid>
+                <Grid x:Name="main">
+                    <Image x:Name="HairBack" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/h/hair-def-back.png" StretchDirection="Both" Stretch="Uniform"/>
+                    <Image x:Name="Ribbon_back" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/ribbon/acs-ribbon_def-0.png" StretchDirection="Both" Stretch="Uniform"/>
+                    <Grid x:Name="acs">
+
+                    </Grid>
+                    <Image x:Name="Body" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/b/body-def-0.png" StretchDirection="Both" Stretch="Uniform"/>
+                    <Image x:Name="Body1" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/b/body-def-1.png" StretchDirection="Both" Stretch="Uniform"/>
+                    <Image x:Name="UniformBody" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/null.png" StretchDirection="Both" Stretch="Uniform"/>
+                    <Image x:Name="UniformBody1" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/null.png" StretchDirection="Both" Stretch="Uniform"/>
+                    <Image x:Name="Head" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/b/body-def-head.png" StretchDirection="Both" Stretch="Uniform"/>
+                    <Image x:Name="Face" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/null.png" StretchDirection="Both" Stretch="Uniform"/>
+                    <Image x:Name="Hair" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/h/hair-def-front.png" StretchDirection="Both" Stretch="Uniform"/>
+                    <Image x:Name="Eyes" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/fe/face-eyes-normal.png" StretchDirection="Both" Stretch="Uniform"/>
+                    <Image x:Name="EyeBrow" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/fb/face-eyebrows-up.png" StretchDirection="Both" Stretch="Uniform"/>
+                    <Image x:Name="Mouth" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/fm/face-mouth-small.png" StretchDirection="Both" Stretch="Uniform"/>
+                    <Image x:Name="Hand" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/b/arms-right-down-0.png" StretchDirection="Both" Stretch="Uniform"/>
+                    <Image x:Name="Hand1" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/b/arms-left-down-0.png" StretchDirection="Both" Stretch="Uniform"/>
+                    <Image x:Name="Hand2" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/null.png" StretchDirection="Both" Stretch="Uniform"/>
+                    <Image x:Name="UniformHand" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/null.png" StretchDirection="Both" Stretch="Uniform"/>
+                    <Image x:Name="UniformHand1" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/null.png" StretchDirection="Both" Stretch="Uniform"/>
+                    <Image x:Name="UniformHand2" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/null.png" StretchDirection="Both" Stretch="Uniform"/>
+                </Grid>
+                <Image x:Name="table2" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/t/table-def.png" StretchDirection="Both" Stretch="Uniform"/>
+                <Image x:Name="table3" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/t/table-def-s.png" StretchDirection="Both" Stretch="Uniform"/>
+                
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

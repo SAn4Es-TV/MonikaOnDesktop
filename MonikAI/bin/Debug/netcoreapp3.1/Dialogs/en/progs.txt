@@ -22,15 +22,15 @@
 [Photoshop.exe]
 5lub Ooh! You like photo manipulation?
 [renpy.exe]
-2eua So, you know Python?
-2hub Perhaps I can learn something new from you.
+2euc So, you know Python?
+2huc Perhaps I can learn something new from you.
 [Spotify.exe|AIMP.exe]
-1eub Listening to music? Awesome, you know how much I love music!
-2hub You should listen to my song too~
+1euc Listening to music? Awesome, you know how much I love music!
+2huc You should listen to my song too~
 [Telegram.exe]
 1kub Tell your friends I said hi!
 [osu!.exe]
-4hub You can beat cookiezi!!!
+4huc You can beat cookiezi!!!
 5kub You can do better!
 5fub Try to get some pp this time
 [regedit.exe]
