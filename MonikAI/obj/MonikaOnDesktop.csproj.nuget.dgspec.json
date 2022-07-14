@@ -1,20 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\SAn4Es_TV\\Source\\Repos\\MonikaOnDesktop\\MonikAI\\MonikaOnDesktop.csproj": {}
+    "C:\\Users\\sanes\\source\\repos\\MonikaOnDesktop\\MonikAI\\MonikaOnDesktop.csproj": {}
   },
   "projects": {
-    "C:\\Users\\SAn4Es_TV\\Source\\Repos\\MonikaOnDesktop\\MonikAI\\MonikaOnDesktop.csproj": {
+    "C:\\Users\\sanes\\source\\repos\\MonikaOnDesktop\\MonikAI\\MonikaOnDesktop.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\SAn4Es_TV\\Source\\Repos\\MonikaOnDesktop\\MonikAI\\MonikaOnDesktop.csproj",
+        "projectUniqueName": "C:\\Users\\sanes\\source\\repos\\MonikaOnDesktop\\MonikAI\\MonikaOnDesktop.csproj",
         "projectName": "MonikaOnDesktop",
-        "projectPath": "C:\\Users\\SAn4Es_TV\\Source\\Repos\\MonikaOnDesktop\\MonikAI\\MonikaOnDesktop.csproj",
-        "packagesPath": "C:\\Users\\SAn4Es_TV\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\SAn4Es_TV\\Source\\Repos\\MonikaOnDesktop\\MonikAI\\obj\\",
+        "projectPath": "C:\\Users\\sanes\\source\\repos\\MonikaOnDesktop\\MonikAI\\MonikaOnDesktop.csproj",
+        "packagesPath": "C:\\Users\\sanes\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\sanes\\source\\repos\\MonikaOnDesktop\\MonikAI\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "D:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\SAn4Es_TV\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\sanes\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -83,7 +87,7 @@
               "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.101\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.302\\RuntimeIdentifierGraph.json"
         }
       }
     }

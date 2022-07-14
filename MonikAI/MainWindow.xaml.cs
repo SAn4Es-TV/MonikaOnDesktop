@@ -42,6 +42,7 @@ using Newtonsoft.Json.Linq;
 using System.Windows.Media.Media3D;
 using System.Drawing.Imaging;
 using System.Threading.Channels;
+using System.Net.NetworkInformation;
 
 namespace MonikaOnDesktop
 {
@@ -76,6 +77,7 @@ namespace MonikaOnDesktop
         public static bool IsNight => MonikaSettings.Default.DarkMode != "Day" &&
                                       (MonikaSettings.Default.DarkMode == "Night" || DateTime.Now.Hour > (MonikaSettings.Default.NightStart - 1) ||
                                        DateTime.Now.Hour < (MonikaSettings.Default.NightEnd + 1));               // Проверка День/Ночь
+        public bool oldIsNight;
         public static bool IsBDay => DateTime.Now.Month == 9 && DateTime.Now.Day == 22;                          // Проверка Дня Рождения
         private bool applicationRunning = true;     // Запущено ли приложение (серьёзно, так нужно =ъ)
         public bool isSpeaking = true;              // Идёт ли разговорчик
@@ -94,6 +96,7 @@ namespace MonikaOnDesktop
         public string lastProcess;                  // Имя прошлого процесса
         public string normalPose = "1esc";
         const string name = "MonikaStartUp";
+        public string lastQuery;
 
         CharacterModel Monika = new CharacterModel(AppDomain.CurrentDomain.BaseDirectory + "/characters/monika.chr", AppDomain.CurrentDomain.BaseDirectory + "/characters/"); // Персонаж Моники
         private Settings settingsWindow;            // Окно настроек
@@ -143,6 +146,7 @@ namespace MonikaOnDesktop
             #endregion
 
             InitializeComponent();                      // Инициализация ЮИ (Юзер Интерфейс)(Вроде для этого)
+            oldIsNight = IsNight;
             mainFilter = nightFilter;
             AllowsTransparency = true;
             DirectoryInfo dirInfo = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory + "/characters");
@@ -357,31 +361,43 @@ namespace MonikaOnDesktop
                         listener.Start();
                         //Console.WriteLine("Ожидание подключений...");
                         var nextBlink = DateTime.Now + TimeSpan.FromSeconds(random.Next(7, 50));
-                        Debug.WriteLine(this.applicationRunning);
                         while (this.applicationRunning)
                         {
                             // метод GetContext блокирует текущий поток, ожидая получение запроса 
                             HttpListenerContext context = listener.GetContext();
                             HttpListenerRequest request = context.Request;
                             string query = context.Request.QueryString["myurl"];
-                            // получаем объект ответа
-                            //Debug.WriteLine(query);
-                            //readSitesTxt(formatURL(query));
-                            // Check if currently speaking, only blink if not in dialog
-                            if (!isSpeaking)
+                            if (lastQuery != query)
                             {
-                                Debug.WriteLine("Открыт сайт: " + formatURL(query));
-                                //readLongXml(formatURL(query), sitesDialogPath, 1);
+                                // получаем объект ответа
+                                //Debug.WriteLine(query);
+                                //readSitesTxt(formatURL(query));
+                                // Check if currently speaking, only blink if not in dialog
+                                if (!isSpeaking)
+                                {
+                                    if (!formatURL(query).Contains("google.com/search?"))
+                                    {
+                                        Debug.WriteLine("Открыт сайт: " + formatURL(query));
+                                        readLongXml(formatURL(query), sitesDialogPath, 1);
+                                    }
+
+                                    if (formatURL(query).Contains("google.com/search?"))
+                                    {
+                                        Debug.WriteLine("Введён запрос Google: " + formatURL(query));
+                                        readLongXml(formatURL(query), googleDialogPath, 2);
+                                    }
+
+                                    if (formatURL(query).Contains("youtube.com/results?"))
+                                    {
+                                        Debug.WriteLine("Введён запрос Youtube: " + formatURL(query));
+                                        readLongXml(formatURL(query), youtubeDialogPath, 3);
+                                    }
+                                }
+                                lastQuery = query;
                             }
-                            if (!isSpeaking)
+                            else
                             {
-                                Debug.WriteLine("Введён запрос Google: " + formatURL(query));
-                                readLongXml(formatURL(query), googleDialogPath, 2);
-                            }
-                            if (!isSpeaking)
-                            {
-                                Debug.WriteLine("Введён запрос Youtube: " + formatURL(query));
-                                //readLongXml(formatURL(query), youtubeDialogPath, 3);
+                                Debug.WriteLine("Повторный запрос");
                             }
                             //readSitesTxt(formatURL(query));
                             //readGoogleTxt(formatURL(query));
@@ -529,7 +545,8 @@ namespace MonikaOnDesktop
                         }
                     });
                 });
-                //await checkUpdatesAsync();
+                if(isConectedToInternet())
+                    await checkUpdatesAsync();
 
             };
             this.BeginAnimation(OpacityProperty, _start);
@@ -568,17 +585,18 @@ namespace MonikaOnDesktop
         }
         public void loadGifts()
         {
-            foreach (string i in Monika.gifts)
-            {
-                string[] gift = i.Split(" | ");
-                BitmapImage bitmapImage = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/gifts/" + gift[1]), mainFilter));
-                System.Windows.Controls.Image img = new System.Windows.Controls.Image
+                foreach (string i in Monika.gifts)
                 {
-                    Source = bitmapImage,
-                    Name = gift[0]
-                };
-                RegisterName(gift[0], img);
-                gifts.Children.Add(img);
+                    string[] gift = i.Split(" | ");
+                    BitmapImage bitmapImage = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/gifts/" + gift[1]), mainFilter));
+                    System.Windows.Controls.Image img = new System.Windows.Controls.Image
+                    {
+                        Source = bitmapImage,
+                        Name = gift[0]
+                    };
+                    if(FindName(gift[0]) == null)
+                        RegisterName(gift[0], img);
+                    gifts.Children.Add(img);
             }
         }
         private void stopWatch_EventArrived(object sender, EventArrivedEventArgs e) // Ивент закрытия процесса
@@ -741,6 +759,23 @@ namespace MonikaOnDesktop
                 Debug.WriteLine("endOfDialog");
             }
         }
+        public bool isConectedToInternet()
+        {
+            try
+            {
+                Ping myPing = new Ping();
+                String host = "google.com";
+                byte[] buffer = new byte[32];
+                int timeout = 1000;
+                PingOptions pingOptions = new PingOptions();
+                PingReply reply = myPing.Send(host, timeout, buffer, pingOptions);
+                return (reply.Status == IPStatus.Success);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
         #region
         public async Task FirstLaunch()
         {
@@ -892,6 +927,11 @@ namespace MonikaOnDesktop
             string mouth = faceName[3].ToString();
 
             RedrawCostume(body, Monika.costumeName);
+            if (oldIsNight != IsNight)
+            {
+                RedrawGifts();
+                oldIsNight = IsNight;
+            }
             try
             {
                 this.Dispatcher.Invoke(() =>
@@ -1068,8 +1108,9 @@ namespace MonikaOnDesktop
                             this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[4] + ".png"), mainFilter));
                             break;
                     }
-                    if (body == 5) { Monika.leaningWord = "-leaning"; } else { Monika.leaningWord = ""; }
+                    if (body == 5) { Monika.leaningWord = "-leaning-def"; } else { Monika.leaningWord = ""; }
                     string hairPath = "hair" + Monika.leaningWord + "-" + Monika.hairType;
+                    if (body == 5) { Monika.leaningWord = "-leaning"; } else { Monika.leaningWord = ""; }
                     string nosePath = "face" + Monika.leaningWord + "-nose-def.png";
                     this.Face.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/face/" + nosePath), mainFilter));
                     this.Hair.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/h/" + hairPath + "-front.png"), mainFilter));
@@ -1160,6 +1201,28 @@ namespace MonikaOnDesktop
             {
 
             };
+        }
+        public void RedrawGifts()
+        {
+
+            this.Dispatcher.Invoke(() =>
+            {
+                gifts.Children.Clear();
+                foreach (string i in Monika.gifts)
+                {
+                    string[] gift = i.Split(" | ");
+                    BitmapImage bitmapImage = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/gifts/" + gift[1]), mainFilter));
+                    System.Windows.Controls.Image img = new System.Windows.Controls.Image
+                    {
+                        Source = bitmapImage,
+                        Name = gift[0]
+                    };
+                    if (FindName(gift[0]) != null)
+                        UnregisterName(gift[0]);
+                    RegisterName(gift[0], img);
+                    gifts.Children.Add(img);
+                }
+            });
         }
         public void UnpackCostume(string name)
         {
@@ -1566,7 +1629,7 @@ namespace MonikaOnDesktop
         string[] giftNameList;
         public void readLongXml(string Name, string sPath, int type)
         {
-            Debug.WriteLine("Ввели текст: " + Name);
+            //Debug.WriteLine("Ввели текст: " + Name);
             #region
             //string sPath = progsDialogPath;
             string mainXML = "<Mains>";
