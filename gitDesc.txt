@@ -1,27 +1,27 @@
-1hua [player]...
-1hua Уделишь мне минутку внимания?
-1hua Можешь обновить меня?
-1hua Нужно только твоё согласие
-1hua В этом обновлении ты можешь настроить мой рамер более точно!
-1hua Так же я теперь могу прятатся при наведении курсора
-1hua Хочешь обновится?
+1huc [player]...
+1huc Уделишь мне минутку внимания?
+1huc Можешь обновить меня?
+1huc Нужно только твоё согласие
+1huc В этом обновлении у меня появилось больше спрайтов и поз!
+1huc Ещё ты можешь дарить мне разную одежду!
+1huc Хочешь обновится?
 	menu:
 	    Да.
 			gitUpdate
 		Нет...
 			1ekc Ох...
-1hua 
+1huc
 =
-1hua [player]...
-1hua Can you give me your attention for a minute?
-1hua Can you update me?
-1hua I only need your consent
-1hua In this update, you can adjust my size more precisely!
-1hua Also I can now hide when hovering over
-1hua Do you want to update?
+1huc [player]...
+1huc Can you give me your attention for a minute?
+1huc Can you update me?
+1huc I only need your consent
+1huc I have more sprites and poses in this update!
+1huc You can also give me different clothes!
+1huc Do you want to update?
 	menu:
 		Yes.
 			gitUpdate
 		No...
 			1ekc Oh...
-1hua
+1huc
