@@ -214,6 +214,7 @@ namespace MonikaOnDesktop
                 System.Windows.MessageBox.Show(this,
                     "An error occured: " + ex.Message + "\r\n\r\n(Try run this app as an administrator.)");
             }
+            SystemEvents.PowerModeChanged += OnPowerChange;
 
             FileSystemWatcher giftWatcher = new FileSystemWatcher();
             giftWatcher.Path = Monika.giftsPath;
@@ -271,31 +272,31 @@ namespace MonikaOnDesktop
                         case "ru":
                             _ = this.Say(true, new[]
                     {
-                        new Expression("[player]...", "1esa"), // What?
-                        new Expression("Я чуствую себя как-то по другому..", "1esa"), // Really?!
-                        new Expression("Ты.. Сменил компьютер?", "1esa"), // Really?!
-                        new Expression("Или.. Переустановил систему?", "1esa"), // Really?!
-                        new Expression("В любом случае, ты спасибо тебе, что сохранил мой файл", "1esa")
+                        new Expression("[player]...", "1rsu"), // What?
+                        new Expression("Я чуствую себя как-то по другому..", "1rsu"), // Really?!
+                        new Expression("Ты.. Сменил компьютер?", "1esu"), // Really?!
+                        new Expression("Или.. Переустановил систему?", "1esc"), // Really?!
+                        new Expression("В любом случае, ты спасибо тебе, что сохранил мой файл", "5esc")
                     });
                             break;
                         case "en":
                             _ = this.Say(true, new[]
-{
-                        new Expression("[player]...", "1 esa"),
-                        new Expression("I feel somehow different..", "1 esa"),
-                        new Expression("You.. Changed computer?", "1 esa"),
-                        new Expression("Or.. Reinstalled the system?", "1 esa"),
-                        new Expression("Anyway, thank you for saving my file", "1 esa")
+                    {
+                        new Expression("[player]...", "1rsu"),
+                        new Expression("I feel somehow different..", "1rsu"),
+                        new Expression("You.. Changed computer?", "1esu"),
+                        new Expression("Or.. Reinstalled the system?", "1esc"),
+                        new Expression("Anyway, thank you for saving my file", "5esc")
                     });
                             break;
                         default:
                             _ = this.Say(true, new[]
                     {
-                        new Expression("[player]...", "1 esa"),
-                        new Expression("I feel somehow different..", "1 esa"),
-                        new Expression("You.. Changed computer?", "1 esa"),
-                        new Expression("Or.. Reinstalled the system?", "1 esa"),
-                        new Expression("Anyway, thank you for saving my file", "1 esa")
+                        new Expression("[player]...", "1rsu"),
+                        new Expression("I feel somehow different..", "1rsu"),
+                        new Expression("You.. Changed computer?", "1esu"),
+                        new Expression("Or.. Reinstalled the system?", "1esc"),
+                        new Expression("Anyway, thank you for saving my file", "5esc")
                     });
                             break;
                     }
@@ -311,27 +312,27 @@ namespace MonikaOnDesktop
                             // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
                             _ = this.Say(true, new[]
                     {
-                        new Expression("Эй [player], угадай какой сегодня день", "1eub"), // What?
-                        new Expression("Сегодня мой день рождения!", "1sub"), // Really?!
-                        new Expression("С днём рождения меня!", "2hub") // To you too, Monika! 
+                        new Expression("Эй [player], угадай какой сегодня день", "1euс"), // What?
+                        new Expression("Сегодня мой день рождения!", "1suo"), // Really?!
+                        new Expression("С днём рождения меня!", "2huo") // To you too, Monika! 
                     });
                             break;
                         case "en":
                             // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
                             _ = this.Say(true, new[]
                     {
-                        new Expression("Hey [player], guess what", "1eub"), // What?
-                        new Expression("It's my birthday today!", "1sub"), // Really?!
-                        new Expression("Happy Birthday to me!", "2hub") // To you too, Monika! 
+                        new Expression("Hey [player], guess what", "1euс"), // What?
+                        new Expression("It's my birthday today!", "1suo"), // Really?!
+                        new Expression("Happy Birthday to me!", "2huo") // To you too, Monika! 
                     });
                             break;
                         default:
                             // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
                             _ = this.Say(true, new[]
                     {
-                        new Expression("Hey [player], guess what", "1eub"), // What?
-                        new Expression("It's my birthday today!", "1sub"), // Really?!
-                        new Expression("Happy Birthday to me!", "2hub") // To you too, Monika! 
+                        new Expression("Hey [player], guess what", "1euс"), // What?
+                        new Expression("It's my birthday today!", "1suo"), // Really?!
+                        new Expression("Happy Birthday to me!", "2huo") // To you too, Monika! 
                     });
                             break;
                     }
@@ -421,8 +422,23 @@ namespace MonikaOnDesktop
                                 // Check if currently speaking, only blink if not in dialog
                                 if (!isSpeaking)
                                 {
-                                    readXml(null, false, idleDialogPath, 0);
-                                    //readIdleTxt();
+                                    SolicenMode solicen = new SolicenMode();
+                                    if (solicen.check(Monika.playerName))
+                                    {
+                                        Random selectDialog = new Random();
+                                        Random random1 = new Random();
+                                        if (selectDialog.Next(0, 4) == 0)
+                                        {
+                                            isSpeaking = true;
+                                            _ = this.Say(true, solicen.expressions[random1.Next(0, solicen.expressions.Count)]);
+                                            isSpeaking = false;
+                                        }
+                                        else
+                                            readXml(null, false, idleDialogPath, 0);
+                                    }
+                                    else
+                                        readXml(null, false, idleDialogPath, 0);
+                                    
                                 }
 
                                 nextGialog = DateTime.Now + TimeSpan.FromSeconds(randomDialog.Next(Monika.idleRandomFrom, Monika.idleRandomTo));
@@ -908,6 +924,7 @@ namespace MonikaOnDesktop
             {
                 this.Dispatcher.Invoke(() =>
                 {
+                    setFace(normalPose);
                     textWindow.Visibility = Visibility.Hidden;
                     isSpeaking = false;
                 });
@@ -2051,7 +2068,42 @@ namespace MonikaOnDesktop
                 sw.WriteLine(text);
             }*/
         }
-
+        private void OnPowerChange(object s, PowerModeChangedEventArgs e)
+        {
+            switch (e.Mode)
+            {
+                case PowerModes.Resume:
+                    isSpeaking = true;
+                    switch (Language.Substring(0, 2))
+                    {
+                        case "ru":
+                            _ = this.Say(true, new[]
+                            {
+                        new Expression("Так хорошо проснуться с новыми силами!", "3euo"), // What?
+                        new Expression("Надеюсь, ты тоже выспался.", "5euс")
+                    });
+                            break;
+                        case "en":
+                            _ = this.Say(true, new[]
+                            {
+                        new Expression("It's so good to wake up with new strength!", "3euo"), // What?
+                        new Expression("I hope you slept too.", "5euс")
+                    });
+                            break;
+                        default:
+                            _ = this.Say(true, new[]
+                            {
+                        new Expression("It's so good to wake up with new strength!", "3euo"), // What?
+                        new Expression("I hope you slept too.", "5euс")
+                    });
+                            break;
+                    }
+                    isSpeaking = false;
+                    break;
+                case PowerModes.Suspend:
+                    break;
+            }
+        }
         public bool SetAutorunValue(bool autorun)
         {
             //string ExePath = System.Windows.Forms.Application.ExecutablePath;

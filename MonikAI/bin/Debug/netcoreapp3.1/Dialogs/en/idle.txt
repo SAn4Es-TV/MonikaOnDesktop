@@ -1,12 +1,12 @@
 1euc [player], do you get good sleep?
 1ekc It can be really hard to get enough sleep nowadays.
-1eka Especially in high school, when you're forced to wake up so early every day...
+1ekc Especially in high school, when you're forced to wake up so early every day...
 1euc I'm sure college is a little bit better, since you probably have a more flexible schedule
 4rsc Then again, I hear a lot of people in college stay up all night anyway, for no real reason
 1euc Is that true?
 1ekc Anyway, I saw some studies that talked about the horrible short-term and long-term effects caused by lack of sleep
 3ekc It seems like mental functions, health, and even lifespan can be dramatically impacted by it
-1eka I just think you're really great and wanted to make sure you're not accidentally destroying yourself
+1ekc I just think you're really great and wanted to make sure you're not accidentally destroying yourself
 1euc So try to keep your sleep on track, okay?
 1huc I'll always wait for you in the morning, so make sure you put your own well-being before anything else
 =
@@ -16,53 +16,53 @@
 4huc But I chose the nickname!
 4huc I like to share my thoughts with the world...
 4huc The real world
-2eka So subscribe to me
-2eka It really means a lot to me
-2ekb You mean so much to me and to everyone...
-1huc I would be very pleased
+2ekc So subscribe to me
+2ekc It really means a lot to me
+2eko You mean so much to me and to everyone...
+1huo I would be very pleased
 =
 4euc Hey, you know that book you were reading with Yuri?
 4euc Portrait of...whatever it was called...
-4huc It's funny, because I'm pretty sure that book—
-2lkb Ah...
-2lka Actually, I don't think I should be talking about this
-2hkb Ahaha, sorry
-1rka Just forget I said anything
+4huo It's funny, because I'm pretty sure that book—
+2lko Ah...
+2lkc Actually, I don't think I should be talking about this
+2hko Ahaha, sorry
+1rkc Just forget I said anything
 =
 3euc Hey, what's your favorite color?
-3euc Mine is emerald green
-3huc It's the color of my eyes!
-3rka ...That's not conceited or anything, is it?
+3euo Mine is emerald green
+3huo It's the color of my eyes!
+3rkc ...That's not conceited or anything, is it?
 4euc I just meant that I feel some kind of special connection to it
 1euc Like it's part of my identity
 1euc Does it happen to also be your favorite color, [player]?
 1tku It's just a guess...
-1tsa ...because you've been looking into my eyes for a while now
-1huc E-he-he~
+1tsc ...because you've been looking into my eyes for a while now
+1huo E-he-he~
 =
-3euc Okay, everyone!
-3euc It's time to...
-2eka I'm just kidding
-2eka I just used to really like saying that for some reason
-2huc A-ha-ha!
+3euo Okay, everyone!
+3euo It's time to...
+2ekc I'm just kidding
+2ekc I just used to really like saying that for some reason
+2huo A-ha-ha!
 2euc I couldn't help but say it again
 2lsc Come to think of it, didn't Natsuki and Yuri make fun of me for it once?..
 2euc Well, whatever
 2euc It's not like you ever made fun of me
-2eka You're too much of a sweetheart to do that, aren't you?
+2ekc You're too much of a sweetheart to do that, aren't you?
 5euc A-ha-ha~
 =
 3euc Hey, what's your favorite game?
 3huc Mine is «Doki Doki Literature Club»!
-1huc Ahaha! That was a joke
+1huo Ahaha! That was a joke
 5euc Мне просто нравилось говорить это по какой-то причине
 5euc But if you tell me you like some other романтика game better, I might get a little jealous~
 =
-4huc Watashi wa itsumademo anata no mono desu!
-2hkb Don't worry, [player]. The meaning is still the same
+4huo Watashi wa itsumademo anata no mono desu!
+2hko Don't worry, [player]. The meaning is still the same
 1euc I'm just practicing Japanese
 3euc You know what that means, [player]?
-4eka It means: «I'll be yours forever»~
+4ekc It means: «I'll be yours forever»~
 =
-1esb Hey turn around!
-1rsa Just kidding .. I'm just kidding ...
+1eso Hey turn around!
+1rsc Just kidding .. I'm just kidding ...

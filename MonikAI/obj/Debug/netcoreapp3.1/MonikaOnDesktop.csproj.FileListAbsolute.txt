@@ -212,3 +212,5 @@ C:\Users\sanes\source\repos\MonikaOnDesktop\MonikAI\obj\Debug\netcoreapp3.1\Moni
 C:\Users\sanes\source\repos\MonikaOnDesktop\MonikAI\obj\Debug\netcoreapp3.1\MonikaOnDesktop.dll
 C:\Users\sanes\source\repos\MonikaOnDesktop\MonikAI\obj\Debug\netcoreapp3.1\MonikaOnDesktop.pdb
 C:\Users\sanes\source\repos\MonikaOnDesktop\MonikAI\obj\Debug\netcoreapp3.1\MonikaOnDesktop.genruntimeconfig.cache
+C:\Users\sanes\source\repos\MonikaOnDesktop\MonikAI\bin\Debug\netcoreapp3.1\Microsoft.Win32.SystemEvents.dll
+C:\Users\sanes\source\repos\MonikaOnDesktop\MonikAI\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp3.1\Microsoft.Win32.SystemEvents.dll

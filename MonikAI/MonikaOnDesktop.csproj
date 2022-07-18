@@ -333,6 +333,7 @@
     <PackageReference Include="Lyre" Version="1.0.10" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.7" />
     <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.2" />
+    <PackageReference Include="Microsoft.Win32.SystemEvents" Version="6.0.1" />
     <PackageReference Include="System.Management" Version="5.0.0" />
     <PackageReference Include="uHttpSharp" Version="0.1.6.22" />
   </ItemGroup>
