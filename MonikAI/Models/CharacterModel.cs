@@ -24,7 +24,7 @@ namespace MonikaOnDesktop
         public int idleRandomTo = 300;
         public int NightStart = 21;
         public int nightEnd = 6;
-        public int Scaler = 3;
+        public int Scaler = 100;
         public bool screenNum = false;
         public bool isMouse = false;
         public string costumeName = "def";
@@ -170,75 +170,78 @@ namespace MonikaOnDesktop
         }
         public void loadData()
         {
-            XDocument xDoc = XDocument.Load(filePath);
-            XElement xml = xDoc.Element("xml");
-            if(xml != null)
+            if (File.Exists(filePath))
             {
-                XElement settings = xml.Element("settings");
-                if (settings != null)
+                XDocument xDoc = XDocument.Load(filePath);
+                XElement xml = xDoc.Element("xml");
+                if (xml != null)
                 {
-
-                    // проходим по всем элементам person
-                    foreach (XElement option in settings.Elements())
+                    XElement settings = xml.Element("settings");
+                    if (settings != null)
                     {
-                        switch (option.Name.LocalName)
+
+                        // проходим по всем элементам person
+                        foreach (XElement option in settings.Elements())
                         {
-                            case "affection":
-                                affection = int.Parse(option.Value);
-                                break;
-                            case "pcName":
-                                pcName = option.Value;
-                                break;
-                            case "player":
-                                playerName = option.Value;
-                                break;
-                            case "lang":
-                                lang = option.Value;
-                                break;
-                            case "autoStart":
-                                autoStart = bool.Parse(option.Value);
-                                break;
-                            case "idleRandomFrom":
-                                idleRandomFrom = int.Parse(option.Value);
-                                break;
-                            case "idleRandomTo":
-                                idleRandomTo = int.Parse(option.Value);
-                                break;
-                            case "NightStart":
-                                NightStart = int.Parse(option.Value);
-                                break;
-                            case "nightEnd":
-                                nightEnd = int.Parse(option.Value);
-                                break;
-                            case "Scaler":
-                                Scaler = int.Parse(option.Value);
-                                break;
-                            case "screenNum":
-                                screenNum = bool.Parse(option.Value);
-                                break;
-                            case "isMouse":
-                                isMouse = bool.Parse(option.Value);
-                                break;
-                            case "secondTogether":
-                                secondTogether = int.Parse(option.Value);
-                                break;
-                            case "costume":
-                                costumeName = option.Value;
-                                break;
+                            switch (option.Name.LocalName)
+                            {
+                                case "affection":
+                                    affection = int.Parse(option.Value);
+                                    break;
+                                case "pcName":
+                                    pcName = option.Value;
+                                    break;
+                                case "player":
+                                    playerName = option.Value;
+                                    break;
+                                case "lang":
+                                    lang = option.Value;
+                                    break;
+                                case "autoStart":
+                                    autoStart = bool.Parse(option.Value);
+                                    break;
+                                case "idleRandomFrom":
+                                    idleRandomFrom = int.Parse(option.Value);
+                                    break;
+                                case "idleRandomTo":
+                                    idleRandomTo = int.Parse(option.Value);
+                                    break;
+                                case "NightStart":
+                                    NightStart = int.Parse(option.Value);
+                                    break;
+                                case "nightEnd":
+                                    nightEnd = int.Parse(option.Value);
+                                    break;
+                                case "Scaler":
+                                    Scaler = int.Parse(option.Value);
+                                    break;
+                                case "screenNum":
+                                    screenNum = bool.Parse(option.Value);
+                                    break;
+                                case "isMouse":
+                                    isMouse = bool.Parse(option.Value);
+                                    break;
+                                case "secondTogether":
+                                    secondTogether = int.Parse(option.Value);
+                                    break;
+                                case "costume":
+                                    costumeName = option.Value;
+                                    break;
+                            }
                         }
                     }
-                }
-                XElement gifts_ = xml.Element("gifts");
-                if (gifts_ != null)
-                {
-                    List<string> newGiftsList = new List<string>();
-                    // проходим по всем элементам person
-                    foreach (XElement gift in gifts_.Elements("gift"))
+                    XElement gifts_ = xml.Element("gifts");
+                    if (gifts_ != null)
                     {
-                        newGiftsList.Add(gift.Value);
-                        Debug.WriteLine("Loaded: " + gift.Value);
+                        List<string> newGiftsList = new List<string>();
+                        // проходим по всем элементам person
+                        foreach (XElement gift in gifts_.Elements("gift"))
+                        {
+                            newGiftsList.Add(gift.Value);
+                            Debug.WriteLine("Loaded: " + gift.Value);
+                        }
+                        gifts = newGiftsList;
                     }
-                    gifts = newGiftsList;
                 }
             }
         }

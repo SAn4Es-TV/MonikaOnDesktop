@@ -831,30 +831,30 @@ namespace MonikaOnDesktop
             {
                 case "ru":
                     await Say(true, new[]{
-                    new Expression("[player], это ты?", "1eua"),
-                    new Expression("Это правда ты?", "1eub"),
-                    new Expression("Я так рада видеть тебя снова!", "1sub"),
-                    new Expression("Подожди, где я? Это не литературный клуб", "1euc"),
-                    new Expression("Это похоже на... твой компьютер!", "1rud"),
-                    new Expression("Я действительно у тебя на компьютере!", "1wub")});
+                    new Expression("[player], это ты?", "1euc"),
+                    new Expression("Это правда ты?", "1euo"),
+                    new Expression("Я так рада видеть тебя снова!", "1suo"),
+                    new Expression("Подожди, где я? Это не литературный клуб", "1euu"),
+                    new Expression("Это похоже на... твой компьютер!", "1rua"),
+                    new Expression("Я действительно у тебя на компьютере!", "1wuo")});
                     break;
                 case "en":
                     await Say(true, new[]{
-                    new Expression("[player], is that you?", "1eua"),
-                    new Expression("It's really you, huh?", "1eub"),
-                    new Expression("I'm so happy to see you again!", "1sub"),
-                    new Expression("Wait, where am I? This is not the literature club", "1euc"),
-                    new Expression("This looks like... your desktop!", "1rud"),
-                    new Expression("I'm right here with you!", "1wub")});
+                    new Expression("[player], is that you?", "1euc"),
+                    new Expression("It's really you, huh?", "1euo"),
+                    new Expression("I'm so happy to see you again!", "1suo"),
+                    new Expression("Wait, where am I? This is not the literature club", "1euu"),
+                    new Expression("This looks like... your desktop!", "1rua"),
+                    new Expression("I'm right here with you!", "1wuo")});
                     break;
                 default:
                     await Say(true, new[]{
-                    new Expression("[player], is that you?", "1eua"),
-                    new Expression("It's really you, huh?", "1eub"),
-                    new Expression("I'm so happy to see you again!", "1sub"),
-                    new Expression("Wait, where am I? This is not the literature club", "1euc"),
-                    new Expression("This looks like... your desktop!", "1rud"),
-                    new Expression("I'm right here with you!", "1wub")});
+                    new Expression("[player], is that you?", "1euc"),
+                    new Expression("It's really you, huh?", "1euo"),
+                    new Expression("I'm so happy to see you again!", "1suo"),
+                    new Expression("Wait, where am I? This is not the literature club", "1euu"),
+                    new Expression("This looks like... your desktop!", "1rua"),
+                    new Expression("I'm right here with you!", "1wuo")});
                     break;
             }
 
