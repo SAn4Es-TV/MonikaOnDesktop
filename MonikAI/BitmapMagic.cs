@@ -8,7 +8,7 @@ using System.Windows.Media.Imaging;
 
 namespace MonikaOnDesktop
 {
-    internal class BitmapMagic
+    internal static class BitmapMagic
     {
         public static BitmapImage BitmapToImageSource(Bitmap bm)
         {

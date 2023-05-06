@@ -143,7 +143,7 @@ namespace MonikaOnDesktop
             XElement screenNum_ = new XElement("screenNum"); screenNum_.Value = screenNum.ToString();
             XElement isMouse_ = new XElement("isMouse"); isMouse_.Value = isMouse.ToString();
             XElement secondTogether_ = new XElement("secondTogether"); secondTogether_.Value = secondTogether.ToString();
-            XElement costume_ = new XElement("costume"); costume_.Value = costumeName.ToString();
+            XElement costume_ = new XElement("costume"); costume_.Value = costumeName;
 
             mainSettings.Add(affection_);
             mainSettings.Add(pcName_);

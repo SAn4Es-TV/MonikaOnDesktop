@@ -22,7 +22,7 @@ namespace MonikaOnDesktop
     /// </summary>
     public partial class Settings : Window
     {
-        TextBlock t;
+        private TextBlock t;
         private readonly MainWindow mainWindow;
         public Settings(MainWindow mainWindow)
         {

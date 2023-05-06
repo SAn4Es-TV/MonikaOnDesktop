@@ -35,7 +35,7 @@ namespace MonikaOnDesktop.Models
                 metrics = prect;
             }
 
-            public ScreenRect metrics;
+            private ScreenRect metrics;
         }
 
         static LinkedList<WpfScreen> allScreens = new LinkedList<WpfScreen>();
@@ -50,7 +50,7 @@ namespace MonikaOnDesktop.Models
         {
             allScreens.Clear();
             int monCount = 0;
-            MonitorEnumProc callback = (IntPtr hDesktop, IntPtr hdc, ref ScreenRect prect, int d) =>
+            MonitorEnumProc callback = (IntPtr _, IntPtr hdc, ref ScreenRect prect, int d) =>
             {
                 Debug.WriteLine("Left {0}", prect.left);
                 Debug.WriteLine("Right {0}", prect.right);

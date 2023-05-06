@@ -39,7 +39,7 @@ namespace MonikaOnDesktop
         public static extern bool DeleteObject(object hObject);
 
         #region Всякое
-        SolicenTEAM.Updater.UpdateConfig updateConfig = new SolicenTEAM.Updater.UpdateConfig()
+        readonly SolicenTEAM.Updater.UpdateConfig updateConfig = new SolicenTEAM.Updater.UpdateConfig()
         {
             gitUser = "SAn4Es-TV",
             gitRepo = "MonikaOnDesktop",
@@ -53,12 +53,12 @@ namespace MonikaOnDesktop
 
         String playerName;              // Имя игрока
 
-        public int delay1 = 0;          // Задержка
+        private int delay1 = 0;          // Задержка
         #endregion
         #region Пути
         protected readonly static string baseDir = AppDomain.CurrentDomain.BaseDirectory; // Папка запуска
         protected readonly string assetsPath = "pack://application:,,,/assets";           // Папка ассетов
-        public string ExePath = baseDir + "MonikaOnDesktop.exe"; // Путь к ЕХЕ
+        protected readonly string ExePath = baseDir + "MonikaOnDesktop.exe"; // Путь к ЕХЕ
         private string greetingsDialogPath = baseDir + "/Dialogs/greetings.txt"; // Приветствия
         private string idleDialogPath = baseDir + "/Dialogs/idle.txt";           // Рандомные диалоги
         private string progsDialogPath = baseDir + "/Dialogs/progs.txt";         // Реакции на программы
