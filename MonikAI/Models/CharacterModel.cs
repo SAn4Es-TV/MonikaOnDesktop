@@ -51,7 +51,7 @@ namespace MonikaOnDesktop
 
         public string leaningWord = "leaning";
         public string nullPath = "null";
-        public string[] body = new string[] { "arms-crossed-5",
+        public string[] body = new [] { "arms-crossed-5",
             "arms-crossed-10",
             "arms-leaning-def-left-def-10",
             "arms-leaning-def-right-def-5",
@@ -68,7 +68,7 @@ namespace MonikaOnDesktop
             "body-leaning-def-0",
             "body-leaning-def-1",
             "body-leaning-def-head"};
-        public string[] eyes = new string[] { "eyes-closedhappy",
+        public string[] eyes = new [] { "eyes-closedhappy",
             "eyes-closedsad",
             "eyes-crazy",
             "eyes-left",
@@ -82,12 +82,12 @@ namespace MonikaOnDesktop
             "eyes-wide",
             "eyes-winkleft",
             "eyes-winkright",};
-        public string[] eyesBrow = new string[] { "eyebrows-furrowed",
+        public string[] eyesBrow = new [] { "eyebrows-furrowed",
             "eyebrows-knit",
             "eyebrows-mid",
             "eyebrows-think",
             "eyebrows-up"};
-        public string[] mouth = new string[] { "mouth-angry",
+        public string[] mouth = new [] { "mouth-angry",
             "mouth-big",
             "mouth-gasp",
             "mouth-pout",
