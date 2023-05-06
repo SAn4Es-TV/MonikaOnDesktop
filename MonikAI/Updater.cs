@@ -68,9 +68,9 @@ namespace SolicenTEAM
             //Console.WriteLine(browserURL);
             Debug.WriteLine("browserURL - " + browserURL);
             WebClient webClient = new WebClient();
-            if (File.Exists(pathArchive))
-            File.Delete(pathArchive);
-
+            if (File.Exists(pathArchive)) {
+                File.Delete(pathArchive);
+            } 
             // Продолжает попытки скачать файл если выбивает ошибку пути.
             for (int i = 0; i < 10; i++)
             {
@@ -277,7 +277,11 @@ namespace SolicenTEAM
             }
         }
 
-        public async Task CheckUpdate(string GitUsername = null, string GitRepo = null)
+        public async Task CheckUpdate()
+        {
+            await CheckUpdate(null, null);
+        }
+        public async Task CheckUpdate(string GitUsername, string GitRepo)
         {
             if (GitUsername == null || GitRepo == null)
             {

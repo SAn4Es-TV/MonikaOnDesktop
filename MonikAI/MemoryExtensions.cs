@@ -50,7 +50,7 @@ namespace System
             Current = default;
             _sequence = span;
             _separator = separator;
-            _spanSplitInfo = default(SpanSplitInfo) | (removeEmptyEntries ? SpanSplitInfo.RemoveEmptyEntries : 0);
+            _spanSplitInfo = default(SpanSplitInfo);
         }
 
         /// <summary>

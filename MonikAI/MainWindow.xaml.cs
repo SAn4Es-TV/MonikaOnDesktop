@@ -189,10 +189,13 @@ namespace MonikaOnDesktop
             SetAutorunValue(Monika.autoStart);  // Ставим параметр автозапуска
 
             if (IsBDay)
+            {
                 Debug.WriteLine("Сегодня день рождения?: Да");
+            }
             else
+            {
                 Debug.WriteLine("Сегодня день рождения?: Нет");
-
+            }
             ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT UserName FROM Win32_ComputerSystem");  // Я хз что это
             ManagementObjectCollection collection = searcher.Get();  // Также
             ClearMemory();
@@ -231,10 +234,13 @@ namespace MonikaOnDesktop
         public void Window_Loaded(object sender, RoutedEventArgs e)     // Когда программа проснётся
         {
             ClearMemory();
-            if (IsNight)
+            if (IsNight) {
                 mainFilter = nightFilter;
-            else
+            }
+            else {
                 mainFilter = dayFilter;
+            }
+                
             /*
             new ToastContentBuilder()
        .AddArgument("action", "viewConversation")

@@ -243,6 +243,8 @@ namespace MonikaOnDesktop
                                 case "costume":
                                     costumeName = option.Value;
                                     break;
+                                default:
+                                    break;
                             }
                         }
                     }

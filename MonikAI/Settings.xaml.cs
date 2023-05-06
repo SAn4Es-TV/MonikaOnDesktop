@@ -171,6 +171,8 @@ namespace MonikaOnDesktop
                     case 4:
                         t.Text = (string)this.TryFindResource("s_labelDP5"); //"Очень часто(30 сек - 2 мин)";
                         break;
+                    default:
+                        break;
                 }
             }
         }
