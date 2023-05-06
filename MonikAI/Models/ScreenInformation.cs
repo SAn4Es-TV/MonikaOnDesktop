@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -9,12 +10,17 @@ namespace MonikaOnDesktop.Models
     public class ScreenInformation
     {
         [StructLayout(LayoutKind.Sequential)]
-        public struct ScreenRect
+        public struct ScreenRect : IEquatable<ScreenRect>
         {
             public int left;
             public int top;
             public int right;
             public int bottom;
+
+            public bool Equals(ScreenRect other)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         [DllImport("user32")]

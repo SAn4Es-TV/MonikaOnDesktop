@@ -5,44 +5,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Management;
-using System.Threading;
 using System.IO;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 using System.Net;
-using System.Windows.Automation;
-using Lyre;
 using System.Globalization;
 using System.Web;
 using System.Xml;
 using MonikaOnDesktop.Models;
-using static System.Net.Mime.MediaTypeNames;
-using System.Numerics;
-using System.Xml.Linq;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
-using Microsoft.Toolkit.Uwp.Notifications;
 using System.IO.Compression;
-using Windows.UI.Xaml.Shapes;
 using System.Windows.Threading;
-using System.Drawing;
-using Windows.UI.Xaml.Controls;
-using Newtonsoft.Json.Linq;
-using System.Windows.Media.Media3D;
-using System.Drawing.Imaging;
-using System.Threading.Channels;
 using System.Net.NetworkInformation;
 #endregion
 namespace MonikaOnDesktop
@@ -52,7 +32,21 @@ namespace MonikaOnDesktop
     /// </summary>
     public partial class MainWindow : Window
     {
+        [DllImport("kernel32.dll")]
+        static extern bool SetProcessWorkingSetSize(IntPtr hProcess, int dwMinimumWorkingSetSize, int dwMaximumWorkingSetSize);
+
+        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        public static extern bool DeleteObject(object hObject);
+
         #region Всякое
+        SolicenTEAM.Updater.UpdateConfig updateConfig = new SolicenTEAM.Updater.UpdateConfig()
+        {
+            gitUser = "SAn4Es-TV",
+            gitRepo = "MonikaOnDesktop",
+            IgnoreFiles = "characters/monika.chr",
+            ExeFileName = "MonikaOnDesktop"
+        };
+
 
         public DoubleAnimation _start;  // Анимация запуска
         public DoubleAnimation _quit;   // Анимация выхода
@@ -65,15 +59,15 @@ namespace MonikaOnDesktop
         protected readonly static string baseDir = AppDomain.CurrentDomain.BaseDirectory; // Папка запуска
         protected readonly string assetsPath = "pack://application:,,,/assets";           // Папка ассетов
         public string ExePath = baseDir + "MonikaOnDesktop.exe"; // Путь к ЕХЕ
-        string greetingsDialogPath = baseDir + "/Dialogs/greetings.txt"; // Приветствия
-        string idleDialogPath = baseDir + "/Dialogs/idle.txt";           // Рандомные диалоги
-        string progsDialogPath = baseDir + "/Dialogs/progs.txt";         // Реакции на программы
-        string sitesDialogPath = baseDir + "/Dialogs/sites.txt";         // Реакции на сайты
-        string googleDialogPath = baseDir + "/Dialogs/google.txt";       // Реакции на запросы Гугуля
-        string youtubeDialogPath = baseDir + "/Dialogs/youtube.txt";     // Реакции на запросы Утуба
-        string goodbyeDialogPath = baseDir + "/Dialogs/goodbye.txt";     // Прощания
-        string giftsDialogPath = baseDir + "/Dialogs/ru/gifts/gifts.txt";// Подарки
-        string updateDialogPath = baseDir + "/Dialogs/upd.txt";          // Подарки
+        private string greetingsDialogPath = baseDir + "/Dialogs/greetings.txt"; // Приветствия
+        private string idleDialogPath = baseDir + "/Dialogs/idle.txt";           // Рандомные диалоги
+        private string progsDialogPath = baseDir + "/Dialogs/progs.txt";         // Реакции на программы
+        private string sitesDialogPath = baseDir + "/Dialogs/sites.txt";         // Реакции на сайты
+        private string googleDialogPath = baseDir + "/Dialogs/google.txt";       // Реакции на запросы Гугуля
+        private string youtubeDialogPath = baseDir + "/Dialogs/youtube.txt";     // Реакции на запросы Утуба
+        private string goodbyeDialogPath = baseDir + "/Dialogs/goodbye.txt";     // Прощания
+        private string giftsDialogPath = baseDir + "/Dialogs/ru/gifts/gifts.txt";// Подарки
+        private string updateDialogPath = baseDir + "/Dialogs/upd.txt";          // Подарки
         #endregion
         #region Переменные
         public static bool IsNight => MonikaSettings.Default.DarkMode != "Day" &&
@@ -100,7 +94,7 @@ namespace MonikaOnDesktop
         const string name = "MonikaStartUp";
         public string lastQuery;
 
-        CharacterModel Monika = new CharacterModel(baseDir + "/characters/monika.chr", baseDir + "/characters/"); // Персонаж Моники
+        readonly CharacterModel Monika = new CharacterModel(baseDir + "/characters/monika.chr", baseDir + "/characters/"); // Персонаж Моники
         private Settings settingsWindow;            // Окно настроек
 
         private NotifyIcon NI = new NotifyIcon();
@@ -146,8 +140,9 @@ namespace MonikaOnDesktop
                 monika.Close();
             }*/
             #endregion
-
+            ClearMemory();
             InitializeComponent();                      // Инициализация ЮИ (Юзер Интерфейс)(Вроде для этого)
+            SetProcessWorkingSetSize(Process.GetCurrentProcess().Handle, -1, -1); // Ограничиваем приложению доступ к оперативной памяти - Солицен
             oldIsNight = IsNight;
             mainFilter = nightFilter;
             AllowsTransparency = true;
@@ -159,8 +154,8 @@ namespace MonikaOnDesktop
             Monika.loadData();
             firsLaunch = !Monika.fileExist();           // Если файла нету, то это первый запуск
 
-            SolicenTEAM.Updater.ExeFileName = "MonikaOnDesktop"; // Имя ЕХЕ для перезапука
-            SolicenTEAM.Updater.IgnoreFiles = "characters/monika.chr";     //  игнорируемый файл
+            //SolicenTEAM.Updater.ExeFileName = "MonikaOnDesktop"; // Имя ЕХЕ для перезапука
+            //SolicenTEAM.Updater.IgnoreFiles = "characters/monika.chr";     //  игнорируемый файл
 
             this.settingsWindow = new Settings(this);   // Объявляем окно настроек (так нужно)
             MonikaSettings.Default.Reload();            // Читаем настройки
@@ -200,7 +195,7 @@ namespace MonikaOnDesktop
 
             ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT UserName FROM Win32_ComputerSystem");  // Я хз что это
             ManagementObjectCollection collection = searcher.Get();  // Также
-
+            ClearMemory();
             try
             {
                 ManagementEventWatcher startWatch = new ManagementEventWatcher(new WqlEventQuery("SELECT * FROM Win32_ProcessStartTrace"));
@@ -215,6 +210,7 @@ namespace MonikaOnDesktop
             {
                 System.Windows.MessageBox.Show(this,
                     "An error occured: " + ex.Message + "\r\n\r\n(Try run this app as an administrator.)");
+                ClearMemory();
             }
             SystemEvents.PowerModeChanged += OnPowerChange;
 
@@ -234,6 +230,7 @@ namespace MonikaOnDesktop
         }
         public void Window_Loaded(object sender, RoutedEventArgs e)     // Когда программа проснётся
         {
+            ClearMemory();
             if (IsNight)
                 mainFilter = nightFilter;
             else
@@ -441,6 +438,7 @@ namespace MonikaOnDesktop
                         {
                             if (DateTime.Now >= nextBlink)
                             {
+                                GC.Collect(0);
                                 // Check if currently speaking, only blink if not in dialog
                                 if (!isSpeaking)
                                 {
@@ -458,7 +456,11 @@ namespace MonikaOnDesktop
 
                                 nextBlink = DateTime.Now + TimeSpan.FromSeconds(random.Next(7, 50));
                                 Debug.WriteLine(nextBlink);
+
+                                GC.Collect(1);
+                                GC.Collect(GC.MaxGeneration, GCCollectionMode.Optimized);
                             }
+
                         }
                     });
                 });
@@ -584,7 +586,8 @@ namespace MonikaOnDesktop
         }
         public void loadGifts()
         {
-                foreach (string i in Monika.gifts)
+                var spanGifts = CollectionsMarshal.AsSpan(Monika.gifts);
+                foreach (string i in spanGifts)
                 {
                     string[] gift = i.Split(" | ");
                     BitmapImage bitmapImage = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(baseDir + "/Dialogs/ru/gifts/" + gift[1]), mainFilter));
@@ -596,6 +599,7 @@ namespace MonikaOnDesktop
                     if(FindName(gift[0]) == null)
                         RegisterName(gift[0], img);
                     gifts.Children.Add(img);
+                    DeleteObject(bitmapImage);
             }
         }
         private void stopWatch_EventArrived(object sender, EventArrivedEventArgs e) // Ивент закрытия процесса
@@ -724,16 +728,19 @@ namespace MonikaOnDesktop
         }
         public async Task checkUpdatesAsync()
         {
-            await SolicenTEAM.Updater.CheckUpdate("SAn4Es-TV", "MonikaOnDesktop");  // Проверяем наличие обновления
             bool updateIsAvaliable = false;
-            Debug.WriteLine("This Ver: " + SolicenTEAM.Updater.CurrentVersion);
-            Debug.WriteLine("New Ver: " + SolicenTEAM.Updater.UpdateVersion);
-            Debug.WriteLine("New Desc: " + SolicenTEAM.Updater.UpdateDescription);
-            if (SolicenTEAM.Updater.UpdateVersion == SolicenTEAM.Updater.CurrentVersion)
+            ClearMemory();
+            using (SolicenTEAM.Updater updater = new SolicenTEAM.Updater(updateConfig))
             {
-                updateIsAvaliable = false;
+                await updater.CheckUpdate(); // Проверяем наличие обновления
+
+                Debug.WriteLine("This Ver: " + updater.CurrentVersion);
+                Debug.WriteLine("New Ver: " + updater.UpdateVersion);
+                Debug.WriteLine("New Desc: " + updater.UpdateDescription);
+                if (updater.UpdateVersion != updater.CurrentVersion) 
+                    updateIsAvaliable = true;
             }
-            else
+            if (updateIsAvaliable)
             {
                 while (isSpeaking)
                 {
@@ -856,6 +863,7 @@ namespace MonikaOnDesktop
         #endregion
         public async Task Say(bool auto, Expression[] expression)
         {
+            ClearMemory();
             if (auto) isSpeaking = true;
 
             this.Dispatcher.Invoke(() =>
@@ -914,8 +922,18 @@ namespace MonikaOnDesktop
             }
 
         }
+
+        private void ClearMemory()
+        {
+            SetProcessWorkingSetSize(Process.GetCurrentProcess().Handle, -1, -1);
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);
+            GC.WaitForPendingFinalizers();
+            GC.Collect(0);
+        }
         public void setFace(string faceName)
         {
+            ClearMemory();
+
             if (IsNight)
                 mainFilter = nightFilter;
             else
@@ -1006,7 +1024,7 @@ namespace MonikaOnDesktop
                             break;
                     }
                     if (body == 5) { Monika.leaningWord = "leaning-def-"; } else { Monika.leaningWord = ""; }
-
+                    DeleteObject(Eyes);
                     switch (eye)
                     {
                         case "e":
@@ -1055,6 +1073,7 @@ namespace MonikaOnDesktop
                             this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fe/face-" + Monika.leaningWord + Monika.eyes[4] + ".png"), mainFilter));
                             break;
                     }
+                    DeleteObject(EyeBrow);
                     switch (eyebrow)
                     {
                         case "u":
@@ -1076,6 +1095,7 @@ namespace MonikaOnDesktop
                             this.EyeBrow.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"), mainFilter));
                             break;
                     }
+                    DeleteObject(Mouth);
                     switch (mouth)
                     {
                         case "a":
@@ -1113,6 +1133,10 @@ namespace MonikaOnDesktop
                     string hairPath = "hair" + Monika.leaningWord + "-" + Monika.hairType;
                     if (body == 5) { Monika.leaningWord = "-leaning"; } else { Monika.leaningWord = ""; }
                     string nosePath = "face" + Monika.leaningWord + "-nose-def.png";
+
+
+                    DeleteObject(Face); DeleteObject(Hair); DeleteObject(HairBack);
+                   
                     this.Face.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/face/" + nosePath), mainFilter));
                     this.Hair.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/h/" + hairPath + "-front.png"), mainFilter));
                     this.HairBack.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/h/" + hairPath + "-back.png"), mainFilter));
@@ -1222,6 +1246,7 @@ namespace MonikaOnDesktop
                         UnregisterName(gift[0]);
                     RegisterName(gift[0], img);
                     gifts.Children.Add(img);
+                    DeleteObject(bitmapImage);
                 }
             });
         }
@@ -1382,13 +1407,14 @@ namespace MonikaOnDesktop
         }
         #region
         #region
-        List<DialogModel> dm = new List<DialogModel>();
+        Memory<DialogModel> dm = new Memory<DialogModel>();
         int num = 0;
         public async void readXml(Stream stream, bool typ, string sPath, int type)
         {
+            GC.Collect(); // Попытка сразу очистить память
             // string sPath = idleDialogPath;
-            string mainXML = "<Dialogs>\n\t<Dialog>";
-
+            StringBuilder mainXML = new StringBuilder();
+            mainXML.Append("<Dialogs>\n\t<Dialog>");
             StreamReader f;
             if (typ)
             {
@@ -1428,13 +1454,13 @@ namespace MonikaOnDesktop
                 {
                     S = s.Insert(0, "\n\t\t<Text>") + "</Text>";
                 }
-                mainXML += S;
+                mainXML.Append(S);
             }
             f.Close();
 
-            mainXML += "\n\t</Dialog>\n</Dialogs>";
-            string mainxml = mainXML.Replace("\n\t\t<Text>=</Text>", "\n\t</Dialog>\n\t<Dialog>");
-            string mainXml = mainxml.Replace("\n\t\t\t</Answer>\n\t\t</Menu>\n\t\t\t\t<Text>", "\n\t\t\t\t<Text>")
+            mainXML.Append("\n\t</Dialog>\n</Dialogs>");
+            string mainxml = mainXML.ToString().Replace("\n\t\t<Text>=</Text>", "\n\t</Dialog>\n\t<Dialog>");
+            string mainXml = mainxml.ToString().Replace("\n\t\t\t</Answer>\n\t\t</Menu>\n\t\t\t\t<Text>", "\n\t\t\t\t<Text>")
                 .Replace("\n\t\t\t</Answer>\n\t\t</Menu>\n\t\t\t<Answer", "\n\t\t\t<Answer")
                 .Replace("</Text>\n\t\t\t<Answer", "</Text>\n\t\t\t</Answer>\n\t\t\t<Answer")
                 .Replace("<Text>affection+</Text>", "<Action>affection + 1</Action>")
@@ -1460,8 +1486,7 @@ namespace MonikaOnDesktop
                     idm.Add(new DialogModel(xnode));
                 }
             }
-            dm = idm;
-            Random rnd = new Random();
+            dm = idm.ToArray();
             switch (type)
             {
                 case 0:
@@ -1477,7 +1502,7 @@ namespace MonikaOnDesktop
                     //lastLastDialog = lastDialog;
                     lastDialog = num;
                     Debug.WriteLine("Диалог не совпадает с старым, показываю: " + lastDialog);
-                    sayIdle();
+                    await sayIdle();
                     break;
                 case 1:
                     num = rnd.Next(idm.Count);
@@ -1490,22 +1515,22 @@ namespace MonikaOnDesktop
                     {
                         case "ru":
                             num = 0;
-                            sayIdle();
+                            await sayIdle();
                             break;
                         case "en":
                             num = 1;
-                            sayIdle();
+                            await sayIdle();
                             break;
                         default:
                             num = 1;
-                            sayIdle();
+                            await sayIdle();
                             break;
                     }
                     break;
             }
-
+            
             #endregion
-
+            
         }
         int dialogNum;
         public async Task sayIdle()
@@ -1513,10 +1538,10 @@ namespace MonikaOnDesktop
             isSpeaking = true;
             this.Dispatcher.Invoke(() => { textWindow.Visibility = Visibility.Visible; });
             //Debug.WriteLine(dm[num].Node.InnerXml);
-            for (int u = dialogNum; u < dm[num].Node.ChildNodes.Count; u++)
+            for (int u = dialogNum; u < dm.Span[num].Node.ChildNodes.Count; u++)
             {
                 int delay = 0;
-                XmlNode childnode = dm[num].Node.ChildNodes[u];
+                XmlNode childnode = dm.Span[num].Node.ChildNodes[u];
                 // если узел age
                 if (childnode.Name == "Menu")
                 {
@@ -1529,11 +1554,12 @@ namespace MonikaOnDesktop
                         Expression[] ex1 = new Expression[childnode.ChildNodes[i].ChildNodes.Count];
                         for (int a = 0; a < childnode.ChildNodes[i].ChildNodes.Count; a++)
                         {
-                            ex1[a] = new Expression(childnode.ChildNodes[i].ChildNodes[a].InnerText.Substring(5), childnode.ChildNodes[i].ChildNodes[a].InnerText.Substring(0, 4).ToString());
+                            ReadOnlyMemory<char> memoryChar = childnode.ChildNodes[i].ChildNodes[a].InnerText.ToCharArray();
+                            ex1[a] = new Expression(memoryChar.Slice(5).ToString(), memoryChar.Slice(0, 4).ToString());
                         }
                         ex[i] = ex1;
                     }
-                    Menu(dm[num].Node.ChildNodes[u - 1].InnerText.Substring(5), q, ex);
+                    Menu(dm.Span[num].Node.ChildNodes[u - 1].InnerText.Substring(5), q, ex);
                     dialogNum = u + 1;
                     //Debug.WriteLine("u = " + dialogNum + " count = " + (dm[num].Node.ChildNodes.Count - 1));
                     //Debug.WriteLine(dialogNum);
@@ -1541,14 +1567,16 @@ namespace MonikaOnDesktop
                 }
                 if (childnode.Name == "Text")
                 {
+                    ReadOnlyMemory<char> memoryChar = childnode.InnerText.ToCharArray();
+                    var stringChar = memoryChar.ToString();
                     //Console.WriteLine(childnode.InnerText);
                     //exList.Add(new Expression(childnode.InnerText.Substring(2), childnode.InnerText[0].ToString()));
                     try
                     {
-                        if (childnode.InnerText.Contains("affection"))
+                        if (stringChar.Contains("affection"))
                         {
-                            Debug.WriteLine("Тип кода: " + childnode.InnerText);
-                            string[] i = childnode.InnerText.Split(" ");
+                            Debug.WriteLine("Тип кода: " + stringChar);
+                            string[] i =stringChar.Split(" ");
                             switch (i[1])
                             {
                                 case "+":
@@ -1567,11 +1595,11 @@ namespace MonikaOnDesktop
                             Debug.WriteLine("Привязанность = " + Monika.affection);
 
                         }
-                        else if (childnode.InnerText.Contains("giftAdd"))
+                        else if (stringChar.Contains("giftAdd"))
                         {
                             try
                             {
-                                string[] i = childnode.InnerText.Split(" ");
+                                string[] i = stringChar.Split(" ");
                                 addGift(i[1], i[2]);
                             }
                             catch (Exception e)
@@ -1579,11 +1607,11 @@ namespace MonikaOnDesktop
                                 Debug.WriteLine(e.Message);
                             }
                         }
-                        else if (childnode.InnerText.Contains("giftRemove"))
+                        else if (stringChar.Contains("giftRemove"))
                         {
                             try
                             {
-                                string[] i = childnode.InnerText.Split(" ");
+                                string[] i = stringChar.Split(" ");
                                 removeGift(i[1]);
                             }
                             catch (Exception e)
@@ -1591,14 +1619,14 @@ namespace MonikaOnDesktop
                                 Debug.WriteLine(e.Message);
                             }
                         }
-                        else if (childnode.InnerText.Contains("gitUpdate"))
+                        else if (stringChar.Contains("gitUpdate"))
                         {
                             updateZip();
                         }
                         else
                         {
                             //Debug.WriteLine("Говорим: " + childnode.InnerText.Substring(5));
-                            await Say(false, new[] { new Expression(childnode.InnerText.Substring(5), childnode.InnerText.Substring(0, 4)) });
+                            await Say(false, new[] { new Expression(memoryChar.Slice(5).ToString(), memoryChar.Slice(0, 4).ToString()) });
                         }
                     }
                     catch
@@ -1607,7 +1635,7 @@ namespace MonikaOnDesktop
                     }
                     //Debug.WriteLine("u = " + dialogNum + " count = " + (dm[num].Node.ChildNodes.Count - 1));
                 }
-                if (u >= dm[num].Node.ChildNodes.Count - 1)
+                if (u >= dm.Span[num].Node.ChildNodes.Count - 1)
                 {
                     isSpeaking = false;
                     //Debug.WriteLine("Конец диалога");
@@ -1626,10 +1654,11 @@ namespace MonikaOnDesktop
         }
         #endregion
 
-        List<NamedDialogModel> ldm = new List<NamedDialogModel>();
-        string[] giftNameList;
+        Memory<NamedDialogModel> ldm = new Memory<NamedDialogModel>();
+        string[] giftNameList; Random rnd = new Random();
         public void readLongXml(string Name, string sPath, int type)
         {
+            ClearMemory();
             //Debug.WriteLine("Ввели текст: " + Name);
             #region
             //string sPath = progsDialogPath;
@@ -1719,10 +1748,8 @@ namespace MonikaOnDesktop
                     {
                         if (NDM.Names.Contains(Name))
                         {
-                            dm = NDM.DM;
-
-                            Random rnd = new Random();
-                            num = rnd.Next(dm.Count);
+                            dm = NDM.DM.ToArray();
+                            num = rnd.Next(dm.Length);
                             sayIdle();
                         }
                     }
@@ -1752,10 +1779,8 @@ namespace MonikaOnDesktop
                             }
                             if (Name.Contains(d))
                             {
-                                dm = NDM.DM;
-
-                                Random rnd = new Random();
-                                num = rnd.Next(dm.Count);
+                                dm = NDM.DM.ToArray();
+                                num = rnd.Next(dm.Length);
                                 sayIdle();
                             }
                         }
@@ -1790,10 +1815,8 @@ namespace MonikaOnDesktop
                                 var search = HttpUtility.UrlDecode(googleMatch.Groups[1].ToString()).Trim();
                                 if (search.ToLower().Trim().Contains(d))
                                 {
-                                    dm = NDM.DM;
-
-                                    Random rnd = new Random();
-                                    num = rnd.Next(dm.Count);
+                                    dm = NDM.DM.ToArray();
+                                    num = rnd.Next(dm.Length);
                                     sayIdle();
                                 }
                             }
@@ -1829,10 +1852,10 @@ namespace MonikaOnDesktop
                                 var search = HttpUtility.UrlDecode(youtubeMatch.Groups[1].ToString()).Trim();
                                 if (search.ToLower().Trim().Contains(d))
                                 {
-                                    dm = NDM.DM;
+                                    dm = NDM.DM.ToArray();
 
                                     Random rnd = new Random();
-                                    num = rnd.Next(dm.Count);
+                                    num = rnd.Next(dm.Length);
                                     _ = sayIdle();
                                 }
                             }
@@ -1845,7 +1868,7 @@ namespace MonikaOnDesktop
                         if (NDM.Names.Contains(Name))
                         {
 
-                            dm = NDM.DM;
+                            dm = NDM.DM.ToArray();
                             if (NDM.DM.Count != 1)
                             {
                                 Monika.loadData();
@@ -1865,14 +1888,14 @@ namespace MonikaOnDesktop
                                 giftNameList = NDM.Names;
                                 if (giftList.Contains(Name) || loadedGiftList.Contains(Name))
                                 {
-                                    Debug.WriteLine(dm[1].Node.InnerText);
+                                    Debug.WriteLine(dm.Span[1].Node.InnerText);
                                     num = 1;
                                     _ = sayIdle();
                                     Debug.WriteLine("Подарок уже дарили");
                                 }
                                 else
                                 {
-                                    Debug.WriteLine(dm[0].Node.InnerText);
+                                    Debug.WriteLine(dm.Span[0].Node.InnerText);
                                     num = 0;
                                     _ = sayIdle();
                                     Debug.WriteLine("Первый подарок");
@@ -1880,7 +1903,7 @@ namespace MonikaOnDesktop
                             }
                             else
                             {
-                                Debug.WriteLine(dm[0].Node.InnerText);
+                                Debug.WriteLine(dm.Span[0].Node.InnerText);
                                 num = 0;
                                 _ = sayIdle();
                                 Debug.WriteLine("Одиночный файл");
@@ -1946,37 +1969,19 @@ namespace MonikaOnDesktop
         {
             try
             {
-                await SolicenTEAM.Updater.CheckUpdate("SAn4Es-TV", "MonikaOnDesktop");
-                if (SolicenTEAM.Updater.UpdateVersion != SolicenTEAM.Updater.CurrentVersion && SolicenTEAM.Updater.UpdateVersion != "")
+                using (SolicenTEAM.Updater updater = new SolicenTEAM.Updater(updateConfig))
                 {
-                    SolicenTEAM.Updater.DownloadUpdate(SolicenTEAM.Updater.gitUser, SolicenTEAM.Updater.gitRepo);
-
-                    while (!SolicenTEAM.Updater.readyToUpdate)
+                    await updater.CheckUpdate("SAn4Es-TV", "MonikaOnDesktop");
+                    if (updater.UpdateVersion != updater.CurrentVersion && updater.UpdateVersion != "")
                     {
-                        Debug.WriteLine("Update is ready: " + SolicenTEAM.Updater.readyToUpdate);
-                        await Task.Delay(10);
+                        await updater.DownloadUpdate();
+                        while (!updater.readyToUpdate)
+                        {
+                            Debug.WriteLine("Update is ready: " + updater.readyToUpdate);
+                            await Task.Delay(10);
+                            await updater.ExtractArchive();
+                        }
                     }
-                    Debug.WriteLine("Update is ready: " + SolicenTEAM.Updater.readyToUpdate);
-                    SolicenTEAM.Updater.ExtractArchive();
-                    /*
-                    string processName = "Updater";
-                    var arrayProcesses = Process.GetProcessesByName(processName);
-                    while (arrayProcesses == null || arrayProcesses.Length < 1)
-                    {
-                        Debug.WriteLine("Starting Updater");
-                        Process.Start(baseDir + "/Updater.exe");
-                        arrayProcesses = Process.GetProcessesByName(processName);
-                        //Process proc = new Process();
-                        //proc.StartInfo.FileName = "C:\\HelloWorld.exe";
-                        await Task.Delay(2000);
-                    }
-                    Debug.WriteLine("Updater count: " + arrayProcesses.Length);
-                    await Task.Delay(100);
-                    /*
-                    Debug.WriteLine("Starting Updater");
-                    Process.Start("Updater.exe");
-                    Debug.WriteLine("Exiting");
-                    Environment.Exit(0);*/
                 }
                 Debug.WriteLine("Updated");
             }

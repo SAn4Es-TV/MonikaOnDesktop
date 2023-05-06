@@ -13,8 +13,24 @@ namespace MonikaOnDesktop
 {
     class CharacterModel
     {
-        public string filePath;
-        public string giftsPath;
+        private string _filePath;
+        public string filePath
+        {
+            get => _filePath;
+            set
+            {
+                _filePath = string.Intern(value);
+            }
+        }
+        private string _giftsPath;
+        public string giftsPath
+        {
+            get => _giftsPath;
+            set
+            {
+                _giftsPath = string.Intern(value);
+            }
+        }
         public int affection = 0;
         public string pcName;
         public string playerName;

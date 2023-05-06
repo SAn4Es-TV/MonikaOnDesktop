@@ -128,6 +128,8 @@ namespace MonikaOnDesktop
                     MonikaSettings.Default.idleRandomFrom = 30;
                     MonikaSettings.Default.idleRandomTo = 120;
                     break;
+                default:
+                    break;
             }
             MonikaSettings.Default.Save();/*
             RegistryKey currentUserKey = Registry.CurrentUser;
