@@ -339,6 +339,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="VGPrompter">
+      <HintPath>..\..\..\до переустановки винды\2\Downloads\VGPrompter.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="5a9a580ac2da1161eae7ea2e.png" />
     <Resource Include="assets\gui\choice_hover_background.png" />
     <Resource Include="assets\gui\choice_idle_background.png" />

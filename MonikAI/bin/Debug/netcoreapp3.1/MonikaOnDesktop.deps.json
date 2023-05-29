@@ -14,7 +14,8 @@
           "Microsoft.Toolkit.Uwp.Notifications": "7.1.2",
           "Microsoft.Win32.SystemEvents": "6.0.1",
           "System.Management": "5.0.0",
-          "uHttpSharp": "0.1.6.22"
+          "uHttpSharp": "0.1.6.22",
+          "VGPrompter": "1.0.0.0"
         },
         "runtime": {
           "MonikaOnDesktop.dll": {}
@@ -1023,6 +1024,14 @@
             "fileVersion": "0.1.5653.28566"
           }
         }
+      },
+      "VGPrompter/1.0.0.0": {
+        "runtime": {
+          "VGPrompter.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
       }
     }
   },
@@ -1745,6 +1754,11 @@
       "sha512": "sha512-k4n/JlTZGQ8dMbCxuhgQCdEjXbfiBJQHJAGBOpahhc7xD2h0DiwCK9nA6UgJF5jf4gj1SW/mecK66TOra6QLvg==",
       "path": "uhttpsharp/0.1.6.22",
       "hashPath": "uhttpsharp.0.1.6.22.nupkg.sha512"
+    },
+    "VGPrompter/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
     }
   }
 }

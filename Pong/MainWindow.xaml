@@ -1,0 +1,24 @@
+﻿<Window x:Class="Pong.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Pong"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid Background="#000">
+        <Grid>
+            <Label x:Name="meText" Content="Я" Foreground="#fff" FontSize="30" Margin="10,0,0,0"/>
+            <Label x:Name="monikaText" Content="Monika" Foreground="#fff" FontSize="30" Margin="0,0,10,0" HorizontalContentAlignment="Right"/>
+            <Label x:Name="meScoreText" Content="999" Foreground="#fff" FontSize="25" Margin="0,6,70,0" HorizontalContentAlignment="Center"/>
+            <Label x:Name="monikaScoreText" Content="999" Foreground="#fff" FontSize="25" Margin="70,6,00,0" HorizontalContentAlignment="Center"/>
+            <Grid Background="#fff" Height="2" Margin="0,50,0,0" VerticalAlignment="Top"/>
+        </Grid>
+        <Grid x:Name="board" Margin="0,50,0,0">
+            <Grid Background="#fff" Width="2" Margin="0,0,0,0"/>
+            <Grid x:Name="ball" Background="#fff" Width="10" Height="10" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+            <Grid x:Name="myRocket" Background="#fff" Width="7" Height="70" Margin="10,0,0,0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+            <Grid x:Name="monikaRocket" Background="#fff" Width="7" Height="70" Margin="0,0,10,0" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+        </Grid>
+    </Grid>
+</Window>
