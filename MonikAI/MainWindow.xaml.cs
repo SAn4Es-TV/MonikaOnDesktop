@@ -70,7 +70,17 @@ namespace MonikaOnDesktop {
         public bool oldIsNight;
         public static bool IsBDay => DateTime.Now.Month == 9 && DateTime.Now.Day == 22;                          // Проверка Дня Рождения
         private bool applicationRunning = true;     // Запущено ли приложение (серьёзно, так нужно =ъ)
-        public bool isSpeaking = true;              // Идёт ли разговорчик
+        //public bool isSpeaking = false;              // Идёт ли разговорчик
+        public bool _speak = false;
+        public bool isSpeaking {
+            get {
+                return _speak;
+            }
+            set {
+                Debug.WriteLine("ChageSpeak: " + value);
+                _speak = value;
+            }
+        }
         bool firsLaunch;                            // Первый ли запуск
 
         public int lastDialog;                      // Номер последнего диалога
@@ -207,7 +217,7 @@ namespace MonikaOnDesktop {
             giftWatcher.Created += GiftWatcher_Created;
             giftWatcher.EnableRaisingEvents = true;
             loadGifts();
-            
+
             /*
             FileSystemWatcher acsWatcher = new FileSystemWatcher();
             acsWatcher.Path = Monika.giftsPath;
@@ -235,6 +245,9 @@ namespace MonikaOnDesktop {
             Monika.loadData(); // Грузим данные 
             SetupScale(Monika.Scaler);  // Ставим размер окна
             Lang = MonikaSettings.Default.Language;
+
+            UnpackCostume("def");
+
             _start = new DoubleAnimation();
             _start.From = 0;
             _start.To = 1;
@@ -248,7 +261,7 @@ namespace MonikaOnDesktop {
                 {
                     _ = FirstLaunch();
                 } else if (!firsLaunch && Monika.pcName != Environment.MachineName) // Если сменили ПК
-                  {
+                    {
                     Monika.pcName = Environment.MachineName;
                     isSpeaking = true;
                     switch (Language.Substring(0, 2)) {
@@ -287,7 +300,7 @@ namespace MonikaOnDesktop {
                 }
                   // No idea where the date comes from, someone mentioned it in the spreadsheet. Seems legit.
                   else if (!firsLaunch && Monika.pcName == Environment.MachineName && IsBDay) // День рождения
-                  {
+                    {
                     isSpeaking = true;
                     switch (Language.Substring(0, 2)) {
                         case "ru":
@@ -320,10 +333,13 @@ namespace MonikaOnDesktop {
                     }
                     isSpeaking = false;
                 } else // Просто привет
-                  {
-                    RunScript(greetingsDialogDirectory.FullName + "\\1.txt");
+                    {
+
                     Monika.pcName = Environment.MachineName;
                     Debug.WriteLine("Просто запуск");
+                    //RunScript(greetingsDialogDirectory.FullName + "\\" + "6.txt");
+                    RunScript(greetingsDialogDirectory.FullName + "\\" + new Random().Next(greetingsDialogDirectory.GetFiles().Length) + ".txt");
+
                     //showText();
                     //readXml(null, false, greetingsDialogPath, 0);
                     //readIdleXml();
@@ -336,35 +352,39 @@ namespace MonikaOnDesktop {
                 var random = new Random();
                 this.Dispatcher.Invoke(() => {
                     Task.Run(() => {
-                        HttpListener listener = new HttpListener();
-                        // установка адресов прослушки
-                        listener.Prefixes.Add("http://localhost:2005/");
-                        listener.Start();
-                        //Console.WriteLine("Ожидание подключений...");
-                        var nextBlink = DateTime.Now + TimeSpan.FromSeconds(random.Next(7, 50));
-                        while (this.applicationRunning) {
-                            // метод GetContext блокирует текущий поток, ожидая получение запроса 
-                            HttpListenerContext context = listener.GetContext();
-                            HttpListenerRequest request = context.Request;
-                            string query = context.Request.QueryString["myurl"];
-                            if (lastQuery != query) {
-                                // получаем объект ответа
-                                //Debug.WriteLine(query);
-                                //readSitesTxt(formatURL(query));
-                                // Check if currently speaking, only blink if not in dialog
-                                if (!isSpeaking) {
-                                    if (!formatURL(query).Contains("google.com/search?")) {
-                                        Debug.WriteLine("Открыт сайт: " + formatURL(query));
+                    HttpListener listener = new HttpListener();
+                    // установка адресов прослушки
+                    listener.Prefixes.Add("http://localhost:2005/");
+                    listener.Start();
+                    //Console.WriteLine("Ожидание подключений...");
+                    var nextBlink = DateTime.Now + TimeSpan.FromSeconds(random.Next(7, 50));
+                    while (this.applicationRunning) {
+                        // метод GetContext блокирует текущий поток, ожидая получение запроса 
+                        HttpListenerContext context = listener.GetContext();
+                        HttpListenerRequest request = context.Request;
+                        string query = context.Request.QueryString["myurl"];
+                        if (lastQuery != query) {
+                            // получаем объект ответа
+                            // Check if currently speaking, only blink if not in dialog
+                            if (!isSpeaking) {
+                                if (!formatURL(query).Contains("google.com/search?")) {
+                                    Debug.WriteLine("Открыт сайт: " + formatURL(query));
+                                    DirectoryInfo info = new DirectoryInfo(sitesDialogDirectory.FullName + "\\[" + formatURL(query) + "]");
+                                        RunScript(info.FullName + "\\" + new Random().Next(info.GetFiles().Length) + ".txt");
                                         //readLongXml(formatURL(query), sitesDialogPath, 1);
                                     }
 
                                     if (formatURL(query).Contains("google.com/search?")) {
                                         Debug.WriteLine("Введён запрос Google: " + formatURL(query));
+                                        DirectoryInfo info = new DirectoryInfo(googleDialogDirectory.FullName + "\\[" + formatURL(query) + "]");
+                                        RunScript(info.FullName + "\\" + new Random().Next(info.GetFiles().Length) + ".txt");
                                         //readLongXml(formatURL(query), googleDialogPath, 2);
                                     }
 
                                     if (formatURL(query).Contains("youtube.com/results?")) {
                                         Debug.WriteLine("Введён запрос Youtube: " + formatURL(query));
+                                        DirectoryInfo info = new DirectoryInfo(youtubeDialogDirectory.FullName + "\\[" + formatURL(query) + "]");
+                                        RunScript(info.FullName + "\\" + new Random().Next(info.GetFiles().Length) + ".txt");
                                         //readLongXml(formatURL(query), youtubeDialogPath, 3);
                                     }
                                 }
@@ -372,9 +392,6 @@ namespace MonikaOnDesktop {
                             } else {
                                 Debug.WriteLine("Повторный запрос");
                             }
-                            //readSitesTxt(formatURL(query));
-                            //readGoogleTxt(formatURL(query));
-                            //readYoutubeTxt(formatURL(query));
 
                             Task.Delay(250).Wait();
                         }
@@ -383,11 +400,12 @@ namespace MonikaOnDesktop {
                 var randomDialog = new Random();
                 this.Dispatcher.Invoke(() => {
                     Task.Run(() => {
-                        var nextGialog = DateTime.Now + TimeSpan.FromSeconds(randomDialog.Next(Monika.idleRandomFrom, Monika.idleRandomTo));
+                        var nextGialog = DateTime.Now + TimeSpan.FromSeconds(25);//randomDialog.Next(Monika.idleRandomFrom, Monika.idleRandomTo));
                         while (this.applicationRunning) {
 
                             if (DateTime.Now >= nextGialog) {
                                 // Check if currently speaking, only blink if not in dialog
+                                Debug.WriteLine("DialoG check: " + isSpeaking);
                                 if (!isSpeaking) {
                                     SolicenMode solicen = new SolicenMode();
                                     if (solicen.check(Monika.playerName)) {
@@ -397,12 +415,16 @@ namespace MonikaOnDesktop {
                                             isSpeaking = true;
                                             _ = this.Say(true, solicen.expressions[random1.Next(0, solicen.expressions.Count)]);
                                             isSpeaking = false;
+                                        } else {
+
+                                            Debug.WriteLine("DIALOG");
+                                            RunScript(idleDialogDirectory.FullName + "\\" + new Random().Next(idleDialogDirectory.GetFiles().Length) + ".txt");
                                         }
-                                        //else
-                                        //readXml(null, false, idleDialogPath, 0);
+                                    } else {
+
+                                        Debug.WriteLine("DIALOG");
+                                        RunScript(idleDialogDirectory.FullName + "\\" + new Random().Next(idleDialogDirectory.GetFiles().Length) + ".txt");
                                     }
-                                    //else
-                                    //readXml(null, false, idleDialogPath, 0);
 
                                 }
 
@@ -427,12 +449,9 @@ namespace MonikaOnDesktop {
                                     Task.Delay(15).Wait();
                                     this.setFace(eyesOpen);
                                     Debug.WriteLine("Открываем глаза");
-                                } else {
-                                    Debug.WriteLine("Диалог");
                                 }
 
                                 nextBlink = DateTime.Now + TimeSpan.FromSeconds(random.Next(7, 50));
-                                Debug.WriteLine(nextBlink);
                             }
                         }
                     });
@@ -498,8 +517,8 @@ namespace MonikaOnDesktop {
                         }
                     });
                 });
-                if (isConectedToInternet())
-                    await checkUpdatesAsync();
+                /*if (isConectedToInternet())
+                    await checkUpdatesAsync();*/
 
             };
             this.BeginAnimation(OpacityProperty, _start);
@@ -544,62 +563,130 @@ namespace MonikaOnDesktop {
                 gifts.Children.Add(img);
             }
         }
-
-        public void RunScript(string path) {
-
+        public async void RunScript(string path) {
+            isSpeaking = true;
             var script = Script.FromSource(path);
             script.Prime();
 
             // Check that the script is correctly initialized and ready to run
             script.Validate();
             // Run the script
-            script.RunFromBeginning(
+
+            try {
+                foreach (var x in script) {
+                    Debug.WriteLine(x.ToString());
+                    if (x is Script.Menu) {
+
+                        var menu = x as Script.Menu;
+                        script.CurrentChoiceIndex = 1;
+
+                    } else if (x is Script.DialogueLine) {
+
+                        var line = x as Script.DialogueLine;
+                        await SayV2(line.ToString() + Environment.NewLine);
+
+                    } else if (x is Script.Reference) {
+
+                        var reference = x as Script.Reference;
+                        switch (reference.Tag) {
+                            case "DoNothing":
+                            Console.WriteLine("Why bother?");
+                            break;
+                            default:
+                            reference.Action();
+                            break;
+                        }
+
+                    }
+                }
+            }catch {
+
+            }
+            /*script.RunFromBeginning(
                 OnMenu: menu => (new Random()).Next(menu.Count - 1),
-                OnLine: line => { Debug.WriteLine(line); SayV2(line.ToString()); Thread.Sleep(2000); });
+                OnLine: line => { SayV2(line.ToString()); });*/
+            this.Dispatcher.Invoke(() => {
+                    setFace(normalPose);
+                    textWindow.Visibility = Visibility.Hidden;
+                    isSpeaking = false;
+            });
+            isSpeaking = false;
+            Debug.WriteLine("speak: " + isSpeaking);
+            
         }
-        public void SayV2(string line) {
+        async Task SayV2(string line, int delay = 20) {
+            /*while (isSpeaking) {
+                await Task.Delay(100);
+            }
+            isSpeaking = true;*/
+            this.Dispatcher.Invoke(() => {
+                textWindow.Visibility = Visibility.Visible;
+            });
+            string newText = line.Substring(6).Replace("'player'", playerName).Replace("{PlayerName}", playerName); //замена
+
+            setFace(line.Substring(0, 4));
+
+            for (int i = 0; i < newText.Length; i++) {
+                this.Dispatcher.Invoke(() => {
+                    this.textBlock.Text += newText[i];
+                });
+                if (newText[i].ToString() == ".") {
+                    await Task.Delay(500);
+                } else {
+                    await Task.Delay(delay);
+                }
+
+            }
+            await this.Dispatcher.Invoke(async () => {
+                await Task.Delay(700);
+                textBlock.Text = "";
+            });
+        }
+        /*
+        public async void SayV2(string line) {
+
+            while (isSpeaking) {
+                await Task.Delay(100);
+            }
+            isSpeaking = true;
             this.Dispatcher.Invoke(() => {
                 textWindow.Visibility = Visibility.Visible;
             });
             delay1 = 0;
             try {
-                string newText = line.Replace("[player]", playerName).Replace("{PlayerName}", playerName); //замена
-                                                                                                              //consoleWrite(newText, true);
-                //setFace(line.S);
+                string newText = line.Substring(6).Replace("'player'", playerName).Replace("{PlayerName}", playerName); //замена
+
+                setFace(line.Substring(0, 4));
+
                 for (int i = 0; i < newText.Length; i++) {
                     this.Dispatcher.Invoke(() => {
                         this.textBlock.Text += newText[i];
                     });
                     if (newText[i].ToString() == ".") {
-                        //await Task.Delay(500);
-                        Thread.Sleep(500);
+                        await Task.Delay(500);
                         delay1 += 500;
                     } else {
-                        //await Task.Delay(30);
-                        Thread.Sleep(30);
+                        await Task.Delay(30);
                         delay1 += 30;
                     }
 
                 }
                 delay1 += 700;
-                //await Task.Delay(delay1);
-                this.Dispatcher.Invoke( () => {
-                    //await Task.Delay(700);
-                    Thread.Sleep(700);
-                   // textBlock.Text = "";
+                await this.Dispatcher.Invoke(async () => {
+                    await Task.Delay(700);
+                    textBlock.Text = "";
                 });
 
             } catch (Exception e) {
             }
+            //await Task.Delay(delay1);
             this.Dispatcher.Invoke(() => {
                 setFace(normalPose);
-                //textWindow.Visibility = Visibility.Hidden;
+                textWindow.Visibility = Visibility.Hidden;
 
                 isSpeaking = false;
             });
-
-        }
-
+        }*/
         public void setupFolders() {
             if (!subDialogDirectory.Exists) subDialogDirectory.Create();
             dirs.Add(greetingsDialogDirectory);
@@ -633,6 +720,7 @@ namespace MonikaOnDesktop {
             // асинхронное чтение
             using (StreamReader reader = new StreamReader(path)) {
                 string text = await reader.ReadToEndAsync();
+                text = text.Replace("[player]", "\'player\'");
                 if (text[0] != '[') {
                     string[] files = text.Split("=");
                     for (int i = 0; i < files.Length; i++) {
@@ -708,7 +796,7 @@ namespace MonikaOnDesktop {
                         Lang = MonikaSettings.Default.Language;     // И язык
                         Language = Lang.Parent.ToString();          // Ставим имя старого языка
                         setLanguage(Language);                      // Реально ставим язык
-                        //GoToSecondaryMonitor();
+                                                                    //GoToSecondaryMonitor();
                         setFace(normalPose);                            // Ставим спокойный вид
                     } else          //-------- Иначе (Если была нажата кнопка ПРИНЯТЬ)
                       {
@@ -788,7 +876,7 @@ namespace MonikaOnDesktop {
                 monika.SetValue("screenNum", MonikaSettings.Default.screenNum);
                 monika.SetValue("AutoStart", MonikaSettings.Default.AutoStart);
                 monika.Close();*/
-                #endregion  
+                #endregion
                 //readXml(null, false, goodbyeDialogPath, 1); // Говорим прощание
             } else {
                 MonikaSettings.Default.isColdShutdown = true;
@@ -799,22 +887,22 @@ namespace MonikaOnDesktop {
         public async Task checkUpdatesAsync() {
             await SolicenTEAM.Updater.CheckUpdate("SAn4Es-TV", "MonikaOnDesktop");  // Проверяем наличие обновления
             bool updateIsAvaliable = false;
-            Debug.WriteLine("This Ver: " + SolicenTEAM.Updater.CurrentVersion);
-            Debug.WriteLine("New Ver: " + SolicenTEAM.Updater.UpdateVersion);
-            Debug.WriteLine("New Desc: " + SolicenTEAM.Updater.UpdateDescription);
+            //Debug.WriteLine("This Ver: " + SolicenTEAM.Updater.CurrentVersion);
+            //Debug.WriteLine("New Ver: " + SolicenTEAM.Updater.UpdateVersion);
+            //Debug.WriteLine("New Desc: " + SolicenTEAM.Updater.UpdateDescription);
             if (SolicenTEAM.Updater.UpdateVersion == SolicenTEAM.Updater.CurrentVersion) {
                 updateIsAvaliable = false;
             } else {
                 while (isSpeaking) {
                     await Task.Delay(10);
                 }
-                isSpeaking = true;
+                //isSpeaking = true;
                 WebClient client = new WebClient();
                 client.Proxy = new WebProxy();
                 Stream stream = client.OpenRead("https://raw.githubusercontent.com/SAn4Es-TV/MonikaOnDesktop/master/gitDesc.txt");
                 StreamReader reader = new StreamReader(stream);
                 String content = reader.ReadToEnd();
-                Debug.Write(content);
+                //Debug.Write(content);
                 // запись в файл
                 using (FileStream fstream = new FileStream(updateDialogPath, FileMode.OpenOrCreate)) {
                     // преобразуем строку в байты
@@ -823,7 +911,7 @@ namespace MonikaOnDesktop {
                     fstream.Write(array, 0, array.Length);
                 }
                 //readXml(null, false, updateDialogPath, 2);
-                Debug.WriteLine("endOfDialog");
+                //Debug.WriteLine("endOfDialog");
             }
         }
         public bool isConectedToInternet() {
@@ -922,7 +1010,7 @@ namespace MonikaOnDesktop {
                 delay1 = 0;
                 try {
                     string newText = ex.Text.Replace("[player]", playerName).Replace("{PlayerName}", playerName); //замена
-                    //consoleWrite(newText, true);
+                                                                                                                  //consoleWrite(newText, true);
                     setFace(ex.Face);
                     for (int i = 0; i < newText.Length; i++) {
                         this.Dispatcher.Invoke(() => {
