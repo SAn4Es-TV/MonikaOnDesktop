@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -77,7 +78,6 @@ namespace MonikaOnDesktop {
                 return _speak;
             }
             set {
-                Debug.WriteLine("ChageSpeak: " + value);
                 _speak = value;
             }
         }
@@ -106,6 +106,8 @@ namespace MonikaOnDesktop {
         public float[] nightFilter = { 0.6861919617166911f, 0.387275212f, 0.27662517f };
         public float[] dayFilter = { 1f, 1f, 1f };
         public float[] mainFilter = { 1f, 1f, 1f };
+
+        public bool mouse = true;
         #endregion
         public MainWindow()     // Код главного окна
         {
@@ -206,8 +208,8 @@ namespace MonikaOnDesktop {
                 stopWatch.EventArrived += new EventArrivedEventHandler(stopWatch_EventArrived);
                 stopWatch.Start();
             } catch (Exception ex) {
-                System.Windows.MessageBox.Show(this,
-                   "An error occured: " + ex.Message + "\r\n\r\n(Try run this app as an administrator.)");
+                /*System.Windows.MessageBox.Show(this,
+                   "An error occured: " + ex.Message + "\r\n\r\n(Try run this app as an administrator.)");*/
             }
             SystemEvents.PowerModeChanged += OnPowerChange;
 
@@ -217,6 +219,7 @@ namespace MonikaOnDesktop {
             giftWatcher.Created += GiftWatcher_Created;
             giftWatcher.EnableRaisingEvents = true;
             loadGifts();
+            mouse = Monika.isMouse;
 
             /*
             FileSystemWatcher acsWatcher = new FileSystemWatcher();
@@ -337,8 +340,8 @@ namespace MonikaOnDesktop {
 
                     Monika.pcName = Environment.MachineName;
                     Debug.WriteLine("Просто запуск");
-                    //RunScript(greetingsDialogDirectory.FullName + "\\" + "6.txt");
-                    RunScript(greetingsDialogDirectory.FullName + "\\" + new Random().Next(greetingsDialogDirectory.GetFiles().Length) + ".txt");
+                    RunScript(greetingsDialogDirectory.FullName + "\\" + "6.txt");
+                    //RunScript(greetingsDialogDirectory.FullName + "\\" + new Random().Next(greetingsDialogDirectory.GetFiles().Length) + ".txt");
 
                     //showText();
                     //readXml(null, false, greetingsDialogPath, 0);
@@ -400,7 +403,7 @@ namespace MonikaOnDesktop {
                 var randomDialog = new Random();
                 this.Dispatcher.Invoke(() => {
                     Task.Run(() => {
-                        var nextGialog = DateTime.Now + TimeSpan.FromSeconds(25);//randomDialog.Next(Monika.idleRandomFrom, Monika.idleRandomTo));
+                        var nextGialog = DateTime.Now + TimeSpan.FromSeconds(randomDialog.Next(Monika.idleRandomFrom, Monika.idleRandomTo));
                         while (this.applicationRunning) {
 
                             if (DateTime.Now >= nextGialog) {
@@ -510,8 +513,10 @@ namespace MonikaOnDesktop {
                                     }
                                 }
                                 //Debug.WriteLine("opacity: " + opacity);
-                                if (Monika.isMouse) {
+                                if (mouse) {
                                     Dispatcher.Invoke(() => { mainApp.Opacity = opacity; });
+                                } else {
+                                    Dispatcher.Invoke(() => { mainApp.Opacity = 1.0; });
                                 }
                             }
                         }
@@ -563,6 +568,8 @@ namespace MonikaOnDesktop {
                 gifts.Children.Add(img);
             }
         }
+        bool inChoise = false;
+        string oldLine = "";
         public async void RunScript(string path) {
             isSpeaking = true;
             var script = Script.FromSource(path);
@@ -578,12 +585,18 @@ namespace MonikaOnDesktop {
                     if (x is Script.Menu) {
 
                         var menu = x as Script.Menu;
-                        script.CurrentChoiceIndex = 1;
+
+                        Menu(oldLine, menu.Choices.Count, menu.Choices);
+                        script.CurrentChoiceIndex = (uint?)ch;
 
                     } else if (x is Script.DialogueLine) {
-
+                        while (inChoise) {
+                            await Task.Delay(100);
+                        }
                         var line = x as Script.DialogueLine;
-                        await SayV2(line.ToString() + Environment.NewLine);
+                        
+                            oldLine = line.ToString().Substring(6).Replace("'player'", playerName);
+                            await SayV2(line.ToString() + Environment.NewLine);
 
                     } else if (x is Script.Reference) {
 
@@ -642,51 +655,131 @@ namespace MonikaOnDesktop {
                 textBlock.Text = "";
             });
         }
-        /*
-        public async void SayV2(string line) {
-
-            while (isSpeaking) {
-                await Task.Delay(100);
-            }
-            isSpeaking = true;
-            this.Dispatcher.Invoke(() => {
-                textWindow.Visibility = Visibility.Visible;
-            });
-            delay1 = 0;
-            try {
-                string newText = line.Substring(6).Replace("'player'", playerName).Replace("{PlayerName}", playerName); //замена
-
-                setFace(line.Substring(0, 4));
-
-                for (int i = 0; i < newText.Length; i++) {
-                    this.Dispatcher.Invoke(() => {
-                        this.textBlock.Text += newText[i];
-                    });
-                    if (newText[i].ToString() == ".") {
-                        await Task.Delay(500);
-                        delay1 += 500;
-                    } else {
-                        await Task.Delay(30);
-                        delay1 += 30;
-                    }
-
+        int ch = 0; 
+        void Menu(string s, int num, List<Script.Choice> choices) {
+            inChoise = true;
+            mouse = false;
+            textWindow.Visibility = Visibility.Visible;
+            ButtonsGrid.RowDefinitions.Clear();
+            textBlock.Text = "";
+            textBlock.Text = s;
+            this.ButtonsGrid.Children.Clear();
+            for (int i = 0; i < num; i++) {
+                System.Windows.Controls.RowDefinition row = new System.Windows.Controls.RowDefinition();
+                ButtonsGrid.RowDefinitions.Add(row);
+                var text = new OutlinedTextBlock {
+                    Text = choices[i].Text,
+                    FontFamily = new System.Windows.Media.FontFamily("Comic Sans MS"),
+                    TextWrapping = TextWrapping.Wrap,
+                    StrokeThickness = 1.5,
+                    Stroke = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 0, 0, 0)),
+                    Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 255, 255, 255))
+                };
+                switch (Monika.Scaler) {
+                    case 0:
+                    text.FontSize = 5;
+                    break;
+                    case 1:
+                    text.FontSize = 10;
+                    break;
+                    case 2:
+                    text.FontSize = 15;
+                    break;
+                    case 3:
+                    text.FontSize = 20;
+                    break;
                 }
-                delay1 += 700;
-                await this.Dispatcher.Invoke(async () => {
-                    await Task.Delay(700);
-                    textBlock.Text = "";
-                });
+                var button = new System.Windows.Controls.Button {
+                    Name = "butt" + i,
+                    Content = text,
+                    Width = 400,
+                    Height = 30,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalAlignment = System.Windows.HorizontalAlignment.Center
+                };
+                switch (Monika.Scaler) {
+                    case 0:
+                    button.Width = 100;
+                    button.Height = 10;
+                    break;
+                    case 1:
+                    button.Width = 200;
+                    button.Height = 20;
+                    break;
+                    case 2:
+                    button.Width = 300;
+                    button.Height = 30;
+                    break;
+                    case 3:
+                    button.Width = 400;
+                    button.Height = 40;
+                    break;
+                }
+                button.Click += Button_Click;
 
-            } catch (Exception e) {
+                System.Windows.Controls.Grid.SetRow(button, i);
+                this.ButtonsGrid.Children.Add(button);
             }
-            //await Task.Delay(delay1);
-            this.Dispatcher.Invoke(() => {
-                setFace(normalPose);
-                textWindow.Visibility = Visibility.Hidden;
+        }
 
-                isSpeaking = false;
+        private void Button_Click(object sender, RoutedEventArgs e) {
+            System.Windows.Controls.Button button = sender as System.Windows.Controls.Button;
+            string s = button.Name.Replace("butt", "");
+            ch = int.Parse(s);
+            inChoise = false; 
+            this.Dispatcher.Invoke(() => {
+                textBlock.Text = "";
+                ButtonsGrid.RowDefinitions.Clear();
+                this.ButtonsGrid.Children.Clear();
+                mouse = Monika.isMouse;
             });
-        }*/
+        }
+
+        /*
+public async void SayV2(string line) {
+
+   while (isSpeaking) {
+       await Task.Delay(100);
+   }
+   isSpeaking = true;
+   this.Dispatcher.Invoke(() => {
+       textWindow.Visibility = Visibility.Visible;
+   });
+   delay1 = 0;
+   try {
+       string newText = line.Substring(6).Replace("'player'", playerName).Replace("{PlayerName}", playerName); //замена
+
+       setFace(line.Substring(0, 4));
+
+       for (int i = 0; i < newText.Length; i++) {
+           this.Dispatcher.Invoke(() => {
+               this.textBlock.Text += newText[i];
+           });
+           if (newText[i].ToString() == ".") {
+               await Task.Delay(500);
+               delay1 += 500;
+           } else {
+               await Task.Delay(30);
+               delay1 += 30;
+           }
+
+       }
+       delay1 += 700;
+       await this.Dispatcher.Invoke(async () => {
+           await Task.Delay(700);
+           textBlock.Text = "";
+       });
+
+   } catch (Exception e) {
+   }
+   //await Task.Delay(delay1);
+   this.Dispatcher.Invoke(() => {
+       setFace(normalPose);
+       textWindow.Visibility = Visibility.Hidden;
+
+       isSpeaking = false;
+   });
+}*/
         public void setupFolders() {
             if (!subDialogDirectory.Exists) subDialogDirectory.Create();
             dirs.Add(greetingsDialogDirectory);
@@ -778,7 +871,16 @@ namespace MonikaOnDesktop {
                 string currentProcess = e.NewEvent.Properties["ProcessName"].Value.ToString();  // Узнаём имя процесса
                 if (currentProcess != lastProcess)  // Если оно не равно прошлому процессу, чтобы небыло повторок
                 {
+                    Debug.WriteLine("Процесс открыт: " + e.NewEvent.Properties["ProcessName"].Value.ToString());   // Дебажим имя закрытого процесса
+
+                    DirectoryInfo info = new DirectoryInfo(progsDialogDirectory.FullName + "\\[" + formatURL(currentProcess) + "]");
+                    try {
+                        RunScript(info.FullName + "\\" + new Random().Next(info.GetFiles().Length) + ".txt");
+                    } catch {
+
+                    }
                     //readLongXml(currentProcess, progsDialogPath, 0);    // Чото говорим
+
                     lastProcess = currentProcess;                       // Меняем имя прошлого процесса
                 }
             }
@@ -1350,7 +1452,7 @@ namespace MonikaOnDesktop {
             ZipFile.ExtractToDirectory(AppDomain.CurrentDomain.BaseDirectory + "/characters/" + name + ".costume", path);
             setFace(normalPose);
         }
-        Expression[][] exe;
+        /*Expression[][] exe;
         public void Menu(string question, string[] q, Expression[][] a) {
             this.Dispatcher.Invoke(() => {
                 textWindow.Visibility = Visibility.Visible;
@@ -1462,7 +1564,7 @@ namespace MonikaOnDesktop {
                 //Thread.Sleep(delay); // sleep
             }
             //sayIdle();
-        }
+        }*/
         /*#region
         string mainXml = "<Dialogs>\n\t<Dialog>";
         void ConverToXML(Stream stream, bool typ, string sPath)
