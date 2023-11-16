@@ -15,14 +15,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
-using Microsoft.Win32;
+using CharacterAI;
+using CharacterAI.Models;
 
+using Microsoft.Win32;
 using VGPrompter;
+
+using static System.Net.Mime.MediaTypeNames;
 
 namespace MonikaOnDesktop {
     /// <summary>
@@ -109,45 +114,21 @@ namespace MonikaOnDesktop {
 
         public bool mouse = true;
         #endregion
+
+
+        string AIpath = @"script.txt";
+        string token = "147ab42314427821859a93d217aa2a30119040e2";
+        string characterId = "aywKj4vjL0-X2QeZj2VFcCqPlZ4HmzH0FNlebJKcjTk";
+        CharacterAIClient client;
+        Character character;
+        string historyId;
         public MainWindow()     // Код главного окна
         {
-            #region Этот код нам нафиг не нужен (зачем брать настройки из реестра, если они теперь хранятся в файле Моники)
-            /*
-            RegistryKey monikaKey = Registry.CurrentUser.OpenSubKey("MonikaOnDesktop");
-            if (monikaKey != null)
-            {
-                CultureInfo lang = CultureInfo.GetCultureInfo(monikaKey.GetValue("Language").ToString());
-                MonikaSettings.Default.isColdShutdown = bool.Parse(monikaKey.GetValue("isColdShutdown").ToString());
-                MonikaSettings.Default.FirstLaunch = bool.Parse(monikaKey.GetValue("FirstLaunch").ToString());
-                MonikaSettings.Default.Language = lang;
-                MonikaSettings.Default.UserName = monikaKey.GetValue("UserName").ToString();
-                MonikaSettings.Default.Scaler = (int)monikaKey.GetValue("Scaler");
-                MonikaSettings.Default.NightEnd = (int)monikaKey.GetValue("NightEnd");
-                MonikaSettings.Default.NightStart = (int)monikaKey.GetValue("NightStart");
-                MonikaSettings.Default.idleRandom = (int)monikaKey.GetValue("idleRandom");
-                MonikaSettings.Default.screenNum = bool.Parse(monikaKey.GetValue("screenNum").ToString());
-                MonikaSettings.Default.AutoStart = bool.Parse(monikaKey.GetValue("AutoStart").ToString());
-                monikaKey.Close();
-            }
-            else
-            {
-                RegistryKey currentUserKey = Registry.CurrentUser;
-                RegistryKey monika = currentUserKey.CreateSubKey("MonikaOnDesktop");
-                monika.SetValue("isColdShutdown", MonikaSettings.Default.isColdShutdown);
-                monika.SetValue("Language", MonikaSettings.Default.Language);
-                monika.SetValue("FirstLaunch", MonikaSettings.Default.FirstLaunch);
-                monika.SetValue("UserName", MonikaSettings.Default.UserName);
-                monika.SetValue("Scaler", MonikaSettings.Default.Scaler);
-                monika.SetValue("NightEnd", MonikaSettings.Default.NightEnd);
-                monika.SetValue("NightStart", MonikaSettings.Default.NightStart);
-                monika.SetValue("idleRandom", MonikaSettings.Default.idleRandom);
-                monika.SetValue("screenNum", MonikaSettings.Default.screenNum);
-                monika.SetValue("AutoStart", MonikaSettings.Default.AutoStart);
-                monika.Close();
-            }*/
-            #endregion
+
 
             InitializeComponent();                      // Инициализация ЮИ (Юзер Интерфейс)(Вроде для этого)
+
+
             oldIsNight = IsNight;
             mainFilter = nightFilter;
             AllowsTransparency = true;
@@ -229,8 +210,25 @@ namespace MonikaOnDesktop {
             acsWatcher.Created += AcsWatcher_Created;
             acsWatcher.EnableRaisingEvents = true;*/
         }
-        public void Window_Loaded(object sender, RoutedEventArgs e)     // Когда программа проснётся
+        public async void Window_Loaded(object sender, RoutedEventArgs e)     // Когда программа проснётся
         {
+            client = new CharacterAIClient(token);
+
+            // Launch Puppeteer headless browser
+            await client.LaunchBrowserAsync(killDuplicates: true);
+
+            // Highly recommend to do this
+            AppDomain.CurrentDomain.ProcessExit += (s, args) => client.KillBrowser();
+
+            // Send message to a character
+            string characterId = "aywKj4vjL0-X2QeZj2VFcCqPlZ4HmzH0FNlebJKcjTk";
+            character = await client.GetInfoAsync(characterId);
+
+            historyId = await client.CreateNewChatAsync(characterId);
+
+            if (historyId is null) {
+                return;
+            }
             if (IsNight)
                 mainFilter = nightFilter;
             else
@@ -257,6 +255,7 @@ namespace MonikaOnDesktop {
             _start.RepeatBehavior = new RepeatBehavior(1);
             _start.Duration = new Duration(TimeSpan.FromMilliseconds(4000));
             _start.Completed += async (sender, args) => {
+
                 //RegistryKey reg = Registry.CurrentUser.CreateSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Run\\");
                 RegistryKey WN = Registry.CurrentUser.OpenSubKey("MonikaOnDesktop", true);
 
@@ -340,8 +339,8 @@ namespace MonikaOnDesktop {
 
                     Monika.pcName = Environment.MachineName;
                     Debug.WriteLine("Просто запуск");
-                    RunScript(greetingsDialogDirectory.FullName + "\\" + "6.txt");
-                    //RunScript(greetingsDialogDirectory.FullName + "\\" + new Random().Next(greetingsDialogDirectory.GetFiles().Length) + ".txt");
+                    //RunScript(greetingsDialogDirectory.FullName + "\\" + "6.txt");
+                    RunScript(greetingsDialogDirectory.FullName + "\\" + new Random().Next(greetingsDialogDirectory.GetFiles().Length) + ".txt");
 
                     //showText();
                     //readXml(null, false, greetingsDialogPath, 0);
@@ -409,7 +408,7 @@ namespace MonikaOnDesktop {
                             if (DateTime.Now >= nextGialog) {
                                 // Check if currently speaking, only blink if not in dialog
                                 Debug.WriteLine("DialoG check: " + isSpeaking);
-                                if (!isSpeaking) {
+                                if (!isSpeaking && !isTyping && String.IsNullOrEmpty(AIchat.Text)) {
                                     SolicenMode solicen = new SolicenMode();
                                     if (solicen.check(Monika.playerName)) {
                                         Random selectDialog = new Random();
@@ -533,6 +532,83 @@ namespace MonikaOnDesktop {
             Monika.saveData();
             this.applicationRunning = false;
         }       // Когда закрыли программу
+        bool isTyping = false;
+        private async void AIchat_KeyUpAsync(object sender, System.Windows.Input.KeyEventArgs e) {
+
+            if (e.Key == Key.Enter) {
+                isTyping = true;
+                string _message = AIchat.Text;
+                AIchat.Text = "";
+                Debug.WriteLine(_message);
+                var characterResponse = await client.CallCharacterAsync(
+                    characterId: character.Id,
+                    characterTgt: character.Tgt,
+                    historyId: historyId,
+                    message: _message
+    );
+
+                if (!characterResponse.IsSuccessful) {
+                    Debug.WriteLine(characterResponse.ErrorReason);
+                    return;
+                }
+                string message = characterResponse.Response.Text; // => "Hey!"
+                string text = message.Replace("\n", ".")
+                    .Replace("\"", "\'")
+                    .Replace("...", "...\n")
+                    .Replace("!", "!\n")
+                    .Replace("?", "?\n")
+                    .Replace(".", ".\n")
+                    .Replace("\" ", "\"").Replace("\\", "");
+                string[] _text = text.Split("\n");
+                List<string> strings = new List<string>();
+                foreach (string s in _text) {
+                    Debug.Write("[AI]: " + s + " (" + String.IsNullOrEmpty(s) + ") : ");
+                    if (s != "\t" && !(String.IsNullOrEmpty(s)) && s != "") {
+                        Debug.WriteLine("PASS");
+                        string l = "";
+                        if (!s.StartsWith("\"")) l += "\t\"";
+                        l += s;
+                        if (!s.EndsWith("\"")) l += "\"";
+                        if(l != "\t\"\"" && l != "\t\".\"")
+                            strings.Add(l);
+                    }
+                    }
+                    string final = "label start: \n";
+                foreach (string s in strings) {
+                    final += s + "\n";
+                } 
+                    //.Replace("\"\n\t\"", "");
+                string fileText = "";
+                string dbgtxt = text.Replace("\n", "").Replace("\t", "");
+                /*if (text.Replace("\n", "").Replace("\t", "").EndsWith("\"\"")) {
+                    int lastSpaceIndex = text.LastIndexOf('\"');
+                    fileText = text.Substring(0, lastSpaceIndex);
+                    fileText = "label start: \n\t\"" + fileText;
+                    //fileText = fileText.Replace("\"");
+                }
+                
+                else
+                    fileText = "label start: \n\t\"" + text + "\"";*/
+                /*
+                // Swipe
+                var newCharacterResponse = await client.CallCharacterAsync(
+                    characterId: character.Id,
+                    characterTgt: character.Tgt,
+                    historyId: historyId,
+                    parentMsgUuid: userMessageUuid
+                );*/
+                // полная перезапись файла 
+                using (StreamWriter writer = new StreamWriter(AIpath, false)) {
+                    //await writer.WriteLineAsync(fileText.Replace("\"\n\t\"\n", "\""));
+                    await writer.WriteLineAsync(final.Replace("\"\"", "\""));
+                }
+                RunScript(AIpath);
+
+                isTyping = false;
+            }
+        }
+
+
         private void GiftWatcher_Created(object sender, FileSystemEventArgs e) {
             string file = e.FullPath;
             // Assuming you have one file that you care about, pass it off to whatever
@@ -635,9 +711,15 @@ namespace MonikaOnDesktop {
             this.Dispatcher.Invoke(() => {
                 textWindow.Visibility = Visibility.Visible;
             });
-            string newText = line.Substring(6).Replace("'player'", playerName).Replace("{PlayerName}", playerName); //замена
-
-            setFace(line.Substring(0, 4));
+            string newText = "";
+            if (Char.IsDigit(line[0])) {
+                newText = line.Substring(6).Replace("'player'", playerName).Replace("{PlayerName}", playerName); //замена
+                setFace(line.Substring(0, 4));
+            } else {
+                newText = line.Replace("'player'", playerName).Replace("{PlayerName}", playerName).Replace("<Anonymous>: ", "");
+                newText = char.ToUpper(newText[0]) + newText.Substring(1);
+                setFace(normalPose);
+            }
 
             for (int i = 0; i < newText.Length; i++) {
                 this.Dispatcher.Invoke(() => {
@@ -721,7 +803,6 @@ namespace MonikaOnDesktop {
                 this.ButtonsGrid.Children.Add(button);
             }
         }
-
         private void Button_Click(object sender, RoutedEventArgs e) {
             System.Windows.Controls.Button button = sender as System.Windows.Controls.Button;
             string s = button.Name.Replace("butt", "");
@@ -734,52 +815,7 @@ namespace MonikaOnDesktop {
                 mouse = Monika.isMouse;
             });
         }
-
-        /*
-public async void SayV2(string line) {
-
-   while (isSpeaking) {
-       await Task.Delay(100);
-   }
-   isSpeaking = true;
-   this.Dispatcher.Invoke(() => {
-       textWindow.Visibility = Visibility.Visible;
-   });
-   delay1 = 0;
-   try {
-       string newText = line.Substring(6).Replace("'player'", playerName).Replace("{PlayerName}", playerName); //замена
-
-       setFace(line.Substring(0, 4));
-
-       for (int i = 0; i < newText.Length; i++) {
-           this.Dispatcher.Invoke(() => {
-               this.textBlock.Text += newText[i];
-           });
-           if (newText[i].ToString() == ".") {
-               await Task.Delay(500);
-               delay1 += 500;
-           } else {
-               await Task.Delay(30);
-               delay1 += 30;
-           }
-
-       }
-       delay1 += 700;
-       await this.Dispatcher.Invoke(async () => {
-           await Task.Delay(700);
-           textBlock.Text = "";
-       });
-
-   } catch (Exception e) {
-   }
-   //await Task.Delay(delay1);
-   this.Dispatcher.Invoke(() => {
-       setFace(normalPose);
-       textWindow.Visibility = Visibility.Hidden;
-
-       isSpeaking = false;
-   });
-}*/
+        
         public void setupFolders() {
             if (!subDialogDirectory.Exists) subDialogDirectory.Create();
             dirs.Add(greetingsDialogDirectory);
@@ -1452,119 +1488,7 @@ public async void SayV2(string line) {
             ZipFile.ExtractToDirectory(AppDomain.CurrentDomain.BaseDirectory + "/characters/" + name + ".costume", path);
             setFace(normalPose);
         }
-        /*Expression[][] exe;
-        public void Menu(string question, string[] q, Expression[][] a) {
-            this.Dispatcher.Invoke(() => {
-                textWindow.Visibility = Visibility.Visible;
-                textBlock.Text = "";
-                textBlock.Text = question;
-                ButtonsGrid.RowDefinitions.Clear();
-                this.ButtonsGrid.Children.Clear();
-                for (int i = 0; i < q.Length; i++) {
-                    System.Windows.Controls.RowDefinition row = new System.Windows.Controls.RowDefinition();
-                    ButtonsGrid.RowDefinitions.Add(row);
-                    var text = new OutlinedTextBlock {
-                        Text = q[i],
-                        FontFamily = new System.Windows.Media.FontFamily("Comic Sans MS"),
-                        TextWrapping = TextWrapping.Wrap,
-                        StrokeThickness = 1.5,
-                        Stroke = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 0, 0, 0)),
-                        Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 255, 255, 255))
-                    };
-                    switch (Monika.Scaler) {
-                        case 0:
-                        text.FontSize = 5;
-                        break;
-                        case 1:
-                        text.FontSize = 10;
-                        break;
-                        case 2:
-                        text.FontSize = 15;
-                        break;
-                        case 3:
-                        text.FontSize = 20;
-                        break;
-                    }
-                    var button = new System.Windows.Controls.Button {
-                        Name = "butt" + i,
-                        Content = text,
-                        Width = 400,
-                        Height = 30,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        HorizontalAlignment = System.Windows.HorizontalAlignment.Center
-                    };
-                    switch (Monika.Scaler) {
-                        case 0:
-                        button.Width = 100;
-                        button.Height = 10;
-                        break;
-                        case 1:
-                        button.Width = 200;
-                        button.Height = 20;
-                        break;
-                        case 2:
-                        button.Width = 300;
-                        button.Height = 30;
-                        break;
-                        case 3:
-                        button.Width = 400;
-                        button.Height = 40;
-                        break;
-                    }
-                    button.Click += Button_ClickAsync;
-
-                    System.Windows.Controls.Grid.SetRow(button, i);
-                    this.ButtonsGrid.Children.Add(button);
-                }
-                exe = a;
-            });
-
-        }
-        private async void Button_ClickAsync(object sender, RoutedEventArgs e) {
-            System.Windows.Controls.Button butt = (sender as System.Windows.Controls.Button);
-            int num = int.Parse(butt.Name.Substring(4));
-            Debug.WriteLine("Нажата кнопка " + num);
-            this.Dispatcher.Invoke(() => {
-                textBlock.Text = "";
-                ButtonsGrid.RowDefinitions.Clear();
-                this.ButtonsGrid.Children.Clear();
-            });
-            foreach (Expression expression in exe[num]) {
-                Debug.WriteLine("ex: " + expression.Text);
-
-                if (expression.Text.Contains("tion") && expression.Face == "affe") {
-                    Debug.WriteLine("Тип кода: " + expression.Text);
-                    string[] i = expression.Text.Split(" ");
-                    switch (i[1]) {
-                        case "+":
-                        Monika.affection += int.Parse(i[2]);
-                        Debug.WriteLine("Привязанность " + i[1] + int.Parse(i[2]));
-                        break;
-                        case "-":
-                        Monika.affection -= int.Parse(i[2]);
-                        Debug.WriteLine("Привязанность " + i[1] + int.Parse(i[2]));
-                        if (Monika.affection <= 0) {
-                            Monika.affection = 0;
-                        }
-                        break;
-                    }
-                    Debug.WriteLine("Привязанность = " + Monika.affection);
-
-                } else if (expression.Text.Contains("dd") && expression.Face == "gift") {
-                    string[] i = expression.Text.Split(" ");
-                    addGift(i[1], i[2]);
-                } else if (expression.Text.Contains("emove") && expression.Face == "gift") {
-                    string[] i = expression.Text.Split(" ");
-                    removeGift(i[1]);
-                } else if (expression.Text.Contains("date") && expression.Face == "gitU") {
-                    updateZip();
-                } else {
-                    await Say(false, new[] { expression });
-                }
-                //Thread.Sleep(delay); // sleep
-            }
-            //sayIdle();
-        }*/
+        
         /*#region
         string mainXml = "<Dialogs>\n\t<Dialog>";
         void ConverToXML(Stream stream, bool typ, string sPath)
