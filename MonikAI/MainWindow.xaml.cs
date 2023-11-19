@@ -616,7 +616,6 @@ namespace MonikaOnDesktop {
             }
         }
 
-
         private void GiftWatcher_Created(object sender, FileSystemEventArgs e) {
             string file = e.FullPath;
             // Assuming you have one file that you care about, pass it off to whatever
@@ -626,10 +625,22 @@ namespace MonikaOnDesktop {
             if (info.Exists) {
                 if (info.Extension == ".gift") {
                     string giftName = info.Name.ToLower().Replace(".gift", String.Empty);
+
+                    string path = AppDomain.CurrentDomain.BaseDirectory + "/gifts/" + giftName + "/"; // or whatever 
+                    string giftsPath = AppDomain.CurrentDomain.BaseDirectory + "/gifts/";
+                    if (!Directory.Exists(giftsPath)) {
+                        DirectoryInfo di = Directory.CreateDirectory(giftsPath);
+                        di.Attributes = FileAttributes.Directory | FileAttributes.Hidden;
+                    }
+                    File.Copy(AppDomain.CurrentDomain.BaseDirectory + "/characters/" + giftName + ".gift", giftsPath + giftName + ".gift", true);
+                    ZipFile.ExtractToDirectory(giftsPath + giftName + ".gift", path);
+                    RunScript(path + "ru.txt");
+                    addGift(giftName, path + giftName + ".png");
                     //getGift(giftName);
                     info.Delete();
                     //readLongXml(giftName, giftsDialogPath, 4);
                     Debug.WriteLine("Подарен подарок:" + giftName);
+                    RedrawGifts();
                 }
                 if (info.Extension == ".costume") {
                     string costumeNam = info.Name.ToLower().Replace(".costume", String.Empty);
@@ -642,7 +653,7 @@ namespace MonikaOnDesktop {
         public void loadGifts() {
             foreach (string i in Monika.gifts) {
                 string[] gift = i.Split(" | ");
-                BitmapImage bitmapImage = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/gifts/" + gift[1]), mainFilter));
+                BitmapImage bitmapImage = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(gift[1]), mainFilter));
                 System.Windows.Controls.Image img = new System.Windows.Controls.Image {
                     Source = bitmapImage,
                     Name = gift[0]
@@ -1475,7 +1486,7 @@ namespace MonikaOnDesktop {
                 gifts.Children.Clear();
                 foreach (string i in Monika.gifts) {
                     string[] gift = i.Split(" | ");
-                    BitmapImage bitmapImage = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/gifts/" + gift[1]), mainFilter));
+                    BitmapImage bitmapImage = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(gift[1]), mainFilter));
                     System.Windows.Controls.Image img = new System.Windows.Controls.Image {
                         Source = bitmapImage,
                         Name = gift[0]
@@ -1490,6 +1501,7 @@ namespace MonikaOnDesktop {
         public void UnpackCostume(string name) {
             string path = AppDomain.CurrentDomain.BaseDirectory + "/costumes/" + name; // or whatever 
             string costumesPath = AppDomain.CurrentDomain.BaseDirectory + "/costumes/";
+            File.Copy(AppDomain.CurrentDomain.BaseDirectory + "/characters/" + name + ".costume", costumesPath + name + ".costume", true);
             Monika.costumeName = name;
             if (!Directory.Exists(costumesPath)) {
                 DirectoryInfo di = Directory.CreateDirectory(costumesPath);
@@ -1500,536 +1512,16 @@ namespace MonikaOnDesktop {
                     di.Delete(true);
                 }
             }
-            ZipFile.ExtractToDirectory(AppDomain.CurrentDomain.BaseDirectory + "/characters/" + name + ".costume", path);
+            ZipFile.ExtractToDirectory(costumesPath + name + ".costume", path);
             setFace(normalPose);
         }
-        
-        /*#region
-        string mainXml = "<Dialogs>\n\t<Dialog>";
-        void ConverToXML(Stream stream, bool typ, string sPath)
-        {
-            // string sPath = idleDialogPath;
-
-            StreamReader f;
-            if (typ)
-            {
-                f = new StreamReader(stream);
-            }
-            else
-            {
-                f = new StreamReader(sPath);
-            }
-            while (!f.EndOfStream)
-            {
-                string m = f.ReadLine();
-                string s = m.Replace("\r", String.Empty).Replace("    ", "\t");
-                string S = "";
-                if (s.Contains("menu:"))
-                {
-                    S = s.Replace("menu:", "\n\t\t<Menu>");
-                }
-                if (s.Contains("menuend"))
-                {
-                    S = s.Replace("menuend", "\n\t\t\t</Answer>\n\t\t</Menu>");
-                }
-                if (s.Contains("\t\t") && !s.Contains("affection") && !s.Contains("giftAdd") && !s.Contains("giftRemove"))
-                {
-                    //S = s.Insert(0, "\n\t\t\t<answer text = \"") + "\">";
-                    S = s.Replace("\t\t", "\n\t\t\t<Answer text=\"") + "\">";
-                }
-                if (s.Contains("ansend"))
-                {
-                    S = s.Replace("ansend", "\n\t\t\t</Answer>");
-                }
-                if (s.Contains("\t\t\t"))
-                {
-                    S = s.Replace("\t\t\t", "\n\t\t\t\t<Text>") + "</Text>\n\t\t\t</Answer>\n\t\t</Menu>";
-                }
-                if (!s.Contains("\t\t") && !s.Contains("\t\t") && !s.Contains("menuend") && !s.Contains("menu:"))
-                {
-                    S = s.Insert(0, "\n\t\t<Text>") + "</Text>";
-                }
-                mainXml += S;
-            }
-            f.Close();
-
-            mainXml += "\n\t</Dialog>\n</Dialogs>";
-            mainXml = mainXml.Replace("\n\t\t<Text>=</Text>", "\n\t</Dialog>\n\t<Dialog>")
-                .Replace("\n\t\t\t</Answer>\n\t\t</Menu>\n\t\t\t\t<Text>", "\n\t\t\t\t<Text>")
-                .Replace("\n\t\t\t</Answer>\n\t\t</Menu>\n\t\t\t<Answer", "\n\t\t\t<Answer")
-                .Replace("</Text>\n\t\t\t<Answer", "</Text>\n\t\t\t</Answer>\n\t\t\t<Answer")
-                .Replace("<Text>affection+</Text>", "<Action>affection + 1</Action>")
-                .Replace("<Text>affection-</Text>", "<Action>affection - 1</Action>");
-
-        }
-
-
-        #region
-        List<DialogModel> dm = new List<DialogModel>();
-        int num = 0;
-        public async void readXml(Stream stream, bool typ, string sPath, int type)
-        {
-            ConverToXML(stream, typ, sPath);
-            #region
-            string s1 = mainXml.Replace("\t", String.Empty);
-            string s2 = s1.Replace("\n", String.Empty);
-            Debug.WriteLine(s1);
-            XmlDocument xDoc = new XmlDocument();
-            //string path = testXml;
-            //xDoc.Load(path);
-            xDoc.LoadXml(s1);
-            // получим корневой элемент
-            XmlElement xRoot = xDoc.DocumentElement;
-            // обход всех узлов в корневом элементе
-            List<DialogModel> idm = new List<DialogModel>();
-            foreach (XmlNode xnode in xRoot)
-            {
-                if (xnode.Name == "Dialog")
-                {
-                    //Console.WriteLine("Dialog:");
-                    idm.Add(new DialogModel(xnode));
-                }
-            }
-            dm = idm;
-            Random rnd = new Random();
-            switch (type)
-            {
-                case 0:
-                    num = rnd.Next(idm.Count);
-                    Debug.WriteLine("Прошлый номер диалога: " + lastDialog);
-                    Debug.WriteLine("Рандомный номер диалога: " + num);
-                    //while (dialogNum == lastDialog && dialogNum == lastLastDialog)
-                    while (num == lastDialog) // жоский костыль, без которого показываются повторные диалоги
-                    {
-                        Debug.WriteLine("Номер диалога совпадает с старым, подбираю новый");
-                        num = rnd.Next(idm.Count);
-                    }
-                    //lastLastDialog = lastDialog;
-                    lastDialog = num;
-                    Debug.WriteLine("Диалог не совпадает с старым, показываю: " + lastDialog);
-                    sayIdle();
-                    break;
-                case 1:
-                    num = rnd.Next(idm.Count);
-                    await sayIdle();
-                    Environment.Exit(0);
-                    break;
-                case 2:
-                    string lang = Lang.Parent.Name;
-                    switch (lang)
-                    {
-                        case "ru":
-                            num = 0;
-                            sayIdle();
-                            break;
-                        case "en":
-                            num = 1;
-                            sayIdle();
-                            break;
-                        default:
-                            num = 1;
-                            sayIdle();
-                            break;
-                    }
-                    break;
-            }
-
-            #endregion
-
-        }
-        int dialogNum;
-        public async Task sayIdle()
-        {
-            isSpeaking = true;
-            this.Dispatcher.Invoke(() => { textWindow.Visibility = Visibility.Visible; });
-            //Debug.WriteLine(dm[num].Node.InnerXml);
-            for (int u = dialogNum; u < dm[num].Node.ChildNodes.Count; u++)
-            {
-                int delay = 0;
-                XmlNode childnode = dm[num].Node.ChildNodes[u];
-                // если узел age
-                if (childnode.Name == "Menu")
-                {
-                    string[] q = new string[childnode.ChildNodes.Count];
-                    Expression[][] ex = new Expression[childnode.ChildNodes.Count][];
-                    for (int i = 0; i < childnode.ChildNodes.Count; i++)
-                    {
-                        XmlNode attr = childnode.ChildNodes[i].Attributes.GetNamedItem("text");
-                        q[i] = attr.Value;
-                        Expression[] ex1 = new Expression[childnode.ChildNodes[i].ChildNodes.Count];
-                        for (int a = 0; a < childnode.ChildNodes[i].ChildNodes.Count; a++)
-                        {
-                            ex1[a] = new Expression(childnode.ChildNodes[i].ChildNodes[a].InnerText.Substring(5), childnode.ChildNodes[i].ChildNodes[a].InnerText.Substring(0, 4).ToString());
-                        }
-                        ex[i] = ex1;
-                    }
-                    Menu(dm[num].Node.ChildNodes[u - 1].InnerText.Substring(5), q, ex);
-                    dialogNum = u + 1;
-                    //Debug.WriteLine("u = " + dialogNum + " count = " + (dm[num].Node.ChildNodes.Count - 1));
-                    //Debug.WriteLine(dialogNum);
-                    break;
-                }
-                if (childnode.Name == "Text")
-                {
-                    //Console.WriteLine(childnode.InnerText);
-                    //exList.Add(new Expression(childnode.InnerText.Substring(2), childnode.InnerText[0].ToString()));
-                    try
-                    {
-                        if (childnode.InnerText.Contains("affection"))
-                        {
-                            Debug.WriteLine("Тип кода: " + childnode.InnerText);
-                            string[] i = childnode.InnerText.Split(" ");
-                            switch (i[1])
-                            {
-                                case "+":
-                                    Monika.affection += int.Parse(i[2]);
-                                    Debug.WriteLine("Привязанность " + i[1] + int.Parse(i[2]));
-                                    break;
-                                case "-":
-                                    Monika.affection -= int.Parse(i[2]);
-                                    Debug.WriteLine("Привязанность " + i[1] + int.Parse(i[2]));
-                                    if (Monika.affection <= 0)
-                                    {
-                                        Monika.affection = 0;
-                                    }
-                                    break;
-                            }
-                            Debug.WriteLine("Привязанность = " + Monika.affection);
-
-                        }
-                        else if (childnode.InnerText.Contains("giftAdd"))
-                        {
-                            try
-                            {
-                                string[] i = childnode.InnerText.Split(" ");
-                                addGift(i[1], i[2]);
-                            }
-                            catch (Exception e)
-                            {
-                                Debug.WriteLine(e.Message);
-                            }
-                        }
-                        else if (childnode.InnerText.Contains("giftRemove"))
-                        {
-                            try
-                            {
-                                string[] i = childnode.InnerText.Split(" ");
-                                removeGift(i[1]);
-                            }
-                            catch (Exception e)
-                            {
-                                Debug.WriteLine(e.Message);
-                            }
-                        }
-                        else if (childnode.InnerText.Contains("gitUpdate"))
-                        {
-                            updateZip();
-                        }
-                        else
-                        {
-                            //Debug.WriteLine("Говорим: " + childnode.InnerText.Substring(5));
-                            await Say(false, new[] { new Expression(childnode.InnerText.Substring(5), childnode.InnerText.Substring(0, 4)) });
-                        }
-                    }
-                    catch
-                    {
-                        Debug.WriteLine("ОШИБКА");
-                    }
-                    //Debug.WriteLine("u = " + dialogNum + " count = " + (dm[num].Node.ChildNodes.Count - 1));
-                }
-                if (u >= dm[num].Node.ChildNodes.Count - 1)
-                {
-                    isSpeaking = false;
-                    //Debug.WriteLine("Конец диалога");
-                    this.Dispatcher.Invoke(() =>
-                    {
-                        textWindow.Visibility = Visibility.Hidden;
-                        setFace(normalPose);
-                    });
-                    dialogNum = 0;
-                    Monika.saveData();
-                    break;
-                }
-                //Thread.Sleep(delay1); // sleep
-                //await Task.Delay(delay1);
-            }
-        }
-        #endregion
-
-        List<NamedDialogModel> ldm = new List<NamedDialogModel>();
-        string[] giftNameList;
-        public void readLongXml(string Name, string sPath, int type)
-        {
-            //Debug.WriteLine("Ввели текст: " + Name);
-            #region
-            //string sPath = progsDialogPath;
-            string mainXML = "<Mains>";
-
-            StreamReader f = new StreamReader(sPath);
-            while (!f.EndOfStream)
-            {
-                string m = f.ReadLine();
-                string s = m.Replace("\r", String.Empty);
-                string S = "";
-                if (s.Contains("affection"))
-                {
-                    S = s.Insert(0, "\n\t\t\t<Action>") + "</Action>";
-                }
-                if (s.Contains("menu:"))
-                {
-                    S = s.Replace("menu:", "\n\t\t\t<Menu>");
-                }
-                if (s.Contains("menuend"))
-                {
-                    S = s.Replace("menuend", "\n\t\t\t</Menu>");
-                }
-                if (s.Contains("\t\t"))
-                {
-                    //S = s.Insert(0, "\n\t\t\t<answer text = \"") + "\">";
-                    S = s.Replace("\t\t", "\n\t\t\t\t<Answer text=\"") + "\">";
-                }
-                if (s.Contains("ansend"))
-                {
-                    S = s.Replace("ansend", "\n\t\t\t\t</Answer>");
-                }/*
-                if (s.Contains("\t\t<Text>["))
-                {
-                    S = s.Replace("\t\t<Text>[", "\n\t<Process name=\"");
-                    S = s.Replace("]</Text>", "\">");
-                }*/
-        /*
-                if (s.Contains("\t\t\t") && !s.Contains("["))
-                {
-                    S = s.Replace("\t\t\t", "\n\t\t\t\t\t<Text>") + "</Text>\n\t\t\t\t</Answer>\n\t\t\t</Menu>";
-                }
-                if (!s.Contains("\t\t") && !s.Contains("\t\t") && !s.Contains("menuend") && !s.Contains("menu:") && !s.Contains("affection"))
-                {
-                    S = s.Insert(0, "\n\t\t\t<Text>") + "</Text>";
-                }
-                mainXML += S;
-            }
-            f.Close();
-
-            mainXML += "\n\t\t</Dialog>\n\t</Main>\n</Mains>";
-            string mainxml = mainXML.Replace("\t\t\t<Text>=</Text>", "\t\t</Dialog>\n\t\t<Dialog>").Replace("\t\t\t<Text>[", "\t\t</Dialog>\n\t</Main>\n\t<Main name=\"").Replace("]</Text>", "\">\n\t\t<Dialog>");
-            string mainXml = mainxml.Replace("<Mains>\n\t\t</Dialog>\n\t</Main>", "<Mains>").Replace("\n\t\t\t\t</Answer>\n\t\t\t</Menu>\n\t\t\t\t\t<Text>", "\n\t\t\t\t\t<Text>").Replace("\n\t\t\t\t</Answer>\n\t\t\t</Menu>\n\t\t\t\t<Answer", "\n\t\t\t\t<Answer").Replace("</Text>\n\t\t\t\t<Answer", "</Text>\n\t\t\t\t</Answer>\n\t\t\t\t<Answer");
-
-            //Console.Write("XML Example:\n" + mainXml);
-            //Console.WriteLine("Print dialogues:\n");
-            #endregion
-            #region
-            string s1 = mainXml.Replace("\t", String.Empty);
-            string s2 = s1.Replace("\n", String.Empty);
-            XmlDocument xDoc = new XmlDocument();
-            //string path = testXml;
-            //xDoc.Load(path);
-            xDoc.LoadXml(s2);
-            // получим корневой элемент
-            XmlElement xRoot = xDoc.DocumentElement;
-            string[][] names = new string[xRoot.ChildNodes.Count][];
-            List<NamedDialogModel> Ldm = new List<NamedDialogModel>();
-            // обход всех узлов в корневом элементе
-            foreach (XmlNode xnode in xRoot)
-            {
-                List<DialogModel> dm = new List<DialogModel>();
-                string[] name = xnode.Attributes.GetNamedItem("name").Value.ToLower().Split("|");
-                if (xnode.Name == "Main")
-                {
-                    foreach (XmlNode progsnode in xnode.ChildNodes)
-                    {
-                        dm.Add(new DialogModel(progsnode));
-                    }
-                }
-                Ldm.Add(new NamedDialogModel(name, dm));
-            }
-            dialogNum = 0;
-            switch (type)
-            {
-                case 0:
-                    foreach (NamedDialogModel NDM in Ldm)
-                    {
-                        if (NDM.Names.Contains(Name))
-                        {
-                            dm = NDM.DM;
-
-                            Random rnd = new Random();
-                            num = rnd.Next(dm.Count);
-                            sayIdle();
-                        }
-                    }
-                    break;
-                case 1:
-                    foreach (NamedDialogModel NDM in Ldm)
-                    {
-                        foreach (string c in NDM.Names)
-                        {
-                            string d = c.ToLower().Trim().TrimEnd('/');
-
-                            //Обновлено определение сайтов на более новое через Regex.Matches - обновление подготовил Денис Солицен
-
-                            if (d.StartsWith("http://"))
-                            {
-                                d = d.Substring(7);
-                            }
-
-                            if (d.StartsWith("https://"))
-                            {
-                                d = d.Substring(8);
-                            }
-
-                            if (d.StartsWith("www."))
-                            {
-                                d = d.Substring(4);
-                            }
-                            if (Name.Contains(d))
-                            {
-                                dm = NDM.DM;
-
-                                Random rnd = new Random();
-                                num = rnd.Next(dm.Count);
-                                sayIdle();
-                            }
-                        }
-                    }
-                    break;
-                case 2:
-                    foreach (NamedDialogModel NDM in Ldm)
-                    {
-                        foreach (string c in NDM.Names)
-                        {
-                            string d = c.ToLower().Trim().TrimEnd('/');
-
-                            //Обновлено определение сайтов на более новое через Regex.Matches - обновление подготовил Денис Солицен
-
-                            if (d.StartsWith("http://"))
-                            {
-                                d = d.Substring(7);
-                            }
-
-                            if (d.StartsWith("https://"))
-                            {
-                                d = d.Substring(8);
-                            }
-
-                            if (d.StartsWith("www."))
-                            {
-                                d = d.Substring(4);
-                            }
-                            var googleMatch = Regex.Match(Name, GOOGLE_REGEX, RegexOptions.Compiled);
-                            if (googleMatch.Success)
-                            {
-                                var search = HttpUtility.UrlDecode(googleMatch.Groups[1].ToString()).Trim();
-                                if (search.ToLower().Trim().Contains(d))
-                                {
-                                    dm = NDM.DM;
-
-                                    Random rnd = new Random();
-                                    num = rnd.Next(dm.Count);
-                                    sayIdle();
-                                }
-                            }
-                        }
-                    }
-                    break;
-                case 3:
-                    foreach (NamedDialogModel NDM in Ldm)
-                    {
-                        foreach (string c in NDM.Names)
-                        {
-                            string d = c.ToLower().Trim().TrimEnd('/');
-
-                            //Обновлено определение сайтов на более новое через Regex.Matches - обновление подготовил Денис Солицен
-
-                            if (d.StartsWith("http://"))
-                            {
-                                d = d.Substring(7);
-                            }
-
-                            if (d.StartsWith("https://"))
-                            {
-                                d = d.Substring(8);
-                            }
-
-                            if (d.StartsWith("www."))
-                            {
-                                d = d.Substring(4);
-                            }
-                            var youtubeMatch = Regex.Match(Name, YOUTUBE_REGEX, RegexOptions.Compiled);
-                            if (youtubeMatch.Success)
-                            {
-                                var search = HttpUtility.UrlDecode(youtubeMatch.Groups[1].ToString()).Trim();
-                                if (search.ToLower().Trim().Contains(d))
-                                {
-                                    dm = NDM.DM;
-
-                                    Random rnd = new Random();
-                                    num = rnd.Next(dm.Count);
-                                    _ = sayIdle();
-                                }
-                            }
-                        }
-                    }
-                    break;
-                case 4:
-                    foreach (NamedDialogModel NDM in Ldm)
-                    {
-                        if (NDM.Names.Contains(Name))
-                        {
-
-                            dm = NDM.DM;
-                            if (NDM.DM.Count != 1)
-                            {
-                                Monika.loadData();
-                                Debug.WriteLine(Monika.gifts.Count);
-                                List<string> giftList = new List<string>();
-                                List<string> loadedGiftList = new List<string>();
-                                foreach (string i in Monika.gifts)
-                                {
-                                    string[] gift = i.Split(" | ");
-                                    giftList.Add(gift[0]);
-                                    string[] a = gift[2].Split("|");
-                                    foreach (string b in a)
-                                    {
-                                        loadedGiftList.Add(b);
-                                    }
-                                }
-                                giftNameList = NDM.Names;
-                                if (giftList.Contains(Name) || loadedGiftList.Contains(Name))
-                                {
-                                    Debug.WriteLine(dm[1].Node.InnerText);
-                                    num = 1;
-                                    _ = sayIdle();
-                                    Debug.WriteLine("Подарок уже дарили");
-                                }
-                                else
-                                {
-                                    Debug.WriteLine(dm[0].Node.InnerText);
-                                    num = 0;
-                                    _ = sayIdle();
-                                    Debug.WriteLine("Первый подарок");
-                                }
-                            }
-                            else
-                            {
-                                Debug.WriteLine(dm[0].Node.InnerText);
-                                num = 0;
-                                _ = sayIdle();
-                                Debug.WriteLine("Одиночный файл");
-                            }
-                        }
-                    }
-                    break;
-            }
-            #endregion
-
-        }
-        #endregion*/
         public void addGift(string name, string path) {
             System.Windows.Application.Current.Dispatcher.Invoke(() => {
                 System.Windows.Controls.Image img1 = (System.Windows.Controls.Image)gifts.FindName(name);
                 if (img1 == null) {
                     System.Windows.Controls.Image img = new System.Windows.Controls.Image {
-                        Source = new BitmapImage(new Uri(AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/gifts/" + path)),
+                        //Source = new BitmapImage(new Uri(AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/gifts/" + name + path)),
+                        Source = new BitmapImage(new Uri(path)),
                         Name = name
                     };
                     RegisterName(name, img);
@@ -2039,7 +1531,8 @@ namespace MonikaOnDesktop {
                     {
                         giftList += i + "|";
                     }*/
-                    Monika.gifts.Add(name + " | " + path + " | " + giftList);
+                    Monika.gifts.Add(name + " | " + path + " | ");
+                    Monika.saveData();
                     Debug.WriteLine("Подарен подарок " + name);
                 }
             });
