@@ -88,6 +88,8 @@ namespace MonikaOnDesktop
             checkBox1.IsChecked = MonikaSettings.Default.AutoStart;
             checkBox.IsChecked = MonikaSettings.Default.screenNum;
             checkBox_Copy.IsChecked = MonikaSettings.Default.isMouse;
+            checkBox_ai.IsChecked = MonikaSettings.Default.ai;
+            aiId.Text = MonikaSettings.Default.aitoken;
             if (System.Windows.Forms.Screen.AllScreens.Length == 1)
             {
                 checkBox.Visibility = Visibility.Hidden;
@@ -106,6 +108,8 @@ namespace MonikaOnDesktop
             MonikaSettings.Default.screenNum = (bool)checkBox.IsChecked;
             MonikaSettings.Default.AutoStart = (bool)checkBox1.IsChecked;
             MonikaSettings.Default.isMouse = (bool)checkBox_Copy.IsChecked;
+            MonikaSettings.Default.ai = (bool)checkBox_ai.IsChecked;
+            MonikaSettings.Default.aitoken = aiId.Text;
             switch (randomIdle.Value)
             {
                 case 0:

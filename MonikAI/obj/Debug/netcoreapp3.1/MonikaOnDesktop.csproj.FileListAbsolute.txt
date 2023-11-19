@@ -327,3 +327,4 @@ D:\Projects\MoD\MonikAI\bin\Debug\netcoreapp3.1\System.Runtime.CompilerServices.
 D:\Projects\MoD\MonikAI\bin\Debug\netcoreapp3.1\System.Text.Encodings.Web.dll
 D:\Projects\MoD\MonikAI\bin\Debug\netcoreapp3.1\System.Text.Json.dll
 D:\Projects\MoD\MonikAI\bin\Debug\netcoreapp3.1\CharacterAI.pdb
+D:\Projects\MoD\MonikAI\bin\Debug\netcoreapp3.1\MonikaOnDesktop.dll.config

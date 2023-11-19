@@ -117,7 +117,7 @@ namespace MonikaOnDesktop {
 
 
         string AIpath = @"script.txt";
-        string token = "147ab42314427821859a93d217aa2a30119040e2";
+        //string token = "147ab42314427821859a93d217aa2a30119040e2";
         string characterId = "aywKj4vjL0-X2QeZj2VFcCqPlZ4HmzH0FNlebJKcjTk";
         CharacterAIClient client;
         Character character;
@@ -212,22 +212,27 @@ namespace MonikaOnDesktop {
         }
         public async void Window_Loaded(object sender, RoutedEventArgs e)     // Когда программа проснётся
         {
-            client = new CharacterAIClient(token);
+            if (Monika.AI && !String.IsNullOrEmpty(Monika.aiToken)) {
+                AIchat.Visibility = Visibility.Visible;
+                client = new CharacterAIClient(Monika.aiToken);
 
-            // Launch Puppeteer headless browser
-            await client.LaunchBrowserAsync(killDuplicates: true);
+                // Launch Puppeteer headless browser
+                await client.LaunchBrowserAsync(killDuplicates: true);
 
-            // Highly recommend to do this
-            AppDomain.CurrentDomain.ProcessExit += (s, args) => client.KillBrowser();
+                // Highly recommend to do this
+                AppDomain.CurrentDomain.ProcessExit += (s, args) => client.KillBrowser();
 
-            // Send message to a character
-            string characterId = "aywKj4vjL0-X2QeZj2VFcCqPlZ4HmzH0FNlebJKcjTk";
-            character = await client.GetInfoAsync(characterId);
+                // Send message to a character
+                string characterId = "aywKj4vjL0-X2QeZj2VFcCqPlZ4HmzH0FNlebJKcjTk";
+                character = await client.GetInfoAsync(characterId);
 
-            historyId = await client.CreateNewChatAsync(characterId);
+                historyId = await client.CreateNewChatAsync(characterId);
 
-            if (historyId is null) {
-                return;
+                if (historyId is null) {
+                    return;
+                }
+            } else {
+                AIchat.Visibility = Visibility.Hidden;
             }
             if (IsNight)
                 mainFilter = nightFilter;
@@ -408,7 +413,11 @@ namespace MonikaOnDesktop {
                             if (DateTime.Now >= nextGialog) {
                                 // Check if currently speaking, only blink if not in dialog
                                 Debug.WriteLine("DialoG check: " + isSpeaking);
-                                if (!isSpeaking && !isTyping && String.IsNullOrEmpty(AIchat.Text)) {
+                                bool aiRequestIsNull = true;
+                                this.Dispatcher.Invoke(() => {
+                                    aiRequestIsNull = String.IsNullOrEmpty(AIchat.Text);
+                                });
+                                if (!isSpeaking && !isTyping && aiRequestIsNull) {
                                     SolicenMode solicen = new SolicenMode();
                                     if (solicen.check(Monika.playerName)) {
                                         Random selectDialog = new Random();
@@ -535,7 +544,7 @@ namespace MonikaOnDesktop {
         bool isTyping = false;
         private async void AIchat_KeyUpAsync(object sender, System.Windows.Input.KeyEventArgs e) {
 
-            if (e.Key == Key.Enter) {
+            if (e.Key == Key.Enter && !String.IsNullOrEmpty(Monika.aiToken)) {
                 isTyping = true;
                 string _message = AIchat.Text;
                 AIchat.Text = "";
@@ -965,6 +974,8 @@ namespace MonikaOnDesktop {
                         Monika.screenNum = MonikaSettings.Default.screenNum;
                         Monika.lang = MonikaSettings.Default.Language.Name.ToString();
                         Monika.isMouse = MonikaSettings.Default.isMouse;
+                        Monika.AI = MonikaSettings.Default.ai;
+                        Monika.aiToken = MonikaSettings.Default.aitoken;
                         Monika.saveData();
                         if (String.IsNullOrEmpty(MonikaSettings.Default.UserName) || MonikaSettings.Default.UserName == "{PlayerName}") {
                             playerName = Environment.UserName;
@@ -1015,6 +1026,7 @@ namespace MonikaOnDesktop {
                 monika.SetValue("AutoStart", MonikaSettings.Default.AutoStart);
                 monika.Close();*/
                 #endregion
+                RunScript(goodbyeDialogDirectory.FullName + "\\" + new Random().Next(goodbyeDialogDirectory.GetFiles().Length) + ".txt");
                 //readXml(null, false, goodbyeDialogPath, 1); // Говорим прощание
             } else {
                 MonikaSettings.Default.isColdShutdown = true;

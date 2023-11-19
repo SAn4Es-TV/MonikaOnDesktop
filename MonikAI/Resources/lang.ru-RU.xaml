@@ -25,6 +25,8 @@
     <v:String x:Key="s_labelMonika">Моника</v:String>
     <v:String x:Key="s_labelApp">Программа</v:String>
     <v:String x:Key="s_labelMouseHide">Скрывать при наведении</v:String>
+    <v:String x:Key="s_labelAI">Включить ИИ</v:String>
+    <v:String x:Key="s_labelAIcode">Токен аккаунта</v:String>
 
     <v:String x:Key="s_labelExit">Выход</v:String>
     <v:String x:Key="s_labelSettings">Настройки</v:String>
