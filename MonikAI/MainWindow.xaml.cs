@@ -1002,7 +1002,7 @@ namespace MonikaOnDesktop {
             });
 
         }
-        private void MenuQuit_Click(object sender, RoutedEventArgs e)   // Закрытие программы
+        private async void MenuQuit_Click(object sender, RoutedEventArgs e)   // Закрытие программы
         {
             if (isSpeaking)
                 Debug.WriteLine("isSpeaking: " + isSpeaking);    // Дебыжим
@@ -1027,10 +1027,14 @@ namespace MonikaOnDesktop {
                 #endregion
                 RunScript(goodbyeDialogDirectory.FullName + "\\" + new Random().Next(goodbyeDialogDirectory.GetFiles().Length) + ".txt");
                 //readXml(null, false, goodbyeDialogPath, 1); // Говорим прощание
-            } else {
+
+                while (isSpeaking) {
+                    await Task.Delay(100);
+                }
                 MonikaSettings.Default.isColdShutdown = true;
                 Monika.saveData();
                 Environment.Exit(0);
+            } else {
             }
         }
         public async Task checkUpdatesAsync() {
