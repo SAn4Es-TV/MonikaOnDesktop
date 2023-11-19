@@ -117,7 +117,6 @@ namespace MonikaOnDesktop {
 
 
         string AIpath = @"script.txt";
-        //string token = "147ab42314427821859a93d217aa2a30119040e2";
         string characterId = "aywKj4vjL0-X2QeZj2VFcCqPlZ4HmzH0FNlebJKcjTk";
         CharacterAIClient client;
         Character character;
