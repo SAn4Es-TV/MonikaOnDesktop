@@ -118,6 +118,9 @@
             </Grid.RowDefinitions>
             <!-- Put buttons here. -->
         </Grid>
+        <Grid>
+            <TextBox x:Name="AIchat" Text="" Height="50" VerticalAlignment="Top" Background="#0000" FontFamily="Comic Sans MS" Foreground="#ffff" KeyUp="AIchat_KeyUpAsync" BorderBrush="#0000" SelectionBrush="#0000"/>
+        </Grid>
         <!-- </StackPanel>-->
         <tb:TaskbarIcon x:Name="myNotifyIcon"
                     Visibility="Visible"

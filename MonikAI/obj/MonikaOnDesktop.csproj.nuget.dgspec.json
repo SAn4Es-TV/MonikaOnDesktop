@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\sanes\\source\\repos\\MonikaOnDesktop\\MonikAI\\MonikaOnDesktop.csproj": {}
+    "D:\\Projects\\MoD\\MonikAI\\MonikaOnDesktop.csproj": {}
   },
   "projects": {
-    "C:\\Users\\sanes\\source\\repos\\MonikaOnDesktop\\MonikAI\\MonikaOnDesktop.csproj": {
+    "D:\\Projects\\MoD\\Libraries\\CharacterAi\\CharacterAI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\sanes\\source\\repos\\MonikaOnDesktop\\MonikAI\\MonikaOnDesktop.csproj",
-        "projectName": "MonikaOnDesktop",
-        "projectPath": "C:\\Users\\sanes\\source\\repos\\MonikaOnDesktop\\MonikAI\\MonikaOnDesktop.csproj",
+        "projectUniqueName": "D:\\Projects\\MoD\\Libraries\\CharacterAi\\CharacterAI.csproj",
+        "projectName": "CharacterAI",
+        "projectPath": "D:\\Projects\\MoD\\Libraries\\CharacterAi\\CharacterAI.csproj",
         "packagesPath": "C:\\Users\\sanes\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\sanes\\source\\repos\\MonikaOnDesktop\\MonikAI\\obj\\",
+        "outputPath": "D:\\Projects\\MoD\\Libraries\\CharacterAi\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "D:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
           "C:\\Users\\sanes\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -26,12 +26,91 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "netcoreapp3.1": {
             "targetAlias": "netcoreapp3.1",
             "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp3.1": {
+          "targetAlias": "netcoreapp3.1",
+          "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
+            },
+            "PuppeteerExtraSharp": {
+              "target": "Package",
+              "version": "[2.0.0, )"
+            },
+            "PuppeteerSharp": {
+              "target": "Package",
+              "version": "[11.0.6, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.302\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\Projects\\MoD\\MonikAI\\MonikaOnDesktop.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Projects\\MoD\\MonikAI\\MonikaOnDesktop.csproj",
+        "projectName": "MonikaOnDesktop",
+        "projectPath": "D:\\Projects\\MoD\\MonikAI\\MonikaOnDesktop.csproj",
+        "packagesPath": "C:\\Users\\sanes\\.nuget\\packages\\",
+        "outputPath": "D:\\Projects\\MoD\\MonikAI\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\sanes\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp3.1"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp3.1": {
+            "targetAlias": "netcoreapp3.1",
+            "projectReferences": {
+              "D:\\Projects\\MoD\\Libraries\\CharacterAi\\CharacterAI.csproj": {
+                "projectPath": "D:\\Projects\\MoD\\Libraries\\CharacterAi\\CharacterAI.csproj"
+              }
+            }
           }
         },
         "warningProperties": {
@@ -54,7 +133,7 @@
             },
             "Microsoft.AspNet.WebApi.Core": {
               "target": "Package",
-              "version": "[5.2.7, )"
+              "version": "[5.3.0, )"
             },
             "Microsoft.Toolkit.Uwp.Notifications": {
               "target": "Package",
@@ -63,6 +142,14 @@
             "Microsoft.Win32.SystemEvents": {
               "target": "Package",
               "version": "[6.0.1, )"
+            },
+            "PuppeteerExtraSharp": {
+              "target": "Package",
+              "version": "[2.0.0, )"
+            },
+            "PuppeteerSharp": {
+              "target": "Package",
+              "version": "[12.0.0, )"
             },
             "System.Management": {
               "target": "Package",
@@ -79,7 +166,8 @@
             "net47",
             "net471",
             "net472",
-            "net48"
+            "net48",
+            "net481"
           ],
           "assetTargetFallback": true,
           "warn": true,
@@ -91,7 +179,7 @@
               "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.302\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.302\\RuntimeIdentifierGraph.json"
         }
       }
     }
