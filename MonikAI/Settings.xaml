@@ -72,6 +72,7 @@
             <Button FontFamily="Comic Sans MS"  Style="{DynamicResource ButtonStyle1}" x:Name="save" Content="{DynamicResource s_labelSave}" Margin="28,0,0,49" Height="27" VerticalAlignment="Bottom" Click="save_Click" Background="#00DDDDDD" BorderBrush="#00707070" Foreground="#FFFF7FBF" FontWeight="Bold" FontSize="16" HorizontalAlignment="Left" Width="92"/>
         </Grid>
         <Grid Visibility="Visible" x:Name="monika">
+            
             <Slider x:Name="monikaSize" Margin="0,18,37,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="384"  Maximum="100" Value="100" SmallChange="1" TickPlacement="None" ValueChanged="monikaSize_ValueChanged" Minimum="1"/>
             <TextBlock FontFamily="Comic Sans MS" x:Name="label" Text="{DynamicResource s_labelSize}" FontSize="20" HorizontalAlignment="Left" Height="34" Margin="223,10,0,0" VerticalAlignment="Top" Width="104"/>
             <TextBox FontFamily="Comic Sans MS" x:Name="userName" HorizontalAlignment="Right" Margin="0,50,212,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Width="209" Height="32"/>

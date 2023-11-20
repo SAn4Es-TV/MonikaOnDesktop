@@ -211,7 +211,7 @@ namespace MonikaOnDesktop {
         }
         public async void Window_Loaded(object sender, RoutedEventArgs e)     // Когда программа проснётся
         {
-            if (Monika.AI && !String.IsNullOrEmpty(Monika.aiToken)) {
+            if (Monika.AI && !String.IsNullOrEmpty(Monika.aiToken) && isConectedToInternet()) {
                 AIchat.Visibility = Visibility.Visible;
                 client = new CharacterAIClient(Monika.aiToken);
 
@@ -251,7 +251,7 @@ namespace MonikaOnDesktop {
             SetupScale(Monika.Scaler);  // Ставим размер окна
             Lang = MonikaSettings.Default.Language;
 
-            UnpackCostume("def");
+            //UnpackCostume(Monika.costumeName);
 
             _start = new DoubleAnimation();
             _start.From = 0;
@@ -1510,9 +1510,10 @@ namespace MonikaOnDesktop {
                 if (Directory.Exists(path)) {
                     DirectoryInfo di = new DirectoryInfo(path);
                     di.Delete(true);
+                    Directory.CreateDirectory(path);
                 }
             }
-            ZipFile.ExtractToDirectory(costumesPath + name + ".costume", path);
+            ZipFile.ExtractToDirectory(AppDomain.CurrentDomain.BaseDirectory + "/costumes/" + name + ".costume", AppDomain.CurrentDomain.BaseDirectory + "/costumes/" + name);
             setFace(normalPose);
         }
         public void addGift(string name, string path) {
