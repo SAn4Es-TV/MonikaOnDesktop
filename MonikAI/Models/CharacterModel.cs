@@ -29,6 +29,8 @@ namespace MonikaOnDesktop
         public bool isMouse = false;
         public string costumeName = "def";
         public int secondTogether = 0;
+        public bool AI = false;
+        public string aiToken = "";
 
         public List<string> gifts = new List<string>();
 
@@ -110,7 +112,9 @@ namespace MonikaOnDesktop
             MonikaSettings.Default.screenNum = screenNum;
             MonikaSettings.Default.AutoStart = autoStart;
             MonikaSettings.Default.isMouse = isMouse;
-            
+            MonikaSettings.Default.ai = AI;
+            MonikaSettings.Default.aitoken = aiToken;
+
             XDocument xDoc = new XDocument();
             XElement xml = new XElement("xml");
             XElement mainSettings = new XElement("settings");
@@ -128,6 +132,8 @@ namespace MonikaOnDesktop
             XElement isMouse_ = new XElement("isMouse"); isMouse_.Value = isMouse.ToString();
             XElement secondTogether_ = new XElement("secondTogether"); secondTogether_.Value = secondTogether.ToString();
             XElement costume_ = new XElement("costume"); costume_.Value = costumeName.ToString();
+            XElement ai_ = new XElement("ai"); ai_.Value = AI.ToString();
+            XElement aitoken_ = new XElement("aiToken"); aitoken_.Value = aiToken;
 
             mainSettings.Add(affection_);
             mainSettings.Add(pcName_);
@@ -143,6 +149,8 @@ namespace MonikaOnDesktop
             mainSettings.Add(isMouse_);
             mainSettings.Add(secondTogether_);
             mainSettings.Add(costume_);
+            mainSettings.Add(ai_);
+            mainSettings.Add(aitoken_);
 
             XElement gifts_ = new XElement("gifts");
             if (gifts.Count != 0)
@@ -226,6 +234,12 @@ namespace MonikaOnDesktop
                                     break;
                                 case "costume":
                                     costumeName = option.Value;
+                                    break;
+                                case "ai":
+                                    AI = bool.Parse(option.Value);
+                                    break;
+                                case "aiToken":
+                                    aiToken = option.Value;
                                     break;
                             }
                         }

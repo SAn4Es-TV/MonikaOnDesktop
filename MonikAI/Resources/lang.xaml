@@ -25,6 +25,8 @@
     <v:String x:Key="s_labelMonika">Monika</v:String>
     <v:String x:Key="s_labelApp">Program</v:String>
     <v:String x:Key="s_labelMouseHide">Hide on hover</v:String>
+    <v:String x:Key="s_labelAI">AI</v:String>
+    <v:String x:Key="s_labelAIcode">AI Token</v:String>
 
     <v:String x:Key="s_labelExit">Quit</v:String>
     <v:String x:Key="s_labelSettings">Settings</v:String>
