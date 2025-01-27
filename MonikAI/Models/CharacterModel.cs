@@ -13,24 +13,8 @@ namespace MonikaOnDesktop
 {
     class CharacterModel
     {
-        private string _filePath;
-        public string filePath
-        {
-            get => _filePath;
-            set
-            {
-                _filePath = string.Intern(value);
-            }
-        }
-        private string _giftsPath;
-        public string giftsPath
-        {
-            get => _giftsPath;
-            set
-            {
-                _giftsPath = string.Intern(value);
-            }
-        }
+        public string filePath;
+        public string giftsPath;
         public int affection = 0;
         public string pcName;
         public string playerName;
@@ -45,13 +29,15 @@ namespace MonikaOnDesktop
         public bool isMouse = false;
         public string costumeName = "def";
         public int secondTogether = 0;
+        public bool AI = false;
+        public string aiToken = "";
 
         public List<string> gifts = new List<string>();
 
 
         public string leaningWord = "leaning";
         public string nullPath = "null";
-        public string[] body = new [] { "arms-crossed-5",
+        public string[] body = new string[] { "arms-crossed-5",
             "arms-crossed-10",
             "arms-leaning-def-left-def-10",
             "arms-leaning-def-right-def-5",
@@ -68,7 +54,7 @@ namespace MonikaOnDesktop
             "body-leaning-def-0",
             "body-leaning-def-1",
             "body-leaning-def-head"};
-        public string[] eyes = new [] { "eyes-closedhappy",
+        public string[] eyes = new string[] { "eyes-closedhappy",
             "eyes-closedsad",
             "eyes-crazy",
             "eyes-left",
@@ -82,12 +68,12 @@ namespace MonikaOnDesktop
             "eyes-wide",
             "eyes-winkleft",
             "eyes-winkright",};
-        public string[] eyesBrow = new [] { "eyebrows-furrowed",
+        public string[] eyesBrow = new string[] { "eyebrows-furrowed",
             "eyebrows-knit",
             "eyebrows-mid",
             "eyebrows-think",
             "eyebrows-up"};
-        public string[] mouth = new [] { "mouth-angry",
+        public string[] mouth = new string[] { "mouth-angry",
             "mouth-big",
             "mouth-gasp",
             "mouth-pout",
@@ -126,7 +112,9 @@ namespace MonikaOnDesktop
             MonikaSettings.Default.screenNum = screenNum;
             MonikaSettings.Default.AutoStart = autoStart;
             MonikaSettings.Default.isMouse = isMouse;
-            
+            MonikaSettings.Default.ai = AI;
+            MonikaSettings.Default.aitoken = aiToken;
+
             XDocument xDoc = new XDocument();
             XElement xml = new XElement("xml");
             XElement mainSettings = new XElement("settings");
@@ -143,7 +131,9 @@ namespace MonikaOnDesktop
             XElement screenNum_ = new XElement("screenNum"); screenNum_.Value = screenNum.ToString();
             XElement isMouse_ = new XElement("isMouse"); isMouse_.Value = isMouse.ToString();
             XElement secondTogether_ = new XElement("secondTogether"); secondTogether_.Value = secondTogether.ToString();
-            XElement costume_ = new XElement("costume"); costume_.Value = costumeName;
+            XElement costume_ = new XElement("costume"); costume_.Value = costumeName.ToString();
+            XElement ai_ = new XElement("ai"); ai_.Value = AI.ToString();
+            XElement aitoken_ = new XElement("aiToken"); aitoken_.Value = aiToken;
 
             mainSettings.Add(affection_);
             mainSettings.Add(pcName_);
@@ -159,6 +149,8 @@ namespace MonikaOnDesktop
             mainSettings.Add(isMouse_);
             mainSettings.Add(secondTogether_);
             mainSettings.Add(costume_);
+            mainSettings.Add(ai_);
+            mainSettings.Add(aitoken_);
 
             XElement gifts_ = new XElement("gifts");
             if (gifts.Count != 0)
@@ -243,7 +235,11 @@ namespace MonikaOnDesktop
                                 case "costume":
                                     costumeName = option.Value;
                                     break;
-                                default:
+                                case "ai":
+                                    AI = bool.Parse(option.Value);
+                                    break;
+                                case "aiToken":
+                                    aiToken = option.Value;
                                     break;
                             }
                         }

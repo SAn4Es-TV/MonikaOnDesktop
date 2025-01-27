@@ -1,29 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace MonikaOnDesktop
 {
     public class Expression
     {
-        private string _text;
-        public string Text
-        {
-            get => _text;
-            set
-            {
-                _text = string.Intern(value);
-            }
-        }
-        private string _face;
-        public string Face
-        {
-            get => _face;
-            set
-            {
-                _face = string.Intern(value);
-            }
-        }
+        public String Text { get; set; }
+        public String Face { get; set; }
 
-        public String[] Hello = { "Привет, {PlayerName}! Я скучала", "Привет!" };
+        public String[] Hello = {"Привет, {PlayerName}! Я скучала", "Привет!"};
 
         public Expression(string text, string face)
         {
@@ -40,5 +26,6 @@ namespace MonikaOnDesktop
             this.Text = text;
             this.Face = "a";
         }
+
     }
 }

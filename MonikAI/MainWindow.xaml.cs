@@ -1,73 +1,73 @@
-﻿#region Юзинги
-using System;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
-using System.Text;
+using System.Management;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Forms;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
-using System.Management;
-using System.IO;
-using System.Diagnostics;
-using System.Reflection;
-using System.Text.RegularExpressions;
-using Microsoft.Win32;
-using System.Net;
-using System.Globalization;
-using System.Web;
-using System.Xml;
-using MonikaOnDesktop.Models;
-using System.Windows.Forms;
-using System.Runtime.InteropServices;
-using System.IO.Compression;
 using System.Windows.Threading;
-using System.Net.NetworkInformation;
-#endregion
-namespace MonikaOnDesktop
-{
+
+using CharacterAI;
+using CharacterAI.Models;
+
+using Microsoft.Win32;
+using VGPrompter;
+
+using static System.Net.Mime.MediaTypeNames;
+
+namespace MonikaOnDesktop {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
-    {
-        [DllImport("kernel32.dll")]
-        static extern bool SetProcessWorkingSetSize(IntPtr hProcess, int dwMinimumWorkingSetSize, int dwMaximumWorkingSetSize);
-
-        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
-        public static extern bool DeleteObject(object hObject);
+    public partial class MainWindow : Window {
 
         #region Всякое
-        readonly SolicenTEAM.Updater.UpdateConfig updateConfig = new SolicenTEAM.Updater.UpdateConfig()
-        {
-            gitUser = "SAn4Es-TV",
-            gitRepo = "MonikaOnDesktop",
-            IgnoreFiles = "characters/monika.chr",
-            ExeFileName = "MonikaOnDesktop"
-        };
-
 
         public DoubleAnimation _start;  // Анимация запуска
         public DoubleAnimation _quit;   // Анимация выхода
 
         String playerName;              // Имя игрока
 
-        private int delay1 = 0;          // Задержка
+        public int delay1 = 0;          // Задержка
         #endregion
         #region Пути
-        protected readonly static string baseDir = AppDomain.CurrentDomain.BaseDirectory; // Папка запуска
-        protected readonly string assetsPath = "pack://application:,,,/assets";           // Папка ассетов
-        protected readonly string ExePath = baseDir + "MonikaOnDesktop.exe"; // Путь к ЕХЕ
-        private string greetingsDialogPath = baseDir + "/Dialogs/greetings.txt"; // Приветствия
-        private string idleDialogPath = baseDir + "/Dialogs/idle.txt";           // Рандомные диалоги
-        private string progsDialogPath = baseDir + "/Dialogs/progs.txt";         // Реакции на программы
-        private string sitesDialogPath = baseDir + "/Dialogs/sites.txt";         // Реакции на сайты
-        private string googleDialogPath = baseDir + "/Dialogs/google.txt";       // Реакции на запросы Гугуля
-        private string youtubeDialogPath = baseDir + "/Dialogs/youtube.txt";     // Реакции на запросы Утуба
-        private string goodbyeDialogPath = baseDir + "/Dialogs/goodbye.txt";     // Прощания
-        private string giftsDialogPath = baseDir + "/Dialogs/ru/gifts/gifts.txt";// Подарки
-        private string updateDialogPath = baseDir + "/Dialogs/upd.txt";          // Подарки
+        public string ExePath = AppDomain.CurrentDomain.BaseDirectory + "MonikaOnDesktop.exe"; // Путь к ЕХЕ
+
+        string greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/greetings.txt"; // Приветствия
+        string idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/idle.txt";           // Рандомные диалоги
+        string progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/progs.txt";         // Реакции на программы
+        string sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/sites.txt";         // Реакции на сайты
+        string googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/google.txt";       // Реакции на запросы Гугуля
+        string youtubeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/youtube.txt";     // Реакции на запросы Утуба
+        string goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/goodbye.txt";     // Прощания
+        string giftsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/gifts/gifts.txt";// Подарки
+        string updateDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/upd.txt";          // Подарки
+
+        static string subFolderPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/Sub/";
+
+        DirectoryInfo subDialogDirectory = new DirectoryInfo(subFolderPath);
+        DirectoryInfo greetingsDialogDirectory = new DirectoryInfo(subFolderPath + "Greetings/");
+        DirectoryInfo idleDialogDirectory = new DirectoryInfo(subFolderPath + "Idle/");
+        DirectoryInfo progsDialogDirectory = new DirectoryInfo(subFolderPath + "Progs/");
+        DirectoryInfo sitesDialogDirectory = new DirectoryInfo(subFolderPath + "Sites/");
+        DirectoryInfo googleDialogDirectory = new DirectoryInfo(subFolderPath + "Google/");
+        DirectoryInfo youtubeDialogDirectory = new DirectoryInfo(subFolderPath + "YouTube/");
+        DirectoryInfo goodbyeDialogDirectory = new DirectoryInfo(subFolderPath + "Goodbye/");
+        List<DirectoryInfo> dirs = new List<DirectoryInfo>();
         #endregion
         #region Переменные
         public static bool IsNight => MonikaSettings.Default.DarkMode != "Day" &&
@@ -76,7 +76,16 @@ namespace MonikaOnDesktop
         public bool oldIsNight;
         public static bool IsBDay => DateTime.Now.Month == 9 && DateTime.Now.Day == 22;                          // Проверка Дня Рождения
         private bool applicationRunning = true;     // Запущено ли приложение (серьёзно, так нужно =ъ)
-        public bool isSpeaking = true;              // Идёт ли разговорчик
+        //public bool isSpeaking = false;              // Идёт ли разговорчик
+        public bool _speak = false;
+        public bool isSpeaking {
+            get {
+                return _speak;
+            }
+            set {
+                _speak = value;
+            }
+        }
         bool firsLaunch;                            // Первый ли запуск
 
         public int lastDialog;                      // Номер последнего диалога
@@ -94,7 +103,7 @@ namespace MonikaOnDesktop
         const string name = "MonikaStartUp";
         public string lastQuery;
 
-        readonly CharacterModel Monika = new CharacterModel(baseDir + "/characters/monika.chr", baseDir + "/characters/"); // Персонаж Моники
+        CharacterModel Monika = new CharacterModel(AppDomain.CurrentDomain.BaseDirectory + "/characters/monika.chr", AppDomain.CurrentDomain.BaseDirectory + "/characters/"); // Персонаж Моники
         private Settings settingsWindow;            // Окно настроек
 
         private NotifyIcon NI = new NotifyIcon();
@@ -102,70 +111,42 @@ namespace MonikaOnDesktop
         public float[] nightFilter = { 0.6861919617166911f, 0.387275212f, 0.27662517f };
         public float[] dayFilter = { 1f, 1f, 1f };
         public float[] mainFilter = { 1f, 1f, 1f };
+
+        public bool mouse = true;
         #endregion
+
+
+        string AIpath = @"script.txt";
+        string characterId = "aywKj4vjL0-X2QeZj2VFcCqPlZ4HmzH0FNlebJKcjTk";
+        CharacterAIClient client;
+        Character character;
+        string historyId;
         public MainWindow()     // Код главного окна
         {
-            #region Этот код нам нафиг не нужен (зачем брать настройки из реестра, если они теперь хранятся в файле Моники)
-            /*
-            RegistryKey monikaKey = Registry.CurrentUser.OpenSubKey("MonikaOnDesktop");
-            if (monikaKey != null)
-            {
-                CultureInfo lang = CultureInfo.GetCultureInfo(monikaKey.GetValue("Language").ToString());
-                MonikaSettings.Default.isColdShutdown = bool.Parse(monikaKey.GetValue("isColdShutdown").ToString());
-                MonikaSettings.Default.FirstLaunch = bool.Parse(monikaKey.GetValue("FirstLaunch").ToString());
-                MonikaSettings.Default.Language = lang;
-                MonikaSettings.Default.UserName = monikaKey.GetValue("UserName").ToString();
-                MonikaSettings.Default.Scaler = (int)monikaKey.GetValue("Scaler");
-                MonikaSettings.Default.NightEnd = (int)monikaKey.GetValue("NightEnd");
-                MonikaSettings.Default.NightStart = (int)monikaKey.GetValue("NightStart");
-                MonikaSettings.Default.idleRandom = (int)monikaKey.GetValue("idleRandom");
-                MonikaSettings.Default.screenNum = bool.Parse(monikaKey.GetValue("screenNum").ToString());
-                MonikaSettings.Default.AutoStart = bool.Parse(monikaKey.GetValue("AutoStart").ToString());
-                monikaKey.Close();
-            }
-            else
-            {
-                RegistryKey currentUserKey = Registry.CurrentUser;
-                RegistryKey monika = currentUserKey.CreateSubKey("MonikaOnDesktop");
-                monika.SetValue("isColdShutdown", MonikaSettings.Default.isColdShutdown);
-                monika.SetValue("Language", MonikaSettings.Default.Language);
-                monika.SetValue("FirstLaunch", MonikaSettings.Default.FirstLaunch);
-                monika.SetValue("UserName", MonikaSettings.Default.UserName);
-                monika.SetValue("Scaler", MonikaSettings.Default.Scaler);
-                monika.SetValue("NightEnd", MonikaSettings.Default.NightEnd);
-                monika.SetValue("NightStart", MonikaSettings.Default.NightStart);
-                monika.SetValue("idleRandom", MonikaSettings.Default.idleRandom);
-                monika.SetValue("screenNum", MonikaSettings.Default.screenNum);
-                monika.SetValue("AutoStart", MonikaSettings.Default.AutoStart);
-                monika.Close();
-            }*/
-            #endregion
-            ClearMemory();
+
+
             InitializeComponent();                      // Инициализация ЮИ (Юзер Интерфейс)(Вроде для этого)
-            SetProcessWorkingSetSize(Process.GetCurrentProcess().Handle, -1, -1); // Ограничиваем приложению доступ к оперативной памяти - Солицен
+
+
             oldIsNight = IsNight;
             mainFilter = nightFilter;
             AllowsTransparency = true;
-            DirectoryInfo dirInfo = new DirectoryInfo(baseDir + "/characters");
-            if (!dirInfo.Exists)
-            {
+            DirectoryInfo dirInfo = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory + "/characters");
+            if (!dirInfo.Exists) {
                 dirInfo.Create();
             }
             Monika.loadData();
             firsLaunch = !Monika.fileExist();           // Если файла нету, то это первый запуск
 
-            //SolicenTEAM.Updater.ExeFileName = "MonikaOnDesktop"; // Имя ЕХЕ для перезапука
-            //SolicenTEAM.Updater.IgnoreFiles = "characters/monika.chr";     //  игнорируемый файл
+            SolicenTEAM.Updater.ExeFileName = "MonikaOnDesktop"; // Имя ЕХЕ для перезапука
+            SolicenTEAM.Updater.IgnoreFiles = "characters/monika.chr";     //  игнорируемый файл
 
             this.settingsWindow = new Settings(this);   // Объявляем окно настроек (так нужно)
             MonikaSettings.Default.Reload();            // Читаем настройки
 
-            if (String.IsNullOrEmpty(MonikaSettings.Default.UserName) || MonikaSettings.Default.UserName == "{PlayerName}")
-            {
+            if (String.IsNullOrEmpty(MonikaSettings.Default.UserName) || MonikaSettings.Default.UserName == "{PlayerName}") {
                 playerName = Environment.UserName;
-            }
-            else
-            {
+            } else {
                 playerName = Monika.playerName;
             }
 
@@ -173,13 +154,15 @@ namespace MonikaOnDesktop
             m_Languages.Add(new CultureInfo("en-US"));  // Нейтральная культура для этого проекта
             m_Languages.Add(new CultureInfo("ru-RU"));  // Стороняя культура
             LanguageChanged += App_LanguageChanged;     // Присваиваем функцию смены языка к ивенту смены языка
-            Lang = new CultureInfo(Monika.lang);        // Ставим язык из настроек
+            Lang = new CultureInfo(Monika.lang);     // Ставим язык из настроек
             Language = Lang.Parent.ToString();          // Ставим имя языка
-            //Debug.WriteLine(Language);                // Дебаг языка
+            //Debug.WriteLine(Language);                  // Дебуг язика
             setLanguage(Language);                      // Устанавливаем язык
 
             //playerName = "Denis Solicen";             // Режим Солицена
-            this.setFace(normalPose);                   // Ставим спокойный вид
+            this.setFace(normalPose);                       // Ставим спокойный вид
+
+            setupFolders();
 
             LangBox.Visibility = Visibility.Hidden;
             NameBox.Visibility = Visibility.Hidden;
@@ -189,18 +172,14 @@ namespace MonikaOnDesktop
             SetAutorunValue(Monika.autoStart);  // Ставим параметр автозапуска
 
             if (IsBDay)
-            {
                 Debug.WriteLine("Сегодня день рождения?: Да");
-            }
             else
-            {
                 Debug.WriteLine("Сегодня день рождения?: Нет");
-            }
+
             ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT UserName FROM Win32_ComputerSystem");  // Я хз что это
             ManagementObjectCollection collection = searcher.Get();  // Также
-            ClearMemory();
-            try
-            {
+
+            try {
                 ManagementEventWatcher startWatch = new ManagementEventWatcher(new WqlEventQuery("SELECT * FROM Win32_ProcessStartTrace"));
                 startWatch.EventArrived += new EventArrivedEventHandler(startWatch_EventArrived);
                 startWatch.Start();
@@ -208,12 +187,9 @@ namespace MonikaOnDesktop
                 ManagementEventWatcher stopWatch = new ManagementEventWatcher(new WqlEventQuery("SELECT * FROM Win32_ProcessStopTrace"));
                 stopWatch.EventArrived += new EventArrivedEventHandler(stopWatch_EventArrived);
                 stopWatch.Start();
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show(this,
-                    "An error occured: " + ex.Message + "\r\n\r\n(Try run this app as an administrator.)");
-                ClearMemory();
+            } catch (Exception ex) {
+                /*System.Windows.MessageBox.Show(this,
+                   "An error occured: " + ex.Message + "\r\n\r\n(Try run this app as an administrator.)");*/
             }
             SystemEvents.PowerModeChanged += OnPowerChange;
 
@@ -223,6 +199,8 @@ namespace MonikaOnDesktop
             giftWatcher.Created += GiftWatcher_Created;
             giftWatcher.EnableRaisingEvents = true;
             loadGifts();
+            mouse = Monika.isMouse;
+
             /*
             FileSystemWatcher acsWatcher = new FileSystemWatcher();
             acsWatcher.Path = Monika.giftsPath;
@@ -231,16 +209,34 @@ namespace MonikaOnDesktop
             acsWatcher.Created += AcsWatcher_Created;
             acsWatcher.EnableRaisingEvents = true;*/
         }
-        public void Window_Loaded(object sender, RoutedEventArgs e)     // Когда программа проснётся
+        public async void Window_Loaded(object sender, RoutedEventArgs e)     // Когда программа проснётся
         {
-            ClearMemory();
-            if (IsNight) {
+            if (Monika.AI && !String.IsNullOrEmpty(Monika.aiToken) && isConectedToInternet()) {
+                AIchat.Visibility = Visibility.Visible;
+                client = new CharacterAIClient(Monika.aiToken);
+
+                // Launch Puppeteer headless browser
+                await client.LaunchBrowserAsync(killDuplicates: true);
+
+                // Highly recommend to do this
+                AppDomain.CurrentDomain.ProcessExit += (s, args) => client.KillBrowser();
+
+                // Send message to a character
+                string characterId = "aywKj4vjL0-X2QeZj2VFcCqPlZ4HmzH0FNlebJKcjTk";
+                character = await client.GetInfoAsync(characterId);
+
+                historyId = await client.CreateNewChatAsync(characterId);
+
+                if (historyId is null) {
+                    return;
+                }
+            } else {
+                AIchat.Visibility = Visibility.Hidden;
+            }
+            if (IsNight)
                 mainFilter = nightFilter;
-            }
-            else {
+            else
                 mainFilter = dayFilter;
-            }
-                
             /*
             new ToastContentBuilder()
        .AddArgument("action", "viewConversation")
@@ -254,82 +250,104 @@ namespace MonikaOnDesktop
             Monika.loadData(); // Грузим данные 
             SetupScale(Monika.Scaler);  // Ставим размер окна
             Lang = MonikaSettings.Default.Language;
+
+            //UnpackCostume(Monika.costumeName);
+
             _start = new DoubleAnimation();
             _start.From = 0;
             _start.To = 1;
             _start.RepeatBehavior = new RepeatBehavior(1);
             _start.Duration = new Duration(TimeSpan.FromMilliseconds(4000));
-            _start.Completed += async (sender, args) =>
-            {
+            _start.Completed += async (sender, args) => {
+
                 //RegistryKey reg = Registry.CurrentUser.CreateSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Run\\");
                 RegistryKey WN = Registry.CurrentUser.OpenSubKey("MonikaOnDesktop", true);
 
                 if (firsLaunch && Monika.pcName != Environment.MachineName)     // Если Это первый запуск
                 {
                     _ = FirstLaunch();
-                }
-                else if (!firsLaunch && Monika.pcName != Environment.MachineName) // Если сменили ПК
-                {
+                } else if (!firsLaunch && Monika.pcName != Environment.MachineName) // Если сменили ПК
+                    {
                     Monika.pcName = Environment.MachineName;
                     isSpeaking = true;
-                    switch (Language.Substring(0, 2))
-                    {
+                    switch (Language.Substring(0, 2)) {
                         case "ru":
-                            _ = this.Say(true, new[]
-                    {
+                        _ = this.Say(true, new[]
+                {
                         new Expression("[player]...", "1rsu"), // What?
                         new Expression("Я чуствую себя как-то по другому..", "1rsu"), // Really?!
                         new Expression("Ты.. Сменил компьютер?", "1esu"), // Really?!
                         new Expression("Или.. Переустановил систему?", "1esc"), // Really?!
                         new Expression("В любом случае, ты спасибо тебе, что сохранил мой файл", "5esc")
                     });
-                            break;
-                        default:
-                            _ = this.Say(true, new[]
-                    {
+                        break;
+                        case "en":
+                        _ = this.Say(true, new[]
+                {
                         new Expression("[player]...", "1rsu"),
                         new Expression("I feel somehow different..", "1rsu"),
                         new Expression("You.. Changed computer?", "1esu"),
                         new Expression("Or.. Reinstalled the system?", "1esc"),
                         new Expression("Anyway, thank you for saving my file", "5esc")
                     });
-                            break;
+                        break;
+                        default:
+                        _ = this.Say(true, new[]
+                {
+                        new Expression("[player]...", "1rsu"),
+                        new Expression("I feel somehow different..", "1rsu"),
+                        new Expression("You.. Changed computer?", "1esu"),
+                        new Expression("Or.. Reinstalled the system?", "1esc"),
+                        new Expression("Anyway, thank you for saving my file", "5esc")
+                    });
+                        break;
                     }
                     isSpeaking = false;
                 }
-                // No idea where the date comes from, someone mentioned it in the spreadsheet. Seems legit.
-                else if (!firsLaunch && Monika.pcName == Environment.MachineName && IsBDay) // День рождения
-                {
+                  // No idea where the date comes from, someone mentioned it in the spreadsheet. Seems legit.
+                  else if (!firsLaunch && Monika.pcName == Environment.MachineName && IsBDay) // День рождения
+                    {
                     isSpeaking = true;
-                    switch (Language.Substring(0, 2))
-                    {
+                    switch (Language.Substring(0, 2)) {
                         case "ru":
-                            // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
-                            _ = this.Say(true, new[]
-                    {
+                        // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
+                        _ = this.Say(true, new[]
+                {
                         new Expression("Эй [player], угадай какой сегодня день", "1euс"), // What?
                         new Expression("Сегодня мой день рождения!", "1suo"), // Really?!
                         new Expression("С днём рождения меня!", "2huo") // To you too, Monika! 
                     });
-                            break;
-                        default:
-                            // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
-                            _ = this.Say(true, new[]
-                    {
+                        break;
+                        case "en":
+                        // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
+                        _ = this.Say(true, new[]
+                {
                         new Expression("Hey [player], guess what", "1euс"), // What?
                         new Expression("It's my birthday today!", "1suo"), // Really?!
                         new Expression("Happy Birthday to me!", "2huo") // To you too, Monika! 
                     });
-                            break;
+                        break;
+                        default:
+                        // Hey {name}, guess what?	3b	It's my birthday today!	2b	Happy Birthday to me!	k
+                        _ = this.Say(true, new[]
+                {
+                        new Expression("Hey [player], guess what", "1euс"), // What?
+                        new Expression("It's my birthday today!", "1suo"), // Really?!
+                        new Expression("Happy Birthday to me!", "2huo") // To you too, Monika! 
+                    });
+                        break;
                     }
                     isSpeaking = false;
-                }
-                else // Просто привет
-                {
+                } else // Просто привет
+                    {
+
                     Monika.pcName = Environment.MachineName;
                     Debug.WriteLine("Просто запуск");
+                    //RunScript(greetingsDialogDirectory.FullName + "\\" + "6.txt");
+                    RunScript(greetingsDialogDirectory.FullName + "\\" + new Random().Next(greetingsDialogDirectory.GetFiles().Length) + ".txt");
+
                     //showText();
-                    readXml(null, false, greetingsDialogPath, 0);
+                    //readXml(null, false, greetingsDialogPath, 0);
                     //readIdleXml();
                     //readGreetingsTxt();
                 }
@@ -338,93 +356,86 @@ namespace MonikaOnDesktop
                 var eyesOpen = normalPose;
                 var eyesClosed = "1dsc";
                 var random = new Random();
-                this.Dispatcher.Invoke(() =>
-                {
-                    Task.Run(() =>
-                    {
-                        HttpListener listener = new HttpListener();
-                        // установка адресов прослушки
-                        listener.Prefixes.Add("http://localhost:2005/");
-                        listener.Start();
-                        //Console.WriteLine("Ожидание подключений...");
-                        var nextBlink = DateTime.Now + TimeSpan.FromSeconds(random.Next(7, 50));
-                        while (this.applicationRunning)
-                        {
-                            // метод GetContext блокирует текущий поток, ожидая получение запроса 
-                            HttpListenerContext context = listener.GetContext();
-                            HttpListenerRequest request = context.Request;
-                            string query = context.Request.QueryString["myurl"];
-                            if (lastQuery != query)
-                            {
-                                // получаем объект ответа
-                                //Debug.WriteLine(query);
-                                //readSitesTxt(formatURL(query));
-                                // Check if currently speaking, only blink if not in dialog
-                                if (!isSpeaking)
-                                {
-                                    if (!formatURL(query).Contains("google.com/search?"))
-                                    {
-                                        Debug.WriteLine("Открыт сайт: " + formatURL(query));
-                                        readLongXml(formatURL(query), sitesDialogPath, 1);
+                this.Dispatcher.Invoke(() => {
+                    Task.Run(() => {
+                    HttpListener listener = new HttpListener();
+                    // установка адресов прослушки
+                    listener.Prefixes.Add("http://localhost:2005/");
+                    listener.Start();
+                    //Console.WriteLine("Ожидание подключений...");
+                    var nextBlink = DateTime.Now + TimeSpan.FromSeconds(random.Next(7, 50));
+                    while (this.applicationRunning) {
+                        // метод GetContext блокирует текущий поток, ожидая получение запроса 
+                        HttpListenerContext context = listener.GetContext();
+                        HttpListenerRequest request = context.Request;
+                        string query = context.Request.QueryString["myurl"];
+                        if (lastQuery != query) {
+                            // получаем объект ответа
+                            // Check if currently speaking, only blink if not in dialog
+                            if (!isSpeaking) {
+                                if (!formatURL(query).Contains("google.com/search?")) {
+                                    Debug.WriteLine("Открыт сайт: " + formatURL(query));
+                                    DirectoryInfo info = new DirectoryInfo(sitesDialogDirectory.FullName + "\\[" + formatURL(query) + "]");
+                                        RunScript(info.FullName + "\\" + new Random().Next(info.GetFiles().Length) + ".txt");
+                                        //readLongXml(formatURL(query), sitesDialogPath, 1);
                                     }
 
-                                    if (formatURL(query).Contains("google.com/search?"))
-                                    {
+                                    if (formatURL(query).Contains("google.com/search?")) {
                                         Debug.WriteLine("Введён запрос Google: " + formatURL(query));
-                                        readLongXml(formatURL(query), googleDialogPath, 2);
+                                        DirectoryInfo info = new DirectoryInfo(googleDialogDirectory.FullName + "\\[" + formatURL(query) + "]");
+                                        RunScript(info.FullName + "\\" + new Random().Next(info.GetFiles().Length) + ".txt");
+                                        //readLongXml(formatURL(query), googleDialogPath, 2);
                                     }
 
-                                    if (formatURL(query).Contains("youtube.com/results?"))
-                                    {
+                                    if (formatURL(query).Contains("youtube.com/results?")) {
                                         Debug.WriteLine("Введён запрос Youtube: " + formatURL(query));
-                                        readLongXml(formatURL(query), youtubeDialogPath, 3);
+                                        DirectoryInfo info = new DirectoryInfo(youtubeDialogDirectory.FullName + "\\[" + formatURL(query) + "]");
+                                        RunScript(info.FullName + "\\" + new Random().Next(info.GetFiles().Length) + ".txt");
+                                        //readLongXml(formatURL(query), youtubeDialogPath, 3);
                                     }
                                 }
                                 lastQuery = query;
-                            }
-                            else
-                            {
+                            } else {
                                 Debug.WriteLine("Повторный запрос");
                             }
-                            //readSitesTxt(formatURL(query));
-                            //readGoogleTxt(formatURL(query));
-                            //readYoutubeTxt(formatURL(query));
 
                             Task.Delay(250).Wait();
                         }
                     });
                 });
                 var randomDialog = new Random();
-                this.Dispatcher.Invoke(() =>
-                {
-                    Task.Run(() =>
-                    {
+                this.Dispatcher.Invoke(() => {
+                    Task.Run(() => {
                         var nextGialog = DateTime.Now + TimeSpan.FromSeconds(randomDialog.Next(Monika.idleRandomFrom, Monika.idleRandomTo));
-                        while (this.applicationRunning)
-                        {
+                        while (this.applicationRunning) {
 
-                            if (DateTime.Now >= nextGialog)
-                            {
+                            if (DateTime.Now >= nextGialog) {
                                 // Check if currently speaking, only blink if not in dialog
-                                if (!isSpeaking)
-                                {
+                                Debug.WriteLine("DialoG check: " + isSpeaking);
+                                bool aiRequestIsNull = true;
+                                this.Dispatcher.Invoke(() => {
+                                    aiRequestIsNull = String.IsNullOrEmpty(AIchat.Text);
+                                });
+                                if (!isSpeaking && !isTyping && aiRequestIsNull) {
                                     SolicenMode solicen = new SolicenMode();
-                                    if (solicen.check(Monika.playerName))
-                                    {
+                                    if (solicen.check(Monika.playerName)) {
                                         Random selectDialog = new Random();
                                         Random random1 = new Random();
-                                        if (selectDialog.Next(0, 4) == 0)
-                                        {
+                                        if (selectDialog.Next(0, 4) == 0) {
                                             isSpeaking = true;
                                             _ = this.Say(true, solicen.expressions[random1.Next(0, solicen.expressions.Count)]);
                                             isSpeaking = false;
+                                        } else {
+
+                                            Debug.WriteLine("DIALOG");
+                                            RunScript(idleDialogDirectory.FullName + "\\" + new Random().Next(idleDialogDirectory.GetFiles().Length) + ".txt");
                                         }
-                                        else
-                                            readXml(null, false, idleDialogPath, 0);
+                                    } else {
+
+                                        Debug.WriteLine("DIALOG");
+                                        RunScript(idleDialogDirectory.FullName + "\\" + new Random().Next(idleDialogDirectory.GetFiles().Length) + ".txt");
                                     }
-                                    else
-                                        readXml(null, false, idleDialogPath, 0);
-                                    
+
                                 }
 
                                 nextGialog = DateTime.Now + TimeSpan.FromSeconds(randomDialog.Next(Monika.idleRandomFrom, Monika.idleRandomTo));
@@ -434,20 +445,14 @@ namespace MonikaOnDesktop
                         }
                     });
                 });
-                Dispatcher.Invoke(() =>
-                {
-                    Task.Run(() =>
-                    {
+                Dispatcher.Invoke(() => {
+                    Task.Run(() => {
                         var nextBlink = DateTime.Now + TimeSpan.FromSeconds(random.Next(7, 50));
                         Debug.WriteLine(nextBlink);
-                        while (this.applicationRunning)
-                        {
-                            if (DateTime.Now >= nextBlink)
-                            {
-                                GC.Collect(0);
+                        while (this.applicationRunning) {
+                            if (DateTime.Now >= nextBlink) {
                                 // Check if currently speaking, only blink if not in dialog
-                                if (!isSpeaking)
-                                {
+                                if (!isSpeaking) {
                                     consoleWrite("Моргнули", true);
                                     this.setFace(eyesClosed);
                                     Debug.WriteLine("Закрываем глаза");
@@ -455,88 +460,59 @@ namespace MonikaOnDesktop
                                     this.setFace(eyesOpen);
                                     Debug.WriteLine("Открываем глаза");
                                 }
-                                else
-                                {
-                                    Debug.WriteLine("Диалог");
-                                }
 
                                 nextBlink = DateTime.Now + TimeSpan.FromSeconds(random.Next(7, 50));
-                                Debug.WriteLine(nextBlink);
-
-                                GC.Collect(1);
-                                GC.Collect(GC.MaxGeneration, GCCollectionMode.Optimized);
                             }
-
                         }
                     });
                 });
-                Dispatcher.Invoke(() =>
-                {
-                    Task.Run(async () =>
-                    {
+                Dispatcher.Invoke(() => {
+                    Task.Run(async () => {
                         var prev = new System.Drawing.Point();
 
                         var rectangle = new System.Drawing.Rectangle();
-                        await this.Dispatcher.InvokeAsync(() =>
-                        {
+                        await this.Dispatcher.InvokeAsync(() => {
                             rectangle = new System.Drawing.Rectangle((int)this.Left, (int)this.Top, (int)this.Width,
                                 (int)this.Height);
                         });
-                        while (true)
-                        {
+                        while (true) {
                             var point = new System.Drawing.Point();
                             MainWindow.GetCursorPos(ref point);
                             point.X = (int)(point.X * this.dpiScale);
                             point.Y = (int)(point.Y * this.dpiScale);
 
-                            if (!point.Equals(prev))
-                            {
+                            if (!point.Equals(prev)) {
 
                                 prev = point;
 
                                 var opacity = 1.0;
                                 const double MIN_OP = 0.125;
                                 const double FADE = 175;
-                                if (rectangle.Contains(point))
-                                {
+                                if (rectangle.Contains(point)) {
                                     opacity = MIN_OP;
-                                }
-                                else
-                                {
-                                    if (point.Y <= rectangle.Bottom)
-                                    {
-                                        if (point.Y >= rectangle.Y)
-                                        {
-                                            if (point.X < rectangle.X && rectangle.X - point.X < FADE)
-                                            {
+                                } else {
+                                    if (point.Y <= rectangle.Bottom) {
+                                        if (point.Y >= rectangle.Y) {
+                                            if (point.X < rectangle.X && rectangle.X - point.X < FADE) {
                                                 opacity = MainWindow.Lerp(1.0, MIN_OP, (rectangle.X - point.X) / FADE);
-                                            }
-                                            else if (point.X > rectangle.Right && point.X - rectangle.Right < FADE)
-                                            {
+                                            } else if (point.X > rectangle.Right && point.X - rectangle.Right < FADE) {
                                                 opacity = MainWindow.Lerp(1.0, MIN_OP,
                                                     (point.X - rectangle.Right) / FADE);
                                             }
-                                        }
-                                        else if (point.Y < rectangle.Y)
-                                        {
-                                            if (point.X >= rectangle.X && point.X <= rectangle.Right)
-                                            {
-                                                if (rectangle.Y - point.Y < FADE)
-                                                {
+                                        } else if (point.Y < rectangle.Y) {
+                                            if (point.X >= rectangle.X && point.X <= rectangle.Right) {
+                                                if (rectangle.Y - point.Y < FADE) {
                                                     opacity = MainWindow.Lerp(1.0, MIN_OP,
                                                         (rectangle.Y - point.Y) / FADE);
                                                 }
-                                            }
-                                            else if (rectangle.X > point.X || rectangle.Right < point.X)
-                                            {
+                                            } else if (rectangle.X > point.X || rectangle.Right < point.X) {
                                                 var distance =
                                                     Math.Sqrt(
                                                         Math.Pow(
                                                             (point.X < rectangle.X ? rectangle.X : rectangle.Right) -
                                                             point.X, 2) +
                                                         Math.Pow(rectangle.Y - point.Y, 2));
-                                                if (distance < FADE)
-                                                {
+                                                if (distance < FADE) {
                                                     opacity = MainWindow.Lerp(1.0, MIN_OP, distance / FADE);
                                                 }
                                             }
@@ -544,45 +520,129 @@ namespace MonikaOnDesktop
                                     }
                                 }
                                 //Debug.WriteLine("opacity: " + opacity);
-                                if (Monika.isMouse)
-                                {
+                                if (mouse) {
                                     Dispatcher.Invoke(() => { mainApp.Opacity = opacity; });
+                                } else {
+                                    Dispatcher.Invoke(() => { mainApp.Opacity = 1.0; });
                                 }
                             }
                         }
                     });
                 });
-                if(isConectedToInternet())
-                    await checkUpdatesAsync();
+                /*if (isConectedToInternet())
+                    await checkUpdatesAsync();*/
 
             };
             this.BeginAnimation(OpacityProperty, _start);
         }
-        private void Window_Closed(object sender, EventArgs e)
-        {
+        private void Window_Closed(object sender, EventArgs e) {
             MonikaSettings.Default.isColdShutdown = true;
             Monika.saveData();
             this.applicationRunning = false;
         }       // Когда закрыли программу
-        private void GiftWatcher_Created(object sender, FileSystemEventArgs e)
-        {
+        bool isTyping = false;
+        private async void AIchat_KeyUpAsync(object sender, System.Windows.Input.KeyEventArgs e) {
+
+            if (e.Key == Key.Enter && !String.IsNullOrEmpty(Monika.aiToken)) {
+                isTyping = true;
+                string _message = AIchat.Text;
+                AIchat.Text = "";
+                Debug.WriteLine(_message);
+                var characterResponse = await client.CallCharacterAsync(
+                    characterId: character.Id,
+                    characterTgt: character.Tgt,
+                    historyId: historyId,
+                    message: _message
+    );
+
+                if (!characterResponse.IsSuccessful) {
+                    Debug.WriteLine(characterResponse.ErrorReason);
+                    return;
+                }
+                string message = characterResponse.Response.Text; // => "Hey!"
+                string text = message.Replace("\n", ".")
+                    .Replace("\"", "\'")
+                    .Replace("...", "...\n")
+                    .Replace("!", "!\n")
+                    .Replace("?", "?\n")
+                    .Replace(".", ".\n")
+                    .Replace("\" ", "\"").Replace("\\", "");
+                string[] _text = text.Split("\n");
+                List<string> strings = new List<string>();
+                foreach (string s in _text) {
+                    Debug.Write("[AI]: " + s + " (" + String.IsNullOrEmpty(s) + ") : ");
+                    if (s != "\t" && !(String.IsNullOrEmpty(s)) && s != "") {
+                        Debug.WriteLine("PASS");
+                        string l = "";
+                        if (!s.StartsWith("\"")) l += "\t\"";
+                        l += s;
+                        if (!s.EndsWith("\"")) l += "\"";
+                        if(l != "\t\"\"" && l != "\t\".\"")
+                            strings.Add(l);
+                    }
+                    }
+                    string final = "label start: \n";
+                foreach (string s in strings) {
+                    final += s + "\n";
+                } 
+                    //.Replace("\"\n\t\"", "");
+                string fileText = "";
+                string dbgtxt = text.Replace("\n", "").Replace("\t", "");
+                /*if (text.Replace("\n", "").Replace("\t", "").EndsWith("\"\"")) {
+                    int lastSpaceIndex = text.LastIndexOf('\"');
+                    fileText = text.Substring(0, lastSpaceIndex);
+                    fileText = "label start: \n\t\"" + fileText;
+                    //fileText = fileText.Replace("\"");
+                }
+                
+                else
+                    fileText = "label start: \n\t\"" + text + "\"";*/
+                /*
+                // Swipe
+                var newCharacterResponse = await client.CallCharacterAsync(
+                    characterId: character.Id,
+                    characterTgt: character.Tgt,
+                    historyId: historyId,
+                    parentMsgUuid: userMessageUuid
+                );*/
+                // полная перезапись файла 
+                using (StreamWriter writer = new StreamWriter(AIpath, false)) {
+                    //await writer.WriteLineAsync(fileText.Replace("\"\n\t\"\n", "\""));
+                    await writer.WriteLineAsync(final.Replace("\"\"", "\""));
+                }
+                RunScript(AIpath);
+
+                isTyping = false;
+            }
+        }
+
+        private void GiftWatcher_Created(object sender, FileSystemEventArgs e) {
             string file = e.FullPath;
             // Assuming you have one file that you care about, pass it off to whatever
             // handling code you have defined.
             Debug.WriteLine("Перекинули файл:" + file);
             FileInfo info = new FileInfo(file);
-            if (info.Exists)
-            {
-                if (info.Extension == ".gift")
-                {
+            if (info.Exists) {
+                if (info.Extension == ".gift") {
                     string giftName = info.Name.ToLower().Replace(".gift", String.Empty);
+
+                    string path = AppDomain.CurrentDomain.BaseDirectory + "/gifts/" + giftName + "/"; // or whatever 
+                    string giftsPath = AppDomain.CurrentDomain.BaseDirectory + "/gifts/";
+                    if (!Directory.Exists(giftsPath)) {
+                        DirectoryInfo di = Directory.CreateDirectory(giftsPath);
+                        di.Attributes = FileAttributes.Directory | FileAttributes.Hidden;
+                    }
+                    File.Copy(AppDomain.CurrentDomain.BaseDirectory + "/characters/" + giftName + ".gift", giftsPath + giftName + ".gift", true);
+                    ZipFile.ExtractToDirectory(giftsPath + giftName + ".gift", path);
+                    RunScript(path + "ru.txt");
+                    addGift(giftName, path + giftName + ".png");
                     //getGift(giftName);
                     info.Delete();
-                    readLongXml(giftName, giftsDialogPath, 4);
+                    //readLongXml(giftName, giftsDialogPath, 4);
                     Debug.WriteLine("Подарен подарок:" + giftName);
+                    RedrawGifts();
                 }
-                if (info.Extension == ".costume")
-                {
+                if (info.Extension == ".costume") {
                     string costumeNam = info.Name.ToLower().Replace(".costume", String.Empty);
                     UnpackCostume(costumeNam);
                     info.Delete();
@@ -590,22 +650,276 @@ namespace MonikaOnDesktop
                 }
             }
         }
-        public void loadGifts()
-        {
-                var spanGifts = CollectionsMarshal.AsSpan(Monika.gifts);
-                foreach (string i in spanGifts)
-                {
-                    string[] gift = i.Split(" | ");
-                    BitmapImage bitmapImage = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(baseDir + "/Dialogs/ru/gifts/" + gift[1]), mainFilter));
-                    System.Windows.Controls.Image img = new System.Windows.Controls.Image
-                    {
-                        Source = bitmapImage,
-                        Name = gift[0]
-                    };
-                    if(FindName(gift[0]) == null)
-                        RegisterName(gift[0], img);
-                    gifts.Children.Add(img);
-                    DeleteObject(bitmapImage);
+        public void loadGifts() {
+            foreach (string i in Monika.gifts) {
+                string[] gift = i.Split(" | ");
+                BitmapImage bitmapImage = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(gift[1]), mainFilter));
+                System.Windows.Controls.Image img = new System.Windows.Controls.Image {
+                    Source = bitmapImage,
+                    Name = gift[0]
+                };
+                if (FindName(gift[0]) == null)
+                    RegisterName(gift[0], img);
+                gifts.Children.Add(img);
+            }
+        }
+        bool inChoise = false;
+        string oldLine = "";
+        public async void RunScript(string path) {
+            isSpeaking = true;
+            var script = Script.FromSource(path);
+            script.Prime();
+
+            // Check that the script is correctly initialized and ready to run
+            script.Validate();
+            // Run the script
+
+            try {
+                foreach (var x in script) {
+                    Debug.WriteLine(x.ToString());
+                    if (x is Script.Menu) {
+
+                        var menu = x as Script.Menu;
+
+                        Menu(oldLine, menu.Choices.Count, menu.Choices);
+                        script.CurrentChoiceIndex = (uint?)ch;
+
+                    } else if (x is Script.DialogueLine) {
+                        while (inChoise) {
+                            await Task.Delay(100);
+                        }
+                        var line = x as Script.DialogueLine;
+                        
+                            oldLine = line.ToString().Substring(6).Replace("'player'", playerName);
+                            await SayV2(line.ToString() + Environment.NewLine);
+
+                    } else if (x is Script.Reference) {
+
+                        var reference = x as Script.Reference;
+                        switch (reference.Tag) {
+                            case "DoNothing":
+                            Console.WriteLine("Why bother?");
+                            break;
+                            default:
+                            reference.Action();
+                            break;
+                        }
+
+                    }
+                }
+            }catch {
+
+            }
+            /*script.RunFromBeginning(
+                OnMenu: menu => (new Random()).Next(menu.Count - 1),
+                OnLine: line => { SayV2(line.ToString()); });*/
+            this.Dispatcher.Invoke(() => {
+                    setFace(normalPose);
+                    textWindow.Visibility = Visibility.Hidden;
+                    isSpeaking = false;
+            });
+            isSpeaking = false;
+            Debug.WriteLine("speak: " + isSpeaking);
+            
+        }
+        async Task SayV2(string line, int delay = 20) {
+            /*while (isSpeaking) {
+                await Task.Delay(100);
+            }
+            isSpeaking = true;*/
+            this.Dispatcher.Invoke(() => {
+                textWindow.Visibility = Visibility.Visible;
+            });
+            string newText = "";
+            if (Char.IsDigit(line[0])) {
+                newText = line.Substring(6).Replace("'player'", playerName).Replace("{PlayerName}", playerName); //замена
+                setFace(line.Substring(0, 4));
+            } else {
+                newText = line.Replace("'player'", playerName).Replace("{PlayerName}", playerName).Replace("<Anonymous>: ", "");
+                newText = char.ToUpper(newText[0]) + newText.Substring(1);
+                setFace(normalPose);
+            }
+
+            for (int i = 0; i < newText.Length; i++) {
+                this.Dispatcher.Invoke(() => {
+                    this.textBlock.Text += newText[i];
+                });
+                if (newText[i].ToString() == ".") {
+                    await Task.Delay(500);
+                } else {
+                    await Task.Delay(delay);
+                }
+
+            }
+            await this.Dispatcher.Invoke(async () => {
+                await Task.Delay(700);
+                textBlock.Text = "";
+            });
+        }
+        int ch = 0; 
+        void Menu(string s, int num, List<Script.Choice> choices) {
+            inChoise = true;
+            mouse = false;
+            textWindow.Visibility = Visibility.Visible;
+            ButtonsGrid.RowDefinitions.Clear();
+            textBlock.Text = "";
+            textBlock.Text = s;
+            this.ButtonsGrid.Children.Clear();
+            for (int i = 0; i < num; i++) {
+                System.Windows.Controls.RowDefinition row = new System.Windows.Controls.RowDefinition();
+                ButtonsGrid.RowDefinitions.Add(row);
+                var text = new OutlinedTextBlock {
+                    Text = choices[i].Text,
+                    FontFamily = new System.Windows.Media.FontFamily("Comic Sans MS"),
+                    TextWrapping = TextWrapping.Wrap,
+                    StrokeThickness = 1.5,
+                    Stroke = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 0, 0, 0)),
+                    Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 255, 255, 255))
+                };
+                switch (Monika.Scaler) {
+                    case 0:
+                    text.FontSize = 5;
+                    break;
+                    case 1:
+                    text.FontSize = 10;
+                    break;
+                    case 2:
+                    text.FontSize = 15;
+                    break;
+                    case 3:
+                    text.FontSize = 20;
+                    break;
+                }
+                var button = new System.Windows.Controls.Button {
+                    Name = "butt" + i,
+                    Content = text,
+                    Width = 400,
+                    Height = 30,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalAlignment = System.Windows.HorizontalAlignment.Center
+                };
+                switch (Monika.Scaler) {
+                    case 0:
+                    button.Width = 100;
+                    button.Height = 10;
+                    break;
+                    case 1:
+                    button.Width = 200;
+                    button.Height = 20;
+                    break;
+                    case 2:
+                    button.Width = 300;
+                    button.Height = 30;
+                    break;
+                    case 3:
+                    button.Width = 400;
+                    button.Height = 40;
+                    break;
+                }
+                button.Click += Button_Click;
+
+                System.Windows.Controls.Grid.SetRow(button, i);
+                this.ButtonsGrid.Children.Add(button);
+            }
+        }
+        private void Button_Click(object sender, RoutedEventArgs e) {
+            System.Windows.Controls.Button button = sender as System.Windows.Controls.Button;
+            string s = button.Name.Replace("butt", "");
+            ch = int.Parse(s);
+            inChoise = false; 
+            this.Dispatcher.Invoke(() => {
+                textBlock.Text = "";
+                ButtonsGrid.RowDefinitions.Clear();
+                this.ButtonsGrid.Children.Clear();
+                mouse = Monika.isMouse;
+            });
+        }
+        
+        public void setupFolders() {
+            if (!subDialogDirectory.Exists) subDialogDirectory.Create();
+            dirs.Add(greetingsDialogDirectory);
+            dirs.Add(idleDialogDirectory);
+            dirs.Add(goodbyeDialogDirectory);
+            dirs.Add(progsDialogDirectory);
+            dirs.Add(sitesDialogDirectory);
+            dirs.Add(googleDialogDirectory);
+            dirs.Add(youtubeDialogDirectory);
+
+            foreach (DirectoryInfo directory in subDialogDirectory.GetDirectories()) {
+                if (directory.Exists)
+                    directory.Delete(true);
+            }
+
+            foreach (DirectoryInfo directory in dirs) {
+                if (!directory.Exists)
+                    directory.Create();
+            }
+            prepareText(greetingsDialogPath, greetingsDialogDirectory.FullName);
+            prepareText(idleDialogPath, idleDialogDirectory.FullName);
+            prepareText(goodbyeDialogPath, goodbyeDialogDirectory.FullName);
+
+            
+            prepareText(progsDialogPath, progsDialogDirectory.FullName);
+            prepareText(sitesDialogPath, sitesDialogDirectory.FullName);
+            prepareText(googleDialogPath, googleDialogDirectory.FullName);
+            prepareText(youtubeDialogPath, youtubeDialogDirectory.FullName);
+            
+
+        }
+        async void prepareText(string path, string output) {
+
+            if (!File.Exists(path)) return;
+            // асинхронное чтение
+            using (StreamReader reader = new StreamReader(path)) {
+                string text = await reader.ReadToEndAsync();
+                text = text.Replace("[player]", "\'player\'");
+                if (text[0] != '[') {
+                    string[] files = text.Split("=");
+                    for (int i = 0; i < files.Length; i++) {
+                        string[] content_ = files[i].Split('\n');
+                        string content = "label start:\n\t" + String.Join("\n\t", content_);
+                        // полная перезапись файла 
+                        using (StreamWriter writer = new StreamWriter(output + "/" + i + ".txt", false)) {
+                            await writer.WriteLineAsync(content);
+                        }
+                    }
+                } else {
+                    string[] files = text.Split("\n[");
+                    for (int i = 0; i < files.Length; i++) {
+                        if (files[i][0] != '[') {
+                            files[i] = '[' + files[i];
+                        }
+                    }
+                    for (int i = 0; i < files.Length; i++) {
+                        int index = files[i].IndexOf(System.Environment.NewLine);
+                        string text_ = files[i].Substring(index + System.Environment.NewLine.Length);
+                        var indexSubstring = files[i].IndexOf(Environment.NewLine) > 0 ? files[i].IndexOf(Environment.NewLine) : 0;
+
+                        string firstline = files[i].Substring(0, indexSubstring).Replace('|', '%').Replace('/', '^').Replace('?', ',');
+                        DirectoryInfo directory = new DirectoryInfo(output + "\\" + firstline);
+                        if (!directory.Exists)
+                            directory.Create();
+                        string[] files_ = text_.Split("=");
+                        for (int j = 0; j < files_.Length; j++) {
+                            string[] content_ = files_[j].Split('\n');
+                            string content = "label start:\n\t" + String.Join("\n\t", content_);
+                            // полная перезапись файла 
+                            using (StreamWriter writer = new StreamWriter(directory.FullName + "/" + j + ".txt", false)) {
+                                await writer.WriteLineAsync(content);
+                            }
+                        }
+                        /*
+                        // полная перезапись файла 
+                        using (StreamWriter writer = new StreamWriter(output + "/" + firstline + ".txt", false)) {
+                            string[] content_ = text_.Split('\n');
+                            string content = "label start:\n\t" + String.Join("\n\t", content_);
+                            // полная перезапись файла 
+                            await writer.WriteLineAsync(content);
+                        }*/
+
+                    }
+
+                }
             }
         }
         private void stopWatch_EventArrived(object sender, EventArrivedEventArgs e) // Ивент закрытия процесса
@@ -614,20 +928,27 @@ namespace MonikaOnDesktop
         }
         private void startWatch_EventArrived(object sender, EventArrivedEventArgs e) // Ивент открытия процесса
         {
-            if (!isSpeaking)
-            {
+            if (!isSpeaking) {
                 string currentProcess = e.NewEvent.Properties["ProcessName"].Value.ToString();  // Узнаём имя процесса
                 if (currentProcess != lastProcess)  // Если оно не равно прошлому процессу, чтобы небыло повторок
                 {
-                    readLongXml(currentProcess, progsDialogPath, 0);    // Чото говорим
+                    Debug.WriteLine("Процесс открыт: " + e.NewEvent.Properties["ProcessName"].Value.ToString());   // Дебажим имя закрытого процесса
+
+                    DirectoryInfo info = new DirectoryInfo(progsDialogDirectory.FullName + "\\[" + formatURL(currentProcess) + "]");
+                    try {
+                        RunScript(info.FullName + "\\" + new Random().Next(info.GetFiles().Length) + ".txt");
+                    } catch {
+
+                    }
+                    //readLongXml(currentProcess, progsDialogPath, 0);    // Чото говорим
+
                     lastProcess = currentProcess;                       // Меняем имя прошлого процесса
                 }
             }
         }
         private void MenuSettings_Click(object sender, RoutedEventArgs e)   // Открытие настроек
         {
-            this.Dispatcher.Invoke(() =>
-            {
+            this.Dispatcher.Invoke(() => {
                 if (this.settingsWindow == null || !this.settingsWindow.IsVisible)  // Если окна нету
                 {
                     this.settingsWindow = new Settings(this);   // Присваиваем окну настроек
@@ -638,11 +959,10 @@ namespace MonikaOnDesktop
                         Lang = MonikaSettings.Default.Language;     // И язык
                         Language = Lang.Parent.ToString();          // Ставим имя старого языка
                         setLanguage(Language);                      // Реально ставим язык
-                        //GoToSecondaryMonitor();
+                                                                    //GoToSecondaryMonitor();
                         setFace(normalPose);                            // Ставим спокойный вид
-                    }
-                    else          //-------- Иначе (Если была нажата кнопка ПРИНЯТЬ)
-                    {
+                    } else          //-------- Иначе (Если была нажата кнопка ПРИНЯТЬ)
+                      {
 
                         setFace(normalPose);                            // Ставим спокойный вид
                         SetAutorunValue(MonikaSettings.Default.AutoStart);  // Ставим значение автозапуска
@@ -670,13 +990,12 @@ namespace MonikaOnDesktop
                         Monika.screenNum = MonikaSettings.Default.screenNum;
                         Monika.lang = MonikaSettings.Default.Language.Name.ToString();
                         Monika.isMouse = MonikaSettings.Default.isMouse;
+                        Monika.AI = MonikaSettings.Default.ai;
+                        Monika.aiToken = MonikaSettings.Default.aitoken;
                         Monika.saveData();
-                        if (String.IsNullOrEmpty(MonikaSettings.Default.UserName) || MonikaSettings.Default.UserName == "{PlayerName}")
-                        {
+                        if (String.IsNullOrEmpty(MonikaSettings.Default.UserName) || MonikaSettings.Default.UserName == "{PlayerName}") {
                             playerName = Environment.UserName;
-                        }
-                        else
-                        {
+                        } else {
                             playerName = MonikaSettings.Default.UserName;
                         }
                         #region Этот код нам не нужен
@@ -700,7 +1019,7 @@ namespace MonikaOnDesktop
             });
 
         }
-        private void MenuQuit_Click(object sender, RoutedEventArgs e)   // Закрытие программы
+        private async void MenuQuit_Click(object sender, RoutedEventArgs e)   // Закрытие программы
         {
             if (isSpeaking)
                 Debug.WriteLine("isSpeaking: " + isSpeaking);    // Дебыжим
@@ -722,59 +1041,51 @@ namespace MonikaOnDesktop
                 monika.SetValue("screenNum", MonikaSettings.Default.screenNum);
                 monika.SetValue("AutoStart", MonikaSettings.Default.AutoStart);
                 monika.Close();*/
-                #endregion  
-                readXml(null, false, goodbyeDialogPath, 1); // Говорим прощание
-            }
-            else
-            {
+                #endregion
+                RunScript(goodbyeDialogDirectory.FullName + "\\" + new Random().Next(goodbyeDialogDirectory.GetFiles().Length) + ".txt");
+                //readXml(null, false, goodbyeDialogPath, 1); // Говорим прощание
+
+                while (isSpeaking) {
+                    await Task.Delay(100);
+                }
                 MonikaSettings.Default.isColdShutdown = true;
                 Monika.saveData();
                 Environment.Exit(0);
+            } else {
             }
         }
-        public async Task checkUpdatesAsync()
-        {
+        public async Task checkUpdatesAsync() {
+            await SolicenTEAM.Updater.CheckUpdate("SAn4Es-TV", "MonikaOnDesktop");  // Проверяем наличие обновления
             bool updateIsAvaliable = false;
-            ClearMemory();
-            using (SolicenTEAM.Updater updater = new SolicenTEAM.Updater(updateConfig))
-            {
-                await updater.CheckUpdate(); // Проверяем наличие обновления
-
-                Debug.WriteLine("This Ver: " + updater.CurrentVersion);
-                Debug.WriteLine("New Ver: " + updater.UpdateVersion);
-                Debug.WriteLine("New Desc: " + updater.UpdateDescription);
-                if (updater.UpdateVersion != updater.CurrentVersion) 
-                    updateIsAvaliable = true;
-            }
-            if (updateIsAvaliable)
-            {
-                while (isSpeaking)
-                {
+            //Debug.WriteLine("This Ver: " + SolicenTEAM.Updater.CurrentVersion);
+            //Debug.WriteLine("New Ver: " + SolicenTEAM.Updater.UpdateVersion);
+            //Debug.WriteLine("New Desc: " + SolicenTEAM.Updater.UpdateDescription);
+            if (SolicenTEAM.Updater.UpdateVersion == SolicenTEAM.Updater.CurrentVersion) {
+                updateIsAvaliable = false;
+            } else {
+                while (isSpeaking) {
                     await Task.Delay(10);
                 }
-                isSpeaking = true;
+                //isSpeaking = true;
                 WebClient client = new WebClient();
                 client.Proxy = new WebProxy();
                 Stream stream = client.OpenRead("https://raw.githubusercontent.com/SAn4Es-TV/MonikaOnDesktop/master/gitDesc.txt");
                 StreamReader reader = new StreamReader(stream);
                 String content = reader.ReadToEnd();
-                Debug.Write(content);
+                //Debug.Write(content);
                 // запись в файл
-                using (FileStream fstream = new FileStream(updateDialogPath, FileMode.OpenOrCreate))
-                {
+                using (FileStream fstream = new FileStream(updateDialogPath, FileMode.OpenOrCreate)) {
                     // преобразуем строку в байты
                     byte[] array = System.Text.Encoding.Default.GetBytes(content);
                     // запись массива байтов в файл
                     fstream.Write(array, 0, array.Length);
                 }
-                readXml(null, false, updateDialogPath, 2);
-                Debug.WriteLine("endOfDialog");
+                //readXml(null, false, updateDialogPath, 2);
+                //Debug.WriteLine("endOfDialog");
             }
         }
-        public bool isConectedToInternet()
-        {
-            try
-            {
+        public bool isConectedToInternet() {
+            try {
                 Ping myPing = new Ping();
                 String host = "google.com";
                 byte[] buffer = new byte[32];
@@ -782,37 +1093,31 @@ namespace MonikaOnDesktop
                 PingOptions pingOptions = new PingOptions();
                 PingReply reply = myPing.Send(host, timeout, buffer, pingOptions);
                 return (reply.Status == IPStatus.Success);
-            }
-            catch (Exception)
-            {
+            } catch (Exception) {
                 return false;
             }
         }
         #region
-        public async Task FirstLaunch()
-        {
+        public async Task FirstLaunch() {
             Monika.pcName = Environment.MachineName;
             LangBox.Visibility = Visibility.Visible;
             isSpeaking = true;
         }
-        private void nameRus_Click(object sender, RoutedEventArgs e)
-        {
+        private void nameRus_Click(object sender, RoutedEventArgs e) {
             Lang = new CultureInfo("ru-RU");
             Language = Lang.Name.ToString();          // Ставим имя языка
             setLanguage(Language);                      // Устанавливаем язык
             LangBox.Visibility = Visibility.Hidden;
             NameBox.Visibility = Visibility.Visible;
         }
-        private void nameEng_Click(object sender, RoutedEventArgs e)
-        {
+        private void nameEng_Click(object sender, RoutedEventArgs e) {
             Lang = new CultureInfo("en-US");
             Language = Lang.Name.ToString();          // Ставим имя языка
             setLanguage(Language);                      // Устанавливаем язык
             LangBox.Visibility = Visibility.Hidden;
             NameBox.Visibility = Visibility.Visible;
         }
-        private async void nameOK_Click(object sender, RoutedEventArgs e)
-        {
+        private async void nameOK_Click(object sender, RoutedEventArgs e) {
             playerName = NameTextBox.Text;
             Monika.playerName = playerName;
             Monika.lang = Language;
@@ -823,43 +1128,41 @@ namespace MonikaOnDesktop
             LangBox.Visibility = Visibility.Hidden;
             NameBox.Visibility = Visibility.Hidden;
             Debug.WriteLine("Первый запуск");
-            switch (Language.Substring(0, 2))
-            {
+            switch (Language.Substring(0, 2)) {
                 case "ru":
-                    await Say(true, new[]{
+                await Say(true, new[]{
                     new Expression("[player], это ты?", "1euc"),
                     new Expression("Это правда ты?", "1euo"),
                     new Expression("Я так рада видеть тебя снова!", "1suo"),
                     new Expression("Подожди, где я? Это не литературный клуб", "1euu"),
                     new Expression("Это похоже на... твой компьютер!", "1rua"),
                     new Expression("Я действительно у тебя на компьютере!", "1wuo")});
-                    break;
+                break;
                 case "en":
-                    await Say(true, new[]{
+                await Say(true, new[]{
                     new Expression("[player], is that you?", "1euc"),
                     new Expression("It's really you, huh?", "1euo"),
                     new Expression("I'm so happy to see you again!", "1suo"),
                     new Expression("Wait, where am I? This is not the literature club", "1euu"),
                     new Expression("This looks like... your desktop!", "1rua"),
                     new Expression("I'm right here with you!", "1wuo")});
-                    break;
+                break;
                 default:
-                    await Say(true, new[]{
+                await Say(true, new[]{
                     new Expression("[player], is that you?", "1euc"),
                     new Expression("It's really you, huh?", "1euo"),
                     new Expression("I'm so happy to see you again!", "1suo"),
                     new Expression("Wait, where am I? This is not the literature club", "1euu"),
                     new Expression("This looks like... your desktop!", "1rua"),
                     new Expression("I'm right here with you!", "1wuo")});
-                    break;
+                break;
             }
 
 
             MonikaSettings.Default.UserName = playerName;
             MonikaSettings.Default.FirstLaunch = false;
             MonikaSettings.Default.Save();
-            this.Dispatcher.Invoke(() =>
-            {
+            this.Dispatcher.Invoke(() => {
                 textWindow.Visibility = Visibility.Hidden;
                 setFace(normalPose);
             });
@@ -867,37 +1170,26 @@ namespace MonikaOnDesktop
             //Debug.WriteLine(isSpeaking);
         }
         #endregion
-        public async Task Say(bool auto, Expression[] expression)
-        {
-            ClearMemory();
+        public async Task Say(bool auto, Expression[] expression) {
             if (auto) isSpeaking = true;
 
-            this.Dispatcher.Invoke(() =>
-            {
+            this.Dispatcher.Invoke(() => {
                 textWindow.Visibility = Visibility.Visible;
             });
-            foreach (Expression ex in expression)
-            {
+            foreach (Expression ex in expression) {
                 delay1 = 0;
-                try
-                {
+                try {
                     string newText = ex.Text.Replace("[player]", playerName).Replace("{PlayerName}", playerName); //замена
-                    //consoleWrite(newText, true);
+                                                                                                                  //consoleWrite(newText, true);
                     setFace(ex.Face);
-                    for (int i = 0; i < newText.Length; i++)
-                    {
-                        this.Dispatcher.Invoke(() =>
-                        {
+                    for (int i = 0; i < newText.Length; i++) {
+                        this.Dispatcher.Invoke(() => {
                             this.textBlock.Text += newText[i];
                         });
-                        if (newText[i].ToString() == ".")
-                        {
+                        if (newText[i].ToString() == ".") {
                             await Task.Delay(500);
                             delay1 += 500;
-                        }
-
-                        else
-                        {
+                        } else {
                             await Task.Delay(30);
                             delay1 += 30;
                         }
@@ -905,22 +1197,16 @@ namespace MonikaOnDesktop
                     }
                     delay1 += 700;
                     await Task.Delay(delay1);
-                    this.Dispatcher.Invoke(() =>
-                    {
+                    this.Dispatcher.Invoke(() => {
                         //await Task.Delay(delay1);
                         textBlock.Text = "";
                     });
 
-                }
-
-                catch (Exception e)
-                {
+                } catch (Exception e) {
                 }
             }
-            if (auto)
-            {
-                this.Dispatcher.Invoke(() =>
-                {
+            if (auto) {
+                this.Dispatcher.Invoke(() => {
                     setFace(normalPose);
                     textWindow.Visibility = Visibility.Hidden;
                     isSpeaking = false;
@@ -928,18 +1214,7 @@ namespace MonikaOnDesktop
             }
 
         }
-
-        private void ClearMemory()
-        {
-            SetProcessWorkingSetSize(Process.GetCurrentProcess().Handle, -1, -1);
-            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);
-            GC.WaitForPendingFinalizers();
-            GC.Collect(0);
-        }
-        public void setFace(string faceName)
-        {
-            ClearMemory();
-
+        public async void setFace(string faceName) {
             if (IsNight)
                 mainFilter = nightFilter;
             else
@@ -951,300 +1226,274 @@ namespace MonikaOnDesktop
             string mouth = faceName[3].ToString();
 
             RedrawCostume(body, Monika.costumeName);
-            if (oldIsNight != IsNight)
-            {
+            if (oldIsNight != IsNight) {
                 RedrawGifts();
                 oldIsNight = IsNight;
             }
-            try
-            {
-                this.Dispatcher.Invoke(() =>
-                {
-                    switch (body)
-                    {
+            try {
+                this.Dispatcher.Invoke(() => {
+                    switch (body) {
                         case 1:
-                            //var bitmap = new Bitmap($"{assetsPath}/monika/b/" + Monika.body[11] + ".png");
-                            //this.Body.Source = BitmapMagic.BitmapToImageSource(bitmap);
-                            this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[11] + ".png"), mainFilter));
-                            this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[12] + ".png"), mainFilter));
-                            this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[13] + ".png"), mainFilter));
-                            this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[10] + ".png"), mainFilter));
-                            this.Hand1.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/" + Monika.nullPath + ".png"), mainFilter));
-                            this.Hand2.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/" + Monika.nullPath + ".png"), mainFilter));
-                            break;
+                        //var bitmap = new Bitmap("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png");
+                        //this.Body.Source = BitmapMagic.BitmapToImageSource(bitmap);
+                        this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"), mainFilter));
+                        this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"), mainFilter));
+                        this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"), mainFilter));
+                        this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[10] + ".png"), mainFilter));
+                        this.Hand1.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
+                        this.Hand2.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
+                        break;
                         case 2:
-                            this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[11] + ".png"), mainFilter));
-                            this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[12] + ".png"), mainFilter));
-                            this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[13] + ".png"), mainFilter));
-                            this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[0] + ".png"), mainFilter));
-                            this.Hand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[1] + ".png"), mainFilter));
-                            this.Hand2.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/" + Monika.nullPath + ".png"), mainFilter));
-                            break;
+                        this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"), mainFilter));
+                        this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"), mainFilter));
+                        this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"), mainFilter));
+                        this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[0] + ".png"), mainFilter));
+                        this.Hand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[1] + ".png"), mainFilter));
+                        this.Hand2.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
+                        break;
                         case 3:
-                            this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[11] + ".png"), mainFilter));
-                            this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[12] + ".png"), mainFilter));
-                            this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[13] + ".png"), mainFilter));
-                            this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[8] + ".png"), mainFilter));
-                            this.Hand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[6] + ".png"), mainFilter));
-                            this.Hand2.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/" + Monika.nullPath + ".png"), mainFilter));
-                            break;
+                        this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"), mainFilter));
+                        this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"), mainFilter));
+                        this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"), mainFilter));
+                        this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"), mainFilter));
+                        this.Hand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[6] + ".png"), mainFilter));
+                        this.Hand2.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
+                        break;
                         case 4:
-                            this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[11] + ".png"), mainFilter));
-                            this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[12] + ".png"), mainFilter));
-                            this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[13] + ".png"), mainFilter));
-                            this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[8] + ".png"), mainFilter));
-                            this.Hand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[5] + ".png"), mainFilter));
-                            this.Hand2.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/" + Monika.nullPath + ".png"), mainFilter));
-                            break;
+                        this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"), mainFilter));
+                        this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"), mainFilter));
+                        this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"), mainFilter));
+                        this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"), mainFilter));
+                        this.Hand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"), mainFilter));
+                        this.Hand2.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
+                        break;
                         case 5:
-                            this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[14] + ".png"), mainFilter));
-                            this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[15] + ".png"), mainFilter));
-                            this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[16] + ".png"), mainFilter));
-                            this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[2] + ".png"), mainFilter));
-                            this.Hand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[3] + ".png"), mainFilter));
-                            this.Hand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[4] + ".png"), mainFilter));
-                            break;
+                        this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[14] + ".png"), mainFilter));
+                        this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[15] + ".png"), mainFilter));
+                        this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[16] + ".png"), mainFilter));
+                        this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[2] + ".png"), mainFilter));
+                        this.Hand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[3] + ".png"), mainFilter));
+                        this.Hand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[4] + ".png"), mainFilter));
+                        break;
                         case 6:
-                            this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[11] + ".png"), mainFilter));
-                            this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[12] + ".png"), mainFilter));
-                            this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[13] + ".png"), mainFilter));
-                            this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[7] + ".png"), mainFilter));
-                            this.Hand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[5] + ".png"), mainFilter));
-                            this.Hand2.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/" + Monika.nullPath + ".png"), mainFilter));
-                            break;
+                        this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"), mainFilter));
+                        this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"), mainFilter));
+                        this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"), mainFilter));
+                        this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[7] + ".png"), mainFilter));
+                        this.Hand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"), mainFilter));
+                        this.Hand2.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
+                        break;
                         case 7:
-                            this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[11] + ".png"), mainFilter));
-                            this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[12] + ".png"), mainFilter));
-                            this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[13] + ".png"), mainFilter));
-                            this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[10] + ".png"), mainFilter));
-                            this.Hand1.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/" + Monika.nullPath + ".png"), mainFilter));
-                            this.Hand2.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/" + Monika.nullPath + ".png"), mainFilter));
-                            break;
+                        this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"), mainFilter));
+                        this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"), mainFilter));
+                        this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"), mainFilter));
+                        this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[10] + ".png"), mainFilter));
+                        this.Hand1.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
+                        this.Hand2.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
+                        break;
                         default:
-                            this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[11] + ".png"), mainFilter));
-                            this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[12] + ".png"), mainFilter));
-                            this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[13] + ".png"), mainFilter));
-                            this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[5] + ".png"), mainFilter));
-                            this.Hand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/b/" + Monika.body[8] + ".png"), mainFilter));
-                            this.Hand2.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/" + Monika.nullPath + ".png"), mainFilter));
-                            break;
+                        this.Body.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[11] + ".png"), mainFilter));
+                        this.Body1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[12] + ".png"), mainFilter));
+                        this.Head.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[13] + ".png"), mainFilter));
+                        this.Hand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[5] + ".png"), mainFilter));
+                        this.Hand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/b/" + Monika.body[8] + ".png"), mainFilter));
+                        this.Hand2.Source = null;//BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
+                        break;
                     }
                     if (body == 5) { Monika.leaningWord = "leaning-def-"; } else { Monika.leaningWord = ""; }
-                    DeleteObject(Eyes);
-                    switch (eye)
-                    {
+                    switch (eye) {
                         case "e":
-                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fe/face-" + Monika.leaningWord + Monika.eyes[4] + ".png"), mainFilter));
-                            break;
+                        this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[4] + ".png"), mainFilter));
+                        break;
                         case "w":
-                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fe/face-" + Monika.leaningWord + Monika.eyes[11] + ".png"), mainFilter));
-                            break;
+                        this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[11] + ".png"), mainFilter));
+                        break;
                         case "s":
-                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fe/face-" + Monika.leaningWord + Monika.eyes[10] + ".png"), mainFilter));
-                            break;
+                        this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[10] + ".png"), mainFilter));
+                        break;
                         case "t":
-                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fe/face-" + Monika.leaningWord + Monika.eyes[6] + ".png"), mainFilter));
-                            break;
+                        this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[6] + ".png"), mainFilter));
+                        break;
                         case "c":
-                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fe/face-" + Monika.leaningWord + Monika.eyes[2] + ".png"), mainFilter));
-                            break;
+                        this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[2] + ".png"), mainFilter));
+                        break;
                         case "r":
-                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fe/face-" + Monika.leaningWord + Monika.eyes[5] + ".png"), mainFilter));
-                            break;
+                        this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[5] + ".png"), mainFilter));
+                        break;
                         case "l":
-                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fe/face-" + Monika.leaningWord + Monika.eyes[3] + ".png"), mainFilter));
-                            break;
+                        this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[3] + ".png"), mainFilter));
+                        break;
                         case "h":
-                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fe/face-" + Monika.leaningWord + Monika.eyes[0] + ".png"), mainFilter));
-                            break;
+                        this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[0] + ".png"), mainFilter));
+                        break;
                         case "d":
-                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fe/face-" + Monika.leaningWord + Monika.eyes[1] + ".png"), mainFilter));
-                            break;
+                        this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[1] + ".png"), mainFilter));
+                        break;
                         case "k":
-                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fe/face-" + Monika.leaningWord + Monika.eyes[12] + ".png"), mainFilter));
-                            break;
+                        this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[12] + ".png"), mainFilter));
+                        break;
                         case "n":
-                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fe/face-" + Monika.leaningWord + Monika.eyes[13] + ".png"), mainFilter));
-                            break;
+                        this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[13] + ".png"), mainFilter));
+                        break;
                         case "f":
-                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fe/face-" + Monika.leaningWord + Monika.eyes[9] + ".png"), mainFilter));
-                            break;
+                        this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[9] + ".png"), mainFilter));
+                        break;
                         case "m":
-                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fe/face-" + Monika.leaningWord + Monika.eyes[7] + ".png"), mainFilter));
-                            break;
+                        this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[7] + ".png"), mainFilter));
+                        break;
                         case "g":
-                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fe/face-" + Monika.leaningWord + Monika.eyes[8] + ".png"), mainFilter));
-                            break;
+                        this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[8] + ".png"), mainFilter));
+                        break;
                         default:
-                            this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fe/face-" + Monika.leaningWord + Monika.eyes[4] + ".png"), mainFilter));
-                            break;
+                        this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[4] + ".png"), mainFilter));
+                        break;
                     }
-                    DeleteObject(EyeBrow);
-                    switch (eyebrow)
-                    {
+                    switch (eyebrow) {
                         case "u":
-                            this.EyeBrow.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"), mainFilter));
-                            break;
+                        this.EyeBrow.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"), mainFilter));
+                        break;
                         case "k":
-                            this.EyeBrow.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[1] + ".png"), mainFilter));
-                            break;
+                        this.EyeBrow.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[1] + ".png"), mainFilter));
+                        break;
                         case "s":
-                            this.EyeBrow.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[2] + ".png"), mainFilter));
-                            break;
+                        this.EyeBrow.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[2] + ".png"), mainFilter));
+                        break;
                         case "t":
-                            this.EyeBrow.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[3] + ".png"), mainFilter));
-                            break;
+                        this.EyeBrow.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[3] + ".png"), mainFilter));
+                        break;
                         case "f":
-                            this.EyeBrow.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[0] + ".png"), mainFilter));
-                            break;
+                        this.EyeBrow.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[0] + ".png"), mainFilter));
+                        break;
                         default:
-                            this.EyeBrow.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"), mainFilter));
-                            break;
+                        this.EyeBrow.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"), mainFilter));
+                        break;
                     }
-                    DeleteObject(Mouth);
-                    switch (mouth)
-                    {
+                    switch (mouth) {
                         case "a":
-                            this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fm/face-" + Monika.leaningWord + Monika.mouth[4] + ".png"), mainFilter));
-                            break;
+                        this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[4] + ".png"), mainFilter));
+                        break;
                         case "b":
-                            this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fm/face-" + Monika.leaningWord + Monika.mouth[0] + ".png"), mainFilter));
-                            break;
+                        this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[0] + ".png"), mainFilter));
+                        break;
                         case "c":
-                            this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fm/face-" + Monika.leaningWord + Monika.mouth[5] + ".png"), mainFilter));
-                            break;
+                        this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[5] + ".png"), mainFilter));
+                        break;
                         case "d":
-                            this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fm/face-" + Monika.leaningWord + Monika.mouth[3] + ".png"), mainFilter));
-                            break;
+                        this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[3] + ".png"), mainFilter));
+                        break;
                         case "o":
-                            this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fm/face-" + Monika.leaningWord + Monika.mouth[1] + ".png"), mainFilter));
-                            break;
+                        this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[1] + ".png"), mainFilter));
+                        break;
                         case "u":
-                            this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fm/face-" + Monika.leaningWord + Monika.mouth[6] + ".png"), mainFilter));
-                            break;
+                        this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[6] + ".png"), mainFilter));
+                        break;
                         case "w":
-                            this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fm/face-" + Monika.leaningWord + Monika.mouth[8] + ".png"), mainFilter));
-                            break;
+                        this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[8] + ".png"), mainFilter));
+                        break;
                         case "p":
-                            this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fm/face-" + Monika.leaningWord + Monika.mouth[2] + ".png"), mainFilter));
-                            break;
+                        this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[2] + ".png"), mainFilter));
+                        break;
                         case "t":
-                            this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fm/face-" + Monika.leaningWord + Monika.mouth[7] + ".png"), mainFilter));
-                            break;
+                        this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[7] + ".png"), mainFilter));
+                        break;
                         default:
-                            this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/fm/face-" + Monika.leaningWord + Monika.mouth[4] + ".png"), mainFilter));
-                            break;
+                        this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[4] + ".png"), mainFilter));
+                        break;
                     }
                     if (body == 5) { Monika.leaningWord = "-leaning-def"; } else { Monika.leaningWord = ""; }
                     string hairPath = "hair" + Monika.leaningWord + "-" + Monika.hairType;
                     if (body == 5) { Monika.leaningWord = "-leaning"; } else { Monika.leaningWord = ""; }
                     string nosePath = "face" + Monika.leaningWord + "-nose-def.png";
+                    this.Face.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/face/" + nosePath), mainFilter));
+                    this.Hair.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/h/" + hairPath + "-front.png"), mainFilter));
+                    this.HairBack.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/h/" + hairPath + "-back.png"), mainFilter));
 
-
-                    DeleteObject(Face); DeleteObject(Hair); DeleteObject(HairBack);
-                   
-                    this.Face.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/face/" + nosePath), mainFilter));
-                    this.Hair.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/h/" + hairPath + "-front.png"), mainFilter));
-                    this.HairBack.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/h/" + hairPath + "-back.png"), mainFilter));
-
-                    this.table1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/t/chair-def.png"), mainFilter));
-                    this.table2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/t/table-def.png"), mainFilter));
-                    this.table3.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/t/table-def-s.png"), mainFilter));
+                    this.table1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/t/chair-def.png"), mainFilter));
+                    this.table2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/t/table-def.png"), mainFilter));
+                    this.table3.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/t/table-def-s.png"), mainFilter));
                 });
-            }
-            catch
-            {
+            } catch {
             }
         }
-        public void RedrawCostume(int body, string costume)
-        {
-            string pathCost = baseDir + "/costumes/";
+        public void RedrawCostume(int body, string costume) {
+            string pathCost = AppDomain.CurrentDomain.BaseDirectory + "/costumes/";
 
-            try
-            {
-                this.Dispatcher.Invoke(() =>
-                {
-                    switch (body)
-                    {
+            try {
+                this.Dispatcher.Invoke(() => {
+                    switch (body) {
                         case 1:
-                            this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"), mainFilter));
-                            this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"), mainFilter));
-                            this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[10] + ".png"), mainFilter));
-                            this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/" + Monika.nullPath + ".png"), mainFilter));
-                            this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/" + Monika.nullPath + ".png"), mainFilter));
-                            break;
+                        this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"), mainFilter));
+                        this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"), mainFilter));
+                        this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[10] + ".png"), mainFilter));
+                        this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
+                        this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
+                        break;
                         case 2:
-                            this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"), mainFilter));
-                            this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"), mainFilter));
-                            this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[0] + ".png"), mainFilter));
-                            this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[1] + ".png"), mainFilter));
-                            this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/" + Monika.nullPath + ".png"), mainFilter));
-                            break;
+                        this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"), mainFilter));
+                        this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"), mainFilter));
+                        this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[0] + ".png"), mainFilter));
+                        this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[1] + ".png"), mainFilter));
+                        this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
+                        break;
                         case 3:
-                            this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"), mainFilter));
-                            this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"), mainFilter));
-                            this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[8] + ".png"), mainFilter));
-                            this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[6] + ".png"), mainFilter));
-                            this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/" + Monika.nullPath + ".png"), mainFilter));
-                            break;
+                        this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"), mainFilter));
+                        this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"), mainFilter));
+                        this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[8] + ".png"), mainFilter));
+                        this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[6] + ".png"), mainFilter));
+                        this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
+                        break;
                         case 4:
-                            this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"), mainFilter));
-                            this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"), mainFilter));
-                            this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[8] + ".png"), mainFilter));
-                            this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[5] + ".png"), mainFilter));
-                            this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/" + Monika.nullPath + ".png"), mainFilter));
-                            break;
+                        this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"), mainFilter));
+                        this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"), mainFilter));
+                        this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[8] + ".png"), mainFilter));
+                        this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[5] + ".png"), mainFilter));
+                        this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
+                        break;
                         case 5:
-                            this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[14] + ".png"), mainFilter));
-                            this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[15] + ".png"), mainFilter));
-                            this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[2] + ".png"), mainFilter));
-                            this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[3] + ".png"), mainFilter));
-                            this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[4] + ".png"), mainFilter));
-                            break;
+                        this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[14] + ".png"), mainFilter));
+                        this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[15] + ".png"), mainFilter));
+                        this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[2] + ".png"), mainFilter));
+                        this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[3] + ".png"), mainFilter));
+                        this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[4] + ".png"), mainFilter));
+                        break;
                         case 6:
-                            this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"), mainFilter));
-                            this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"), mainFilter));
-                            this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[7] + ".png"), mainFilter));
-                            this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[5] + ".png"), mainFilter));
-                            this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/" + Monika.nullPath + ".png"), mainFilter));
-                            break;
+                        this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"), mainFilter));
+                        this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"), mainFilter));
+                        this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[7] + ".png"), mainFilter));
+                        this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[5] + ".png"), mainFilter));
+                        this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
+                        break;
                         case 7:
-                            this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"), mainFilter));
-                            this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"), mainFilter));
-                            this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[10] + ".png"), mainFilter));
-                            this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/" + Monika.nullPath + ".png"), mainFilter));
-                            this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/" + Monika.nullPath + ".png"), mainFilter));
-                            break;
+                        this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"), mainFilter));
+                        this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"), mainFilter));
+                        this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[10] + ".png"), mainFilter));
+                        this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
+                        this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
+                        break;
                         default:
-                            this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"), mainFilter));
-                            this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"), mainFilter));
-                            this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[5] + ".png"), mainFilter));
-                            this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[8] + ".png"), mainFilter));
-                            this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/" + Monika.nullPath + ".png"), mainFilter));
-                            break;
+                        this.UniformBody.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[11] + ".png"), mainFilter));
+                        this.UniformBody1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[12] + ".png"), mainFilter));
+                        this.UniformHand.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[5] + ".png"), mainFilter));
+                        this.UniformHand1.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(pathCost + costume + "/" + Monika.body[8] + ".png"), mainFilter));
+                        this.UniformHand2.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/" + Monika.nullPath + ".png"), mainFilter));
+                        break;
                     }
                     if (body == 5) { Monika.leaningWord = "5"; } else { Monika.leaningWord = "0"; }
                     string ribbonPath = "acs-ribbon_def-" + Monika.leaningWord + ".png";
-                    this.Ribbon_back.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri($"{assetsPath}/monika/ribbon/" + ribbonPath), mainFilter));
+                    this.Ribbon_back.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/ribbon/" + ribbonPath), mainFilter));
                 });
-            }
-            catch
-            {
+            } catch {
 
             };
         }
-        public void RedrawGifts()
-        {
+        public void RedrawGifts() {
 
-            this.Dispatcher.Invoke(() =>
-            {
+            this.Dispatcher.Invoke(() => {
                 gifts.Children.Clear();
-                foreach (string i in Monika.gifts)
-                {
+                foreach (string i in Monika.gifts) {
                     string[] gift = i.Split(" | ");
-                    BitmapImage bitmapImage = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(baseDir + "/Dialogs/ru/gifts/" + gift[1]), mainFilter));
-                    System.Windows.Controls.Image img = new System.Windows.Controls.Image
-                    {
+                    BitmapImage bitmapImage = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(gift[1]), mainFilter));
+                    System.Windows.Controls.Image img = new System.Windows.Controls.Image {
                         Source = bitmapImage,
                         Name = gift[0]
                     };
@@ -1252,717 +1501,61 @@ namespace MonikaOnDesktop
                         UnregisterName(gift[0]);
                     RegisterName(gift[0], img);
                     gifts.Children.Add(img);
-                    DeleteObject(bitmapImage);
                 }
             });
         }
-        public void UnpackCostume(string name)
-        {
-            string path = baseDir + "/costumes/" + name; // or whatever 
-            string costumesPath = baseDir + "/costumes/";
+        public void UnpackCostume(string name) {
+            string path = AppDomain.CurrentDomain.BaseDirectory + "/costumes/" + name; // or whatever 
+            string costumesPath = AppDomain.CurrentDomain.BaseDirectory + "/costumes/";
+            File.Copy(AppDomain.CurrentDomain.BaseDirectory + "/characters/" + name + ".costume", costumesPath + name + ".costume", true);
             Monika.costumeName = name;
-            if (!Directory.Exists(costumesPath))
-            {
+            if (!Directory.Exists(costumesPath)) {
                 DirectoryInfo di = Directory.CreateDirectory(costumesPath);
                 di.Attributes = FileAttributes.Directory | FileAttributes.Hidden;
-            }
-            else
-            {
-                if (Directory.Exists(path))
-                {
+            } else {
+                if (Directory.Exists(path)) {
                     DirectoryInfo di = new DirectoryInfo(path);
                     di.Delete(true);
+                    Directory.CreateDirectory(path);
                 }
             }
-            ZipFile.ExtractToDirectory(baseDir + "/characters/" + name + ".costume", path);
+            ZipFile.ExtractToDirectory(AppDomain.CurrentDomain.BaseDirectory + "/costumes/" + name + ".costume", AppDomain.CurrentDomain.BaseDirectory + "/costumes/" + name);
             setFace(normalPose);
         }
-        Expression[][] exe;
-        public void Menu(string question, string[] q, Expression[][] a)
-        {
-            this.Dispatcher.Invoke(() =>
-            {
-                textWindow.Visibility = Visibility.Visible;
-                textBlock.Text = "";
-                textBlock.Text = question;
-                ButtonsGrid.RowDefinitions.Clear();
-                this.ButtonsGrid.Children.Clear();
-                for (int i = 0; i < q.Length; i++)
-                {
-                    System.Windows.Controls.RowDefinition row = new System.Windows.Controls.RowDefinition();
-                    ButtonsGrid.RowDefinitions.Add(row);
-                    var text = new OutlinedTextBlock
-                    {
-                        Text = q[i],
-                        FontFamily = new System.Windows.Media.FontFamily("Comic Sans MS"),
-                        TextWrapping = TextWrapping.Wrap,
-                        StrokeThickness = 1.5,
-                        Stroke = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 0, 0, 0)),
-                        Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 255, 255, 255))
-                    };
-                    switch (Monika.Scaler)
-                    {
-                        case 0:
-                            text.FontSize = 5;
-                            break;
-                        case 1:
-                            text.FontSize = 10;
-                            break;
-                        case 2:
-                            text.FontSize = 15;
-                            break;
-                        case 3:
-                            text.FontSize = 20;
-                            break;
-                    }
-                    var button = new System.Windows.Controls.Button
-                    {
-                        Name = "butt" + i,
-                        Content = text,
-                        Width = 400,
-                        Height = 30,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        HorizontalAlignment = System.Windows.HorizontalAlignment.Center
-                    };
-                    switch (Monika.Scaler)
-                    {
-                        case 0:
-                            button.Width = 100;
-                            button.Height = 10;
-                            break;
-                        case 1:
-                            button.Width = 200;
-                            button.Height = 20;
-                            break;
-                        case 2:
-                            button.Width = 300;
-                            button.Height = 30;
-                            break;
-                        case 3:
-                            button.Width = 400;
-                            button.Height = 40;
-                            break;
-                    }
-                    button.Click += Button_ClickAsync;
-
-                    System.Windows.Controls.Grid.SetRow(button, i);
-                    this.ButtonsGrid.Children.Add(button);
-                }
-                exe = a;
-            });
-
-        }
-        private async void Button_ClickAsync(object sender, RoutedEventArgs e)
-        {
-            System.Windows.Controls.Button butt = (sender as System.Windows.Controls.Button);
-            int num = int.Parse(butt.Name.Substring(4));
-            Debug.WriteLine("Нажата кнопка " + num);
-            this.Dispatcher.Invoke(() =>
-            {
-                textBlock.Text = "";
-                ButtonsGrid.RowDefinitions.Clear();
-                this.ButtonsGrid.Children.Clear();
-            });
-            foreach (Expression expression in exe[num])
-            {
-                Debug.WriteLine("ex: " + expression.Text);
-
-                if (expression.Text.Contains("tion") && expression.Face == "affe")
-                {
-                    Debug.WriteLine("Тип кода: " + expression.Text);
-                    string[] i = expression.Text.Split(" ");
-                    switch (i[1])
-                    {
-                        case "+":
-                            Monika.affection += int.Parse(i[2]);
-                            Debug.WriteLine("Привязанность " + i[1] + int.Parse(i[2]));
-                            break;
-                        case "-":
-                            Monika.affection -= int.Parse(i[2]);
-                            Debug.WriteLine("Привязанность " + i[1] + int.Parse(i[2]));
-                            if (Monika.affection <= 0)
-                            {
-                                Monika.affection = 0;
-                            }
-                            break;
-                    }
-                    Debug.WriteLine("Привязанность = " + Monika.affection);
-
-                }
-                else if (expression.Text.Contains("dd") && expression.Face == "gift")
-                {
-                    string[] i = expression.Text.Split(" ");
-                    addGift(i[1], i[2]);
-                }
-                else if (expression.Text.Contains("emove") && expression.Face == "gift")
-                {
-                    string[] i = expression.Text.Split(" ");
-                    removeGift(i[1]);
-                }
-                else if (expression.Text.Contains("date") && expression.Face == "gitU")
-                {
-                    updateZip();
-                }
-                else
-                {
-                    await Say(false, new[] { expression });
-                }
-                //Thread.Sleep(delay); // sleep
-            }
-            sayIdle();
-        }
-        #region
-        #region
-        Memory<DialogModel> dm = new Memory<DialogModel>();
-        int num = 0;
-        public async void readXml(Stream stream, bool typ, string sPath, int type)
-        {
-            GC.Collect(); // Попытка сразу очистить память
-            // string sPath = idleDialogPath;
-            StringBuilder mainXML = new StringBuilder();
-            mainXML.Append("<Dialogs>\n\t<Dialog>");
-            StreamReader f;
-            if (typ)
-            {
-                f = new StreamReader(stream);
-            }
-            else
-            {
-                f = new StreamReader(sPath);
-            }
-            while (!f.EndOfStream)
-            {
-                string m = f.ReadLine();
-                string s = m.Replace("\r", String.Empty).Replace("    ", "\t");
-                string S = "";
-                if (s.Contains("menu:"))
-                {
-                    S = s.Replace("menu:", "\n\t\t<Menu>");
-                }
-                if (s.Contains("menuend"))
-                {
-                    S = s.Replace("menuend", "\n\t\t\t</Answer>\n\t\t</Menu>");
-                }
-                if (s.Contains("\t\t") && !s.Contains("affection") && !s.Contains("giftAdd") && !s.Contains("giftRemove"))
-                {
-                    //S = s.Insert(0, "\n\t\t\t<answer text = \"") + "\">";
-                    S = s.Replace("\t\t", "\n\t\t\t<Answer text=\"") + "\">";
-                }
-                if (s.Contains("ansend"))
-                {
-                    S = s.Replace("ansend", "\n\t\t\t</Answer>");
-                }
-                if (s.Contains("\t\t\t"))
-                {
-                    S = s.Replace("\t\t\t", "\n\t\t\t\t<Text>") + "</Text>\n\t\t\t</Answer>\n\t\t</Menu>";
-                }
-                if (!s.Contains("\t\t") && !s.Contains("\t\t") && !s.Contains("menuend") && !s.Contains("menu:"))
-                {
-                    S = s.Insert(0, "\n\t\t<Text>") + "</Text>";
-                }
-                mainXML.Append(S);
-            }
-            f.Close();
-
-            mainXML.Append("\n\t</Dialog>\n</Dialogs>");
-            string mainxml = mainXML.ToString().Replace("\n\t\t<Text>=</Text>", "\n\t</Dialog>\n\t<Dialog>");
-            string mainXml = mainxml.ToString().Replace("\n\t\t\t</Answer>\n\t\t</Menu>\n\t\t\t\t<Text>", "\n\t\t\t\t<Text>")
-                .Replace("\n\t\t\t</Answer>\n\t\t</Menu>\n\t\t\t<Answer", "\n\t\t\t<Answer")
-                .Replace("</Text>\n\t\t\t<Answer", "</Text>\n\t\t\t</Answer>\n\t\t\t<Answer")
-                .Replace("<Text>affection+</Text>", "<Action>affection + 1</Action>")
-                .Replace("<Text>affection-</Text>", "<Action>affection - 1</Action>");
-
-            #region
-            string s1 = mainXml.Replace("\t", String.Empty);
-            string s2 = s1.Replace("\n", String.Empty);
-            //Debug.WriteLine(s1);
-            XmlDocument xDoc = new XmlDocument();
-            //string path = testXml;
-            //xDoc.Load(path);
-            xDoc.LoadXml(s1);
-            // получим корневой элемент
-            XmlElement xRoot = xDoc.DocumentElement;
-            // обход всех узлов в корневом элементе
-            List<DialogModel> idm = new List<DialogModel>();
-            foreach (XmlNode xnode in xRoot)
-            {
-                if (xnode.Name == "Dialog")
-                {
-                    //Console.WriteLine("Dialog:");
-                    idm.Add(new DialogModel(xnode));
-                }
-            }
-            dm = idm.ToArray();
-            switch (type)
-            {
-                case 0:
-                    num = rnd.Next(idm.Count);
-                    Debug.WriteLine("Прошлый номер диалога: " + lastDialog);
-                    Debug.WriteLine("Рандомный номер диалога: " + num);
-                    //while (dialogNum == lastDialog && dialogNum == lastLastDialog)
-                    while (num == lastDialog) // жоский костыль, без которого показываются повторные диалоги
-                    {
-                        Debug.WriteLine("Номер диалога совпадает с старым, подбираю новый");
-                        num = rnd.Next(idm.Count);
-                    }
-                    //lastLastDialog = lastDialog;
-                    lastDialog = num;
-                    Debug.WriteLine("Диалог не совпадает с старым, показываю: " + lastDialog);
-                    await sayIdle();
-                    break;
-                case 1:
-                    num = rnd.Next(idm.Count);
-                    await sayIdle();
-                    Environment.Exit(0);
-                    break;
-                case 2:
-                    string lang = Lang.Parent.Name;
-                    switch (lang)
-                    {
-                        case "ru":
-                            num = 0;
-                            await sayIdle();
-                            break;
-                        case "en":
-                            num = 1;
-                            await sayIdle();
-                            break;
-                        default:
-                            num = 1;
-                            await sayIdle();
-                            break;
-                    }
-                    break;
-            }
-            
-            #endregion
-            
-        }
-        int dialogNum;
-        public async Task sayIdle()
-        {
-            isSpeaking = true;
-            this.Dispatcher.Invoke(() => { textWindow.Visibility = Visibility.Visible; });
-            //Debug.WriteLine(dm[num].Node.InnerXml);
-            for (int u = dialogNum; u < dm.Span[num].Node.ChildNodes.Count; u++)
-            {
-                int delay = 0;
-                XmlNode childnode = dm.Span[num].Node.ChildNodes[u];
-                // если узел age
-                if (childnode.Name == "Menu")
-                {
-                    string[] q = new string[childnode.ChildNodes.Count];
-                    Expression[][] ex = new Expression[childnode.ChildNodes.Count][];
-                    for (int i = 0; i < childnode.ChildNodes.Count; i++)
-                    {
-                        XmlNode attr = childnode.ChildNodes[i].Attributes.GetNamedItem("text");
-                        q[i] = attr.Value;
-                        Expression[] ex1 = new Expression[childnode.ChildNodes[i].ChildNodes.Count];
-                        for (int a = 0; a < childnode.ChildNodes[i].ChildNodes.Count; a++)
-                        {
-                            ReadOnlyMemory<char> memoryChar = childnode.ChildNodes[i].ChildNodes[a].InnerText.ToCharArray();
-                            ex1[a] = new Expression(memoryChar.Slice(5).ToString(), memoryChar.Slice(0, 4).ToString());
-                        }
-                        ex[i] = ex1;
-                    }
-                    Menu(dm.Span[num].Node.ChildNodes[u - 1].InnerText.Substring(5), q, ex);
-                    dialogNum = u + 1;
-                    //Debug.WriteLine("u = " + dialogNum + " count = " + (dm[num].Node.ChildNodes.Count - 1));
-                    //Debug.WriteLine(dialogNum);
-                    break;
-                }
-                if (childnode.Name == "Text")
-                {
-                    ReadOnlyMemory<char> memoryChar = childnode.InnerText.ToCharArray();
-                    var stringChar = memoryChar.ToString();
-                    //Console.WriteLine(childnode.InnerText);
-                    //exList.Add(new Expression(childnode.InnerText.Substring(2), childnode.InnerText[0].ToString()));
-                    try
-                    {
-                        if (stringChar.Contains("affection"))
-                        {
-                            Debug.WriteLine("Тип кода: " + stringChar);
-                            string[] i =stringChar.Split(" ");
-                            switch (i[1])
-                            {
-                                case "+":
-                                    Monika.affection += int.Parse(i[2]);
-                                    Debug.WriteLine("Привязанность " + i[1] + int.Parse(i[2]));
-                                    break;
-                                case "-":
-                                    Monika.affection -= int.Parse(i[2]);
-                                    Debug.WriteLine("Привязанность " + i[1] + int.Parse(i[2]));
-                                    if (Monika.affection <= 0)
-                                    {
-                                        Monika.affection = 0;
-                                    }
-                                    break;
-                            }
-                            Debug.WriteLine("Привязанность = " + Monika.affection);
-
-                        }
-                        else if (stringChar.Contains("giftAdd"))
-                        {
-                            try
-                            {
-                                string[] i = stringChar.Split(" ");
-                                addGift(i[1], i[2]);
-                            }
-                            catch (Exception e)
-                            {
-                                Debug.WriteLine(e.Message);
-                            }
-                        }
-                        else if (stringChar.Contains("giftRemove"))
-                        {
-                            try
-                            {
-                                string[] i = stringChar.Split(" ");
-                                removeGift(i[1]);
-                            }
-                            catch (Exception e)
-                            {
-                                Debug.WriteLine(e.Message);
-                            }
-                        }
-                        else if (stringChar.Contains("gitUpdate"))
-                        {
-                            updateZip();
-                        }
-                        else
-                        {
-                            //Debug.WriteLine("Говорим: " + childnode.InnerText.Substring(5));
-                            await Say(false, new[] { new Expression(memoryChar.Slice(5).ToString(), memoryChar.Slice(0, 4).ToString()) });
-                        }
-                    }
-                    catch
-                    {
-                        Debug.WriteLine("ОШИБКА");
-                    }
-                    //Debug.WriteLine("u = " + dialogNum + " count = " + (dm[num].Node.ChildNodes.Count - 1));
-                }
-                if (u >= dm.Span[num].Node.ChildNodes.Count - 1)
-                {
-                    isSpeaking = false;
-                    //Debug.WriteLine("Конец диалога");
-                    this.Dispatcher.Invoke(() =>
-                    {
-                        textWindow.Visibility = Visibility.Hidden;
-                        setFace(normalPose);
-                    });
-                    dialogNum = 0;
-                    Monika.saveData();
-                    break;
-                }
-                //Thread.Sleep(delay1); // sleep
-                //await Task.Delay(delay1);
-            }
-        }
-        #endregion
-
-        Memory<NamedDialogModel> ldm = new Memory<NamedDialogModel>();
-        string[] giftNameList; Random rnd = new Random();
-        public void readLongXml(string Name, string sPath, int type)
-        {
-            ClearMemory();
-            //Debug.WriteLine("Ввели текст: " + Name);
-            #region
-            //string sPath = progsDialogPath;
-            string mainXML = "<Mains>";
-
-            StreamReader f = new StreamReader(sPath);
-            while (!f.EndOfStream)
-            {
-                string m = f.ReadLine();
-                string s = m.Replace("\r", String.Empty);
-                string S = "";
-                if (s.Contains("affection"))
-                {
-                    S = s.Insert(0, "\n\t\t\t<Action>") + "</Action>";
-                }
-                if (s.Contains("menu:"))
-                {
-                    S = s.Replace("menu:", "\n\t\t\t<Menu>");
-                }
-                if (s.Contains("menuend"))
-                {
-                    S = s.Replace("menuend", "\n\t\t\t</Menu>");
-                }
-                if (s.Contains("\t\t"))
-                {
-                    //S = s.Insert(0, "\n\t\t\t<answer text = \"") + "\">";
-                    S = s.Replace("\t\t", "\n\t\t\t\t<Answer text=\"") + "\">";
-                }
-                if (s.Contains("ansend"))
-                {
-                    S = s.Replace("ansend", "\n\t\t\t\t</Answer>");
-                }/*
-                if (s.Contains("\t\t<Text>["))
-                {
-                    S = s.Replace("\t\t<Text>[", "\n\t<Process name=\"");
-                    S = s.Replace("]</Text>", "\">");
-                }*/
-                if (s.Contains("\t\t\t") && !s.Contains("["))
-                {
-                    S = s.Replace("\t\t\t", "\n\t\t\t\t\t<Text>") + "</Text>\n\t\t\t\t</Answer>\n\t\t\t</Menu>";
-                }
-                if (!s.Contains("\t\t") && !s.Contains("\t\t") && !s.Contains("menuend") && !s.Contains("menu:") && !s.Contains("affection"))
-                {
-                    S = s.Insert(0, "\n\t\t\t<Text>") + "</Text>";
-                }
-                mainXML += S;
-            }
-            f.Close();
-
-            mainXML += "\n\t\t</Dialog>\n\t</Main>\n</Mains>";
-            string mainxml = mainXML.Replace("\t\t\t<Text>=</Text>", "\t\t</Dialog>\n\t\t<Dialog>").Replace("\t\t\t<Text>[", "\t\t</Dialog>\n\t</Main>\n\t<Main name=\"").Replace("]</Text>", "\">\n\t\t<Dialog>");
-            string mainXml = mainxml.Replace("<Mains>\n\t\t</Dialog>\n\t</Main>", "<Mains>").Replace("\n\t\t\t\t</Answer>\n\t\t\t</Menu>\n\t\t\t\t\t<Text>", "\n\t\t\t\t\t<Text>").Replace("\n\t\t\t\t</Answer>\n\t\t\t</Menu>\n\t\t\t\t<Answer", "\n\t\t\t\t<Answer").Replace("</Text>\n\t\t\t\t<Answer", "</Text>\n\t\t\t\t</Answer>\n\t\t\t\t<Answer");
-
-            //Console.Write("XML Example:\n" + mainXml);
-            //Console.WriteLine("Print dialogues:\n");
-            #endregion
-            #region
-            string s1 = mainXml.Replace("\t", String.Empty);
-            string s2 = s1.Replace("\n", String.Empty);
-            XmlDocument xDoc = new XmlDocument();
-            //string path = testXml;
-            //xDoc.Load(path);
-            xDoc.LoadXml(s2);
-            // получим корневой элемент
-            XmlElement xRoot = xDoc.DocumentElement;
-            string[][] names = new string[xRoot.ChildNodes.Count][];
-            List<NamedDialogModel> Ldm = new List<NamedDialogModel>();
-            // обход всех узлов в корневом элементе
-            foreach (XmlNode xnode in xRoot)
-            {
-                List<DialogModel> dm = new List<DialogModel>();
-                string[] name = xnode.Attributes.GetNamedItem("name").Value.ToLower().Split("|");
-                if (xnode.Name == "Main")
-                {
-                    foreach (XmlNode progsnode in xnode.ChildNodes)
-                    {
-                        dm.Add(new DialogModel(progsnode));
-                    }
-                }
-                Ldm.Add(new NamedDialogModel(name, dm));
-            }
-            dialogNum = 0;
-            switch (type)
-            {
-                case 0:
-                    foreach (NamedDialogModel NDM in Ldm)
-                    {
-                        if (NDM.Names.Contains(Name))
-                        {
-                            dm = NDM.DM.ToArray();
-                            num = rnd.Next(dm.Length);
-                            sayIdle();
-                        }
-                    }
-                    break;
-                case 1:
-                    foreach (NamedDialogModel NDM in Ldm)
-                    {
-                        foreach (string c in NDM.Names)
-                        {
-                            string d = c.ToLower().Trim().TrimEnd('/');
-
-                            //Обновлено определение сайтов на более новое через Regex.Matches - обновление подготовил Денис Солицен
-
-                            if (d.StartsWith("http://"))
-                            {
-                                d = d.Substring(7);
-                            }
-
-                            if (d.StartsWith("https://"))
-                            {
-                                d = d.Substring(8);
-                            }
-
-                            if (d.StartsWith("www."))
-                            {
-                                d = d.Substring(4);
-                            }
-                            if (Name.Contains(d))
-                            {
-                                dm = NDM.DM.ToArray();
-                                num = rnd.Next(dm.Length);
-                                sayIdle();
-                            }
-                        }
-                    }
-                    break;
-                case 2:
-                    foreach (NamedDialogModel NDM in Ldm)
-                    {
-                        foreach (string c in NDM.Names)
-                        {
-                            string d = c.ToLower().Trim().TrimEnd('/');
-
-                            //Обновлено определение сайтов на более новое через Regex.Matches - обновление подготовил Денис Солицен
-
-                            if (d.StartsWith("http://"))
-                            {
-                                d = d.Substring(7);
-                            }
-
-                            if (d.StartsWith("https://"))
-                            {
-                                d = d.Substring(8);
-                            }
-
-                            if (d.StartsWith("www."))
-                            {
-                                d = d.Substring(4);
-                            }
-                            var googleMatch = Regex.Match(Name, GOOGLE_REGEX, RegexOptions.Compiled);
-                            if (googleMatch.Success)
-                            {
-                                var search = HttpUtility.UrlDecode(googleMatch.Groups[1].ToString()).Trim();
-                                if (search.ToLower().Trim().Contains(d))
-                                {
-                                    dm = NDM.DM.ToArray();
-                                    num = rnd.Next(dm.Length);
-                                    sayIdle();
-                                }
-                            }
-                        }
-                    }
-                    break;
-                case 3:
-                    foreach (NamedDialogModel NDM in Ldm)
-                    {
-                        foreach (string c in NDM.Names)
-                        {
-                            string d = c.ToLower().Trim().TrimEnd('/');
-
-                            //Обновлено определение сайтов на более новое через Regex.Matches - обновление подготовил Денис Солицен
-
-                            if (d.StartsWith("http://"))
-                            {
-                                d = d.Substring(7);
-                            }
-
-                            if (d.StartsWith("https://"))
-                            {
-                                d = d.Substring(8);
-                            }
-
-                            if (d.StartsWith("www."))
-                            {
-                                d = d.Substring(4);
-                            }
-                            var youtubeMatch = Regex.Match(Name, YOUTUBE_REGEX, RegexOptions.Compiled);
-                            if (youtubeMatch.Success)
-                            {
-                                var search = HttpUtility.UrlDecode(youtubeMatch.Groups[1].ToString()).Trim();
-                                if (search.ToLower().Trim().Contains(d))
-                                {
-                                    dm = NDM.DM.ToArray();
-
-                                    Random rnd = new Random();
-                                    num = rnd.Next(dm.Length);
-                                    _ = sayIdle();
-                                }
-                            }
-                        }
-                    }
-                    break;
-                case 4:
-                    foreach (NamedDialogModel NDM in Ldm)
-                    {
-                        if (NDM.Names.Contains(Name))
-                        {
-
-                            dm = NDM.DM.ToArray();
-                            if (NDM.DM.Count != 1)
-                            {
-                                Monika.loadData();
-                                Debug.WriteLine(Monika.gifts.Count);
-                                List<string> giftList = new List<string>();
-                                List<string> loadedGiftList = new List<string>();
-                                foreach (string i in Monika.gifts)
-                                {
-                                    string[] gift = i.Split(" | ");
-                                    giftList.Add(gift[0]);
-                                    string[] a = gift[2].Split("|");
-                                    foreach (string b in a)
-                                    {
-                                        loadedGiftList.Add(b);
-                                    }
-                                }
-                                giftNameList = NDM.Names;
-                                if (giftList.Contains(Name) || loadedGiftList.Contains(Name))
-                                {
-                                    Debug.WriteLine(dm.Span[1].Node.InnerText);
-                                    num = 1;
-                                    _ = sayIdle();
-                                    Debug.WriteLine("Подарок уже дарили");
-                                }
-                                else
-                                {
-                                    Debug.WriteLine(dm.Span[0].Node.InnerText);
-                                    num = 0;
-                                    _ = sayIdle();
-                                    Debug.WriteLine("Первый подарок");
-                                }
-                            }
-                            else
-                            {
-                                Debug.WriteLine(dm.Span[0].Node.InnerText);
-                                num = 0;
-                                _ = sayIdle();
-                                Debug.WriteLine("Одиночный файл");
-                            }
-                        }
-                    }
-                    break;
-            }
-            #endregion
-
-        }
-        #endregion
-        public void addGift(string name, string path)
-        {
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
-            {
+        public void addGift(string name, string path) {
+            System.Windows.Application.Current.Dispatcher.Invoke(() => {
                 System.Windows.Controls.Image img1 = (System.Windows.Controls.Image)gifts.FindName(name);
-                if (img1 == null)
-                {
-                    System.Windows.Controls.Image img = new System.Windows.Controls.Image
-                    {
-                        Source = new BitmapImage(new Uri(baseDir + "/Dialogs/ru/gifts/" + path)),
+                if (img1 == null) {
+                    System.Windows.Controls.Image img = new System.Windows.Controls.Image {
+                        //Source = new BitmapImage(new Uri(AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/gifts/" + name + path)),
+                        Source = new BitmapImage(new Uri(path)),
                         Name = name
                     };
                     RegisterName(name, img);
                     gifts.Children.Add(img);
                     string giftList = "";
-                    foreach (string i in giftNameList)
+                    /*foreach (string i in giftNameList)
                     {
                         giftList += i + "|";
-                    }
-                    Monika.gifts.Add(name + " | " + path + " | " + giftList);
+                    }*/
+                    Monika.gifts.Add(name + " | " + path + " | ");
+                    Monika.saveData();
                     Debug.WriteLine("Подарен подарок " + name);
                 }
             });
 
         }
-        public void removeGift(string name)
-        {
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
-            {
+        public void removeGift(string name) {
+            System.Windows.Application.Current.Dispatcher.Invoke(() => {
                 System.Windows.Controls.Image img = (System.Windows.Controls.Image)gifts.FindName(name);
 
-                if (img != null)
-                {
+                if (img != null) {
                     Debug.WriteLine("Имя картинки: " + img.Name);
                     UnregisterName(img.Name);
                     gifts.Children.Remove(img);
-                    for (int i = 0; i < Monika.gifts.Count; i++)
-                    {
+                    for (int i = 0; i < Monika.gifts.Count; i++) {
                         string[] gift = Monika.gifts[i].Split(" | ");
-                        if (gift[0] == name)
-                        {
+                        if (gift[0] == name) {
                             Monika.gifts.RemoveAt(i);
                             Debug.WriteLine("Подарок удалён: " + name);
                             Monika.saveData();
@@ -1971,33 +1564,44 @@ namespace MonikaOnDesktop
                 }
             });
         }
-        public async void updateZip()
-        {
-            try
-            {
-                using (SolicenTEAM.Updater updater = new SolicenTEAM.Updater(updateConfig))
-                {
-                    await updater.CheckUpdate("SAn4Es-TV", "MonikaOnDesktop");
-                    if (updater.UpdateVersion != updater.CurrentVersion && updater.UpdateVersion != "")
-                    {
-                        await updater.DownloadUpdate();
-                        while (!updater.readyToUpdate)
-                        {
-                            Debug.WriteLine("Update is ready: " + updater.readyToUpdate);
-                            await Task.Delay(10);
-                            await updater.ExtractArchive();
-                        }
+        public async void updateZip() {
+            try {
+                await SolicenTEAM.Updater.CheckUpdate("SAn4Es-TV", "MonikaOnDesktop");
+                if (SolicenTEAM.Updater.UpdateVersion != SolicenTEAM.Updater.CurrentVersion && SolicenTEAM.Updater.UpdateVersion != "") {
+                    SolicenTEAM.Updater.DownloadUpdate(SolicenTEAM.Updater.gitUser, SolicenTEAM.Updater.gitRepo);
+
+                    while (!SolicenTEAM.Updater.readyToUpdate) {
+                        Debug.WriteLine("Update is ready: " + SolicenTEAM.Updater.readyToUpdate);
+                        await Task.Delay(10);
                     }
+                    Debug.WriteLine("Update is ready: " + SolicenTEAM.Updater.readyToUpdate);
+                    SolicenTEAM.Updater.ExtractArchive();
+                    /*
+                    string processName = "Updater";
+                    var arrayProcesses = Process.GetProcessesByName(processName);
+                    while (arrayProcesses == null || arrayProcesses.Length < 1)
+                    {
+                        Debug.WriteLine("Starting Updater");
+                        Process.Start(AppDomain.CurrentDomain.BaseDirectory + "/Updater.exe");
+                        arrayProcesses = Process.GetProcessesByName(processName);
+                        //Process proc = new Process();
+                        //proc.StartInfo.FileName = "C:\\HelloWorld.exe";
+                        await Task.Delay(2000);
+                    }
+                    Debug.WriteLine("Updater count: " + arrayProcesses.Length);
+                    await Task.Delay(100);
+                    /*
+                    Debug.WriteLine("Starting Updater");
+                    Process.Start("Updater.exe");
+                    Debug.WriteLine("Exiting");
+                    Environment.Exit(0);*/
                 }
                 Debug.WriteLine("Updated");
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 Debug.WriteLine(e.Message);
             }
         }
-        public void SetupScale(int scaler)
-        {
+        public void SetupScale(int scaler) {
             this.Width = 8 * scaler;
             this.Height = 5.12 * scaler;
             this.monika.Margin = new Thickness(0, -20 * scaler / 100, 0, 0);
@@ -2012,33 +1616,25 @@ namespace MonikaOnDesktop
             //Top = primaryMonitorArea.Bottom - this.Height;
             GoToSecondaryMonitor();
         }
-        public void GoToSecondaryMonitor()
-        {
+        public void GoToSecondaryMonitor() {
             // Вот здесь можно посмотреть координаты экранов
             var ss = System.Windows.Forms.Screen.AllScreens;
             //_ = MessageBox.Show(string.Join(Environment.NewLine + Environment.NewLine, (object[])ss), "Параметры мониторов");
 
             var rightScreen = System.Windows.Forms.Screen.AllScreens[0];
             var leftScreen = System.Windows.Forms.Screen.AllScreens[0];
-            foreach (var s in System.Windows.Forms.Screen.AllScreens.Skip(1))
-            {
-                if (s.WorkingArea.X > rightScreen.WorkingArea.X)
-                {
+            foreach (var s in System.Windows.Forms.Screen.AllScreens.Skip(1)) {
+                if (s.WorkingArea.X > rightScreen.WorkingArea.X) {
                     rightScreen = s;
-                }
-                else
-                {
+                } else {
                     leftScreen = s;
                 }
             }
             var rightWorkingArea = rightScreen.WorkingArea;
-            if (MonikaSettings.Default.screenNum)
-            {
+            if (MonikaSettings.Default.screenNum) {
                 var workingRectangle = Screen.PrimaryScreen.WorkingArea;
                 rightWorkingArea = rightScreen.WorkingArea;
-            }
-            else
-            {
+            } else {
                 rightWorkingArea = leftScreen.WorkingArea;
             }
             //Left = rightWorkingArea.X + rightWorkingArea.Width - Width;
@@ -2058,113 +1654,93 @@ namespace MonikaOnDesktop
 
             string text = "Width - " + this.Width.ToString() + "  ActualWidth: " + this.ActualWidth + " Screen Width: " + workingArea.Width + " Left: " + this.Left + " Screen Left: " + workingArea.Left + "\n";
             text += "Height - " + this.Height.ToString() + "  ActualHeight: " + this.ActualHeight + " Screen Height: " + workingArea.Height + " Top: " + this.Top + " Screen Top: " + workingArea.Top + "\n";
-            using (StreamWriter sw = new StreamWriter(baseDir + "/debug.txt", false, System.Text.Encoding.Default))
+            using (StreamWriter sw = new StreamWriter(AppDomain.CurrentDomain.BaseDirectory + "/debug.txt", false, System.Text.Encoding.Default))
             {
                 sw.WriteLine(text);
             }*/
         }
-        private void OnPowerChange(object s, PowerModeChangedEventArgs e)
-        {
-            switch (e.Mode)
-            {
+        private void OnPowerChange(object s, PowerModeChangedEventArgs e) {
+            switch (e.Mode) {
                 case PowerModes.Resume:
-                    isSpeaking = true;
-                    switch (Language.Substring(0, 2))
+                isSpeaking = true;
+                switch (Language.Substring(0, 2)) {
+                    case "ru":
+                    _ = this.Say(true, new[]
                     {
-                        case "ru":
-                            _ = this.Say(true, new[]
-                            {
                         new Expression("Так хорошо проснуться с новыми силами!", "3euo"), // What?
                         new Expression("Надеюсь, ты тоже выспался.", "5euс")
                     });
-                            break;
-                        case "en":
-                            _ = this.Say(true, new[]
-                            {
-                        new Expression("It's so good to wake up with new strength!", "3euo"), // What?
-                        new Expression("I hope you slept too.", "5euс")
-                    });
-                            break;
-                        default:
-                            _ = this.Say(true, new[]
-                            {
-                        new Expression("It's so good to wake up with new strength!", "3euo"), // What?
-                        new Expression("I hope you slept too.", "5euс")
-                    });
-                            break;
-                    }
-                    isSpeaking = false;
                     break;
+                    case "en":
+                    _ = this.Say(true, new[]
+                    {
+                        new Expression("It's so good to wake up with new strength!", "3euo"), // What?
+                        new Expression("I hope you slept too.", "5euс")
+                    });
+                    break;
+                    default:
+                    _ = this.Say(true, new[]
+                    {
+                        new Expression("It's so good to wake up with new strength!", "3euo"), // What?
+                        new Expression("I hope you slept too.", "5euс")
+                    });
+                    break;
+                }
+                isSpeaking = false;
+                break;
                 case PowerModes.Suspend:
-                    break;
+                break;
             }
         }
-        public bool SetAutorunValue(bool autorun)
-        {
+        public bool SetAutorunValue(bool autorun) {
             //string ExePath = System.Windows.Forms.Application.ExecutablePath;
             RegistryKey reg;
             reg = Registry.CurrentUser.CreateSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Run\\");
-            try
-            {
+            try {
                 if (autorun)
                     reg.SetValue(name, ExePath);
-                else
-                {
+                else {
                     RegistryKey WN = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
-                    if (WN.GetValue("MonikaStartUp") != null)
-                    {
+                    if (WN.GetValue("MonikaStartUp") != null) {
                         reg.DeleteValue(name);
                     }
                 }
 
                 reg.Close();
-            }
-            catch
-            {
+            } catch {
                 return false;
             }
             return true;
         }
-        public string formatURL(string url)
-        {
+        public string formatURL(string url) {
             string newUrl = url.ToLower().Trim().TrimEnd('/');
-            if (newUrl.StartsWith("http://"))
-            {
+            if (newUrl.StartsWith("http://")) {
                 newUrl = newUrl.Substring(7);
             }
 
-            if (newUrl.StartsWith("https://"))
-            {
+            if (newUrl.StartsWith("https://")) {
                 newUrl = newUrl.Substring(8);
             }
 
-            if (newUrl.StartsWith("www."))
-            {
+            if (newUrl.StartsWith("www.")) {
                 newUrl = newUrl.Substring(4);
             }
             return newUrl;
         }
-        private static double Lerp(double firstFloat, double secondFloat, double by)
-        {
+        private static double Lerp(double firstFloat, double secondFloat, double by) {
             return firstFloat * by + secondFloat * (1 - by);
         }
 
-        public void consoleWrite(string text, bool time)
-        {
-            this.Dispatcher.Invoke(() =>
-            {
-                if (time)
-                {
+        public void consoleWrite(string text, bool time) {
+            this.Dispatcher.Invoke(() => {
+                if (time) {
                     Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss") + "--> " + text);
-                }
-                else
-                {
+                } else {
                     Debug.WriteLine(text);
                 }
             });
         }
-        private void about_Click(object sender, RoutedEventArgs e)
-        {
+        private void about_Click(object sender, RoutedEventArgs e) {
             AboutWindow about = new AboutWindow();
             about.Show();
 
@@ -2176,23 +1752,18 @@ namespace MonikaOnDesktop
 
         public static List<CultureInfo> m_Languages = new List<CultureInfo>();
 
-        public static List<CultureInfo> Languages
-        {
-            get
-            {
+        public static List<CultureInfo> Languages {
+            get {
                 return m_Languages;
             }
         }
         //Евент для оповещения всех окон приложения
         public static event EventHandler LanguageChanged;
-        public static CultureInfo Lang
-        {
-            get
-            {
+        public static CultureInfo Lang {
+            get {
                 return System.Threading.Thread.CurrentThread.CurrentUICulture;
             }
-            set
-            {
+            set {
                 if (value == null) throw new ArgumentNullException("value");
                 if (value == System.Threading.Thread.CurrentThread.CurrentUICulture) return;
 
@@ -2202,28 +1773,24 @@ namespace MonikaOnDesktop
                 //2. Создаём ResourceDictionary для новой культуры
                 ResourceDictionary dict = new ResourceDictionary();
                 Debug.WriteLine("Установлен язык: " + value.Name);
-                switch (value.Name)
-                {
+                switch (value.Name) {
                     case "ru-RU":
-                        dict.Source = new Uri(String.Format("/Resources/lang.{0}.xaml", value.Name), UriKind.Relative);
-                        break;
+                    dict.Source = new Uri(String.Format("/Resources/lang.{0}.xaml", value.Name), UriKind.Relative);
+                    break;
                     default:
-                        dict.Source = new Uri("/Resources/lang.xaml", UriKind.Relative);
-                        break;
+                    dict.Source = new Uri("/Resources/lang.xaml", UriKind.Relative);
+                    break;
                 }
 
                 //3. Находим старую ResourceDictionary и удаляем его и добавляем новую ResourceDictionary
                 ResourceDictionary oldDict = (from d in System.Windows.Application.Current.Resources.MergedDictionaries
                                               where d.Source != null && d.Source.OriginalString.StartsWith("/Resources/lang.")
                                               select d).FirstOrDefault();
-                if (oldDict != null)
-                {
+                if (oldDict != null) {
                     int ind = System.Windows.Application.Current.Resources.MergedDictionaries.IndexOf(oldDict);
                     System.Windows.Application.Current.Resources.MergedDictionaries.Remove(oldDict);
                     System.Windows.Application.Current.Resources.MergedDictionaries.Insert(ind, dict);
-                }
-                else
-                {
+                } else {
                     System.Windows.Application.Current.Resources.MergedDictionaries.Add(dict);
                 }
 
@@ -2231,55 +1798,53 @@ namespace MonikaOnDesktop
                 LanguageChanged(System.Windows.Application.Current, new EventArgs());
             }
         }
-        private void App_LanguageChanged(Object sender, EventArgs e)
-        {
+        private void App_LanguageChanged(Object sender, EventArgs e) {
             //MonikaSettings.Default.Language = Lang;
             //MonikaSettings.Default.Save();
         }
         public void setLanguage(string lang) // Функция установки язика
         {
             Lang = new CultureInfo(Monika.lang);
-            switch (lang)
-            {
+            switch (lang) {
                 case "ru":
-                    quitMenu.Header = "Выход";
-                    settingsMenu.Header = "Настройки";
+                quitMenu.Header = "Выход";
+                settingsMenu.Header = "Настройки";
 
-                    greetingsDialogPath = baseDir + "/Dialogs/ru/greetings.txt"; // Greetings
-                    idleDialogPath = baseDir + "/Dialogs/ru/idle.txt";           // Idle
-                    progsDialogPath = baseDir + "/Dialogs/ru/progs.txt";         // Programs
-                    sitesDialogPath = baseDir + "/Dialogs/ru/sites.txt";         // Sites
-                    googleDialogPath = baseDir + "/Dialogs/ru/google.txt";       // Google search
-                    youtubeDialogPath = baseDir + "/Dialogs/ru/youtube.txt";     // Youtube search
-                    goodbyeDialogPath = baseDir + "/Dialogs/ru/goodbye.txt";     // Goodbye
-                    giftsDialogPath = baseDir + "/Dialogs/ru/gifts/gifts.txt";// Подарки
-                    break;
+                greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/greetings.txt"; // Greetings
+                idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/idle.txt";           // Idle
+                progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/progs.txt";         // Programs
+                sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/sites.txt";         // Sites
+                googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/google.txt";       // Google search
+                youtubeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/youtube.txt";     // Youtube search
+                goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/goodbye.txt";     // Goodbye
+                giftsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/gifts/gifts.txt";// Подарки
+                break;
                 case "en":
-                    quitMenu.Header = "Quit";
-                    settingsMenu.Header = "Settings";
+                quitMenu.Header = "Quit";
+                settingsMenu.Header = "Settings";
 
-                    greetingsDialogPath = baseDir + "/Dialogs/en/greetings.txt"; // Greetings
-                    idleDialogPath = baseDir + "/Dialogs/en/idle.txt";           // Idle
-                    progsDialogPath = baseDir + "/Dialogs/en/progs.txt";         // Programs
-                    sitesDialogPath = baseDir + "/Dialogs/en/sites.txt";         // Sites
-                    googleDialogPath = baseDir + "/Dialogs/en/google.txt";       // Google search
-                    youtubeDialogPath = baseDir + "/Dialogs/en/youtube.txt";     // Youtube search
-                    goodbyeDialogPath = baseDir + "/Dialogs/en/goodbye.txt";     // Goodbye
-                    giftsDialogPath = baseDir + "/Dialogs/en/gifts/gifts.txt";// Подарки
-                    break;
+                greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/greetings.txt"; // Greetings
+                idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/idle.txt";           // Idle
+                progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/progs.txt";         // Programs
+                sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/sites.txt";         // Sites
+                googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/google.txt";       // Google search
+                youtubeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/youtube.txt";     // Youtube search
+                goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/goodbye.txt";     // Goodbye
+                giftsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/gifts/gifts.txt";// Подарки
+                break;
                 default:
-                    quitMenu.Header = "Quit";
-                    settingsMenu.Header = "Settings";
+                quitMenu.Header = "Quit";
+                settingsMenu.Header = "Settings";
 
-                    greetingsDialogPath = baseDir + "/Dialogs/en/greetings.txt"; // Greetings
-                    idleDialogPath = baseDir + "/Dialogs/en/idle.txt";           // Idle
-                    progsDialogPath = baseDir + "/Dialogs/en/progs.txt";         // Programs
-                    sitesDialogPath = baseDir + "/Dialogs/en/sites.txt";         // Sites
-                    googleDialogPath = baseDir + "/Dialogs/en/google.txt";       // Google search
-                    youtubeDialogPath = baseDir + "/Dialogs/en/youtube.txt";     // Youtube search
-                    goodbyeDialogPath = baseDir + "/Dialogs/en/goodbye.txt";     // Goodbye
-                    giftsDialogPath = baseDir + "/Dialogs/en/gifts/gifts.txt";// Подарки
-                    break;
+                greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/greetings.txt"; // Greetings
+                idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/idle.txt";           // Idle
+                progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/progs.txt";         // Programs
+                sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/sites.txt";         // Sites
+                googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/google.txt";       // Google search
+                youtubeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/youtube.txt";     // Youtube search
+                goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/goodbye.txt";     // Goodbye
+                giftsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/en/gifts/gifts.txt";// Подарки
+                break;
 
             }
         }

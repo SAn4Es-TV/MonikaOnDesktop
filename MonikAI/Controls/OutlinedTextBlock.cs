@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Markup;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 
 namespace MonikaOnDesktop
 {
@@ -179,8 +180,19 @@ namespace MonikaOnDesktop
             set { SetValue(TextWrappingProperty, value); }
         }
 
+        // Добавляем поле для тени
+        private DropShadowEffect _shadowEffect;
+
         public OutlinedTextBlock()
         {
+            _shadowEffect = new DropShadowEffect
+            {
+                Color = Colors.Black, // Цвет тени
+                ShadowDepth = 2,      // Смещение тени
+                BlurRadius = 5,       // Размытие
+                Opacity = 0.7         // Прозрачность
+            };
+
             UpdatePen();
             TextDecorations = new TextDecorationCollection();
         }
@@ -188,6 +200,30 @@ namespace MonikaOnDesktop
         protected override void OnRender(DrawingContext drawingContext)
         {
             EnsureGeometry();
+
+
+            // Рисуем размытую тень
+            if (_TextGeometry != null)
+            {
+                // Настройки размытой тени
+                int shadowSteps = 5; // Количество слоёв для размытия
+                double shadowSpread = 6; // Максимальное размытие (радиус)
+                var shadowColor = Colors.Black; // Цвет тени
+                double shadowOpacity = 0.25; // Начальная прозрачность тени
+
+                for (int i = 0; i < shadowSteps; i++)
+                {
+                    double progress = (double)i / shadowSteps;
+                    double offset = progress * shadowSpread;
+
+                    var shadowBrush = new SolidColorBrush(shadowColor) { Opacity = shadowOpacity * (1 - progress) };
+                    var shadowGeometry = _TextGeometry.Clone();
+                    shadowGeometry.Transform = new TranslateTransform(offset, offset);
+
+                    drawingContext.DrawGeometry(shadowBrush, null, shadowGeometry);
+                }
+            }
+
 
             drawingContext.DrawGeometry(null, _Pen, _TextGeometry);
             drawingContext.DrawGeometry(Fill, null, _TextGeometry);

@@ -3,37 +3,21 @@
 
 namespace SolicenTEAM
 {
-    public class Updater : IDisposable
+    public static class Updater
     {
-        public string gitUser;
-        public string gitRepo;
-        public string browserURL = "";
-        public string pathToArchive = "";
-        public bool readyToUpdate = false;
-        public string UpdateVersion = "";
-        public string CurrentVersion = "";
-        public string UpdateDescription = "";
-        public string responseString = "";
-        public string ExeFileName = "";
-        public string IgnoreFiles = "";
+        public static string gitUser;
+        public static string gitRepo;
+        public static string browserURL = "";
+        public static string pathToArchive = "";
+        public static bool readyToUpdate = false;
+        public static string UpdateVersion = "";
+        public static string CurrentVersion = "";
+        public static string UpdateDescription = "";
+        public static string responseString = "";
+        public static string ExeFileName = "";
+        public static string IgnoreFiles = "";
 
-        public class UpdateConfig
-        {
-            public string gitUser;
-            public string gitRepo;
-            public string IgnoreFiles;
-            public string ExeFileName;
-        }
-
-        public Updater(UpdateConfig config)
-        {
-            this.gitUser = config.gitUser;
-            this.gitRepo = config.gitRepo;
-            this.IgnoreFiles = config.IgnoreFiles;
-            this.ExeFileName = config.ExeFileName;
-        }
-
-        public async Task DownloadUpdate()
+        public async static void DownloadUpdate(string gitUsername, string gitRepo)
         {
             Regex regexRegular = new Regex("\".*?.zip\"", RegexOptions.Multiline);
             var matches = regexRegular.Matches(responseString);
@@ -68,9 +52,9 @@ namespace SolicenTEAM
             //Console.WriteLine(browserURL);
             Debug.WriteLine("browserURL - " + browserURL);
             WebClient webClient = new WebClient();
-            if (File.Exists(pathArchive)) {
-                File.Delete(pathArchive);
-            } 
+            if (File.Exists(pathArchive))
+            File.Delete(pathArchive);
+
             // Продолжает попытки скачать файл если выбивает ошибку пути.
             for (int i = 0; i < 10; i++)
             {
@@ -96,7 +80,7 @@ namespace SolicenTEAM
             readyToUpdate = true;
         }
 
-        public async Task ExtractArchive()
+        public async static void ExtractArchive()
         {
             while (!readyToUpdate)
             {
@@ -127,7 +111,7 @@ namespace SolicenTEAM
 
         }
 
-        public async Task GetUpdateVersion()
+        public async static Task GetUpdateVersion()
         {
             if (!System.Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable()) { return; }
             if (responseString == "") { ResponseStringAsync(); }
@@ -148,15 +132,13 @@ namespace SolicenTEAM
 
             //Console.WriteLine(tempItem.ToString().Replace("\"", ""));
             await Task.Delay(100);
-            await GetCurrentVersion(tempItem.ToString().Replace("\"", ""));
+            GetCurrentVersion(tempItem.ToString().Replace("\"", ""));
             await Task.Delay(100);
             if (UpdateDescription == "") { GetUpdateDescription(); }
         }
 
-        HttpClient client = new HttpClient(); //
-        private bool disposedValue;
-
-        async Task ResponseStringAsync()
+        static HttpClient client = new HttpClient(); //
+        static async void ResponseStringAsync()
         {
             client.DefaultRequestHeaders.Clear();
             client.DefaultRequestHeaders.Add("User-Agent", @"Mozilla/5.0 (Windows NT 10; Win64; x64; rv:60.0) Gecko/20100101 Firefox/60.0");
@@ -173,7 +155,7 @@ namespace SolicenTEAM
                     var resultURL = "https://api.github.com/repos/" + gitUser + "/" + gitRepo + "/releases/latest";
                     responseString = await client.GetStringAsync(resultURL);
                     //Console.WriteLine(responseString);
-                    if (responseString != "") { await GetUpdateVersion(); }
+                    if (responseString != "") { GetUpdateVersion(); }
                     await Task.Delay(30000); // Было 30000
                 }
                 catch (Exception e)
@@ -188,7 +170,7 @@ namespace SolicenTEAM
 
         }
 
-        public async Task GetUpdateDescription()
+        public async static void GetUpdateDescription()
         {
 
 
@@ -242,7 +224,7 @@ namespace SolicenTEAM
             }
         }
 
-        async Task GetCurrentVersion(string updateVersion)
+        static async void GetCurrentVersion(string updateVersion)
         {
             var path = Environment.CurrentDirectory + "\\";
             if (File.Exists(path + "version.ini"))
@@ -267,7 +249,7 @@ namespace SolicenTEAM
             }
         }
 
-        public void CreateConfig()
+        public static void CreateConfig()
         {
             if (ExeFileName != "")
             {
@@ -277,18 +259,8 @@ namespace SolicenTEAM
             }
         }
 
-        public async Task CheckUpdate()
+        public static async Task CheckUpdate(string GitUsername, string GitRepo)
         {
-            await CheckUpdate(null, null);
-        }
-        public async Task CheckUpdate(string GitUsername, string GitRepo)
-        {
-            if (GitUsername == null || GitRepo == null)
-            {
-                GitUsername = gitUser;
-                GitRepo = this.gitRepo;
-            }
-
             if (File.Exists(Environment.CurrentDirectory + "\\" + "version.ini"))
                 CurrentVersion = File.ReadAllText(Environment.CurrentDirectory + "\\" + "version.ini");
 
@@ -302,44 +274,13 @@ namespace SolicenTEAM
                 (Environment.CurrentDirectory + "\\" + "version.ini");
 
             Console.WriteLine("Текущая версия: " + CurrentVersion);
-            Console.WriteLine("Версия обновления: " + this.UpdateVersion);
-            if (this.UpdateVersion != CurrentVersion && this.UpdateVersion != "")
+            Console.WriteLine("Версия обновления: " + SolicenTEAM.Updater.UpdateVersion);
+            if (SolicenTEAM.Updater.UpdateVersion != CurrentVersion && SolicenTEAM.Updater.UpdateVersion != "")
             {
 
             }
             
 
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    // TODO: освободить управляемое состояние (управляемые объекты)
-
-                }
-
-                // TODO: освободить неуправляемые ресурсы (неуправляемые объекты) и переопределить метод завершения
-                // TODO: установить значение NULL для больших полей
-                disposedValue = true;
-                responseString = null;
-                gitUser = null;
-                gitRepo = null;
-                IgnoreFiles = null;
-                UpdateDescription = null;
-                GC.Collect();
-                GC.SuppressFinalize(this);
-                GC.ReRegisterForFinalize(this);
-            }
-        }
-
-        public void Dispose()
-        {
-            // Не изменяйте этот код. Разместите код очистки в методе "Dispose(bool disposing)".
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 }

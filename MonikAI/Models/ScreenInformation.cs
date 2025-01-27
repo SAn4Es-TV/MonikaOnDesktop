@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -10,17 +9,12 @@ namespace MonikaOnDesktop.Models
     public class ScreenInformation
     {
         [StructLayout(LayoutKind.Sequential)]
-        public struct ScreenRect : IEquatable<ScreenRect>
+        public struct ScreenRect
         {
             public int left;
             public int top;
             public int right;
             public int bottom;
-
-            public bool Equals(ScreenRect other)
-            {
-                throw new NotImplementedException();
-            }
         }
 
         [DllImport("user32")]
@@ -35,7 +29,7 @@ namespace MonikaOnDesktop.Models
                 metrics = prect;
             }
 
-            private ScreenRect metrics;
+            public ScreenRect metrics;
         }
 
         static LinkedList<WpfScreen> allScreens = new LinkedList<WpfScreen>();
@@ -50,7 +44,7 @@ namespace MonikaOnDesktop.Models
         {
             allScreens.Clear();
             int monCount = 0;
-            MonitorEnumProc callback = (IntPtr _, IntPtr hdc, ref ScreenRect prect, int d) =>
+            MonitorEnumProc callback = (IntPtr hDesktop, IntPtr hdc, ref ScreenRect prect, int d) =>
             {
                 Debug.WriteLine("Left {0}", prect.left);
                 Debug.WriteLine("Right {0}", prect.right);

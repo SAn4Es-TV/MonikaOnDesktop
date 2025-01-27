@@ -22,7 +22,7 @@ namespace MonikaOnDesktop
     /// </summary>
     public partial class Settings : Window
     {
-        private TextBlock t;
+        TextBlock t;
         private readonly MainWindow mainWindow;
         public Settings(MainWindow mainWindow)
         {
@@ -88,6 +88,8 @@ namespace MonikaOnDesktop
             checkBox1.IsChecked = MonikaSettings.Default.AutoStart;
             checkBox.IsChecked = MonikaSettings.Default.screenNum;
             checkBox_Copy.IsChecked = MonikaSettings.Default.isMouse;
+            checkBox_ai.IsChecked = MonikaSettings.Default.ai;
+            aiId.Text = MonikaSettings.Default.aitoken;
             if (System.Windows.Forms.Screen.AllScreens.Length == 1)
             {
                 checkBox.Visibility = Visibility.Hidden;
@@ -106,6 +108,8 @@ namespace MonikaOnDesktop
             MonikaSettings.Default.screenNum = (bool)checkBox.IsChecked;
             MonikaSettings.Default.AutoStart = (bool)checkBox1.IsChecked;
             MonikaSettings.Default.isMouse = (bool)checkBox_Copy.IsChecked;
+            MonikaSettings.Default.ai = (bool)checkBox_ai.IsChecked;
+            MonikaSettings.Default.aitoken = aiId.Text;
             switch (randomIdle.Value)
             {
                 case 0:
@@ -127,8 +131,6 @@ namespace MonikaOnDesktop
                 case 4:
                     MonikaSettings.Default.idleRandomFrom = 30;
                     MonikaSettings.Default.idleRandomTo = 120;
-                    break;
-                default:
                     break;
             }
             MonikaSettings.Default.Save();/*
@@ -170,8 +172,6 @@ namespace MonikaOnDesktop
                         break;
                     case 4:
                         t.Text = (string)this.TryFindResource("s_labelDP5"); //"Очень часто(30 сек - 2 мин)";
-                        break;
-                    default:
                         break;
                 }
             }

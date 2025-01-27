@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Security.Policy;
 using System.Text;
 using System.Windows.Media.Imaging;
 
 namespace MonikaOnDesktop
 {
-    internal static class BitmapMagic
+    internal class BitmapMagic
     {
         public static BitmapImage BitmapToImageSource(Bitmap bm)
         {
@@ -78,7 +79,9 @@ namespace MonikaOnDesktop
             }
             else
             {
-                bm = new Bitmap(uri.LocalPath);
+                if (File.Exists(uri.LocalPath))
+                    bm = new Bitmap(uri.LocalPath);
+                else return null;
             }
             bm.MakeTransparent();
             System.Drawing.Image image = bm;

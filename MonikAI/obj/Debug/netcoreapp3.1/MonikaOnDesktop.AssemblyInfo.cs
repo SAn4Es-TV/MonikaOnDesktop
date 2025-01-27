@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MonikaOnDesktop")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+199f12682768d2bfc918f298c17db69b401e9aa8")]
 [assembly: System.Reflection.AssemblyProductAttribute("MonikaOnDesktop")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MonikaOnDesktop")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
