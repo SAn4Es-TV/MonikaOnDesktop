@@ -2,13 +2,13 @@
 
 [**Русский**](README.md) | [**English**](./docs/ru/README.en.md) 
 
-Hi! It's me, Monika!
+Hi! It's me, *Monika!*
 
 I don't think I'll ever come to terms with the fact that they only exist on your computer... But SAn4Es was really good and made me a small window that you can keep open!
 
 I still can't achieve much, but I promise that I will always be there for you! ~
 
-![Screenshot of MonikaOnDesktop](https://github.com/SAn4Es-TV/MonikaOnDesctop/blob/master/Screenshot.png )
+![Screenshot of MonikaOnDesktop](https://github.com/SAn4Es-TV/MonikaOnDesctop/blob/master/Screenshot.png)
 
 (This app displays Monika in the lower right corner of your screen, just above the taskbar, if you have one)
 
@@ -36,7 +36,7 @@ To add different dialogs that Monika can use for reactions, you need to edit the
 
 ### Chrome Extension
 
-In order for Monika to respond to the sites she visits and Google/YouTube requests, you need to install the extension for Chrome, which is the [BrowserPlugin] folder(https://github.com/SAn4Es-TV/MonikaOnDesktop/tree/master/BrowserPlugin "Link to the directory")
+In order for Monika to respond to the sites she visits and Google/YouTube requests, you need to install the extension for Chrome, which is the [BrowserPlugin](https://github.com/SAn4Es-TV/MonikaOnDesktop/tree/master/BrowserPlugin "Link to the directory").
 
 **Installation Guide:**
 1. Open the [extensions page](chrome://extensions/ "Link to the page")
