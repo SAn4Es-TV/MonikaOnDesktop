@@ -65,7 +65,7 @@ namespace MonikaOnDesktop {
         #region Пути
         protected readonly static string baseDir = AppDomain.CurrentDomain.BaseDirectory;   // Папка запуска
         protected readonly static string baseGiftsPath = $"{baseDir}\\gifts\\";             // Путь к подаркам
-        protected readonly static string subFolderPath = $"{baseDir}\\Dialogs\\Sub\\";      // Я хз что это (by Solicen)
+        protected readonly static string subFolderPath = $"{baseDir}\\Dialogs\\Sub\\";      // Путь к диалогам
 
         protected readonly string assetsPath = "pack://application:,,,/assets";             // Папка ассетов
         protected readonly string ExePath = baseDir + "MonikaOnDesktop.exe";                // Путь к ЕХЕ
@@ -262,7 +262,7 @@ namespace MonikaOnDesktop {
             SetProcessWorkingSetSize(Process.GetCurrentProcess().Handle, -1, -1);
             GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);
             GC.WaitForPendingFinalizers();
-            GC.Collect(0);
+            GC.Collect();
         }
 
 
@@ -801,13 +801,17 @@ namespace MonikaOnDesktop {
             });
             isSpeaking = false;
             Debug.WriteLine("speak: " + isSpeaking);
-            
+
+            CollectAllGarbage();
+            script = null;
+
         }
         async Task SayV2(string line, int delay = 20) {
             /*while (isSpeaking) {
                 await Task.Delay(100);
             }
             isSpeaking = true;*/
+
             this.Dispatcher.Invoke(() => {
                 textWindow.Visibility = Visibility.Visible;
             });
@@ -815,10 +819,12 @@ namespace MonikaOnDesktop {
             if (Char.IsDigit(line[0])) {
                 newText = line.Substring(6).Replace("'player'", playerName).Replace("{PlayerName}", playerName); //замена
                 setFace(line.Substring(0, 4));
+                CollectAllGarbage();
             } else {
                 newText = line.Replace("'player'", playerName).Replace("{PlayerName}", playerName).Replace("<Anonymous>: ", "");
                 newText = char.ToUpper(newText[0]) + newText.Substring(1);
                 setFace(normalPose);
+                CollectAllGarbage();
             }
 
             for (int i = 0; i < newText.Length; i++) {
@@ -836,8 +842,8 @@ namespace MonikaOnDesktop {
                 await Task.Delay(700);
                 textBlock.Text = "";
             });
-
-            CollectAllGarbage(); // Пытается собирать излишний мусор
+         
+            CollectAllGarbage(); // А тут уже пытаемся собирать излишний мусор
         }
         int ch = 0; 
         void Menu(string s, int num, List<Script.Choice> choices) {
