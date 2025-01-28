@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net9.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>ico.ico</ApplicationIcon>
@@ -339,6 +339,13 @@
     <PackageReference Include="System.Management" Version="5.0.0" />
     <PackageReference Include="uHttpSharp" Version="0.1.6.22" />
     <ProjectReference Include="..\Libraries\CharacterAi\CharacterAI.csproj" />
+  </ItemGroup>
+  
+  
+  <ItemGroup>
+    <Reference Include="VGPrompter">
+      <HintPath>..\..\..\до переустановки винды\2\Downloads\VGPrompter.dll</HintPath>
+    </Reference>
   </ItemGroup>
   
   
@@ -1236,6 +1243,9 @@
     <None Update="MonikaSettings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>MonikaSettings.Designer.cs</LastGenOutput>
+    </None>
+    <None Update="Updater.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

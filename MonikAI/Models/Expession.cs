@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml.Linq;
 
 namespace MonikaOnDesktop
 {
-    public class Expression
+    public class Expression : IDisposable
     {
         public String Text { get; set; }
         public String Face { get; set; }
@@ -27,5 +28,10 @@ namespace MonikaOnDesktop
             this.Face = "a";
         }
 
+        void IDisposable.Dispose()
+        {
+            Text = null; Face = null;
+            GC.Collect(0); GC.SuppressFinalize(this); GC.ReRegisterForFinalize(this);
+        }
     }
 }
