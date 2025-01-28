@@ -10,6 +10,7 @@ using System.Management;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Reflection;
+using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,6 +26,7 @@ using CharacterAI;
 using CharacterAI.Models;
 
 using Microsoft.Win32;
+using SolicenTEAM;
 using VGPrompter;
 
 using static System.Net.Mime.MediaTypeNames;
@@ -34,7 +36,23 @@ namespace MonikaOnDesktop {
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
-
+        #region Обновлятор Солицена
+        static SolicenTEAM.Updater.UpdateConfig uConfig 
+            = new SolicenTEAM.Updater.UpdateConfig
+        { 
+            gitUser = "SAn4Es-TV", 
+            gitRepo = "MonikaOnDesktop", 
+            IgnoreFiles = "characters/monika.chr", 
+            ExeFileName = "MonikaOnDesktop" 
+        };
+        SolicenTEAM.Updater Updater = new SolicenTEAM.Updater(uConfig);
+        #endregion
+        #region Сбор мусора
+        [DllImport("kernel32.dll")]
+        static extern bool SetProcessWorkingSetSize(IntPtr hProcess, int dwMinimumWorkingSetSize, int dwMaximumWorkingSetSize);
+        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        public static extern bool DeleteObject(object hObject);
+        #endregion
         #region Всякое
 
         public DoubleAnimation _start;  // Анимация запуска
@@ -45,19 +63,22 @@ namespace MonikaOnDesktop {
         public int delay1 = 0;          // Задержка
         #endregion
         #region Пути
-        public string ExePath = AppDomain.CurrentDomain.BaseDirectory + "MonikaOnDesktop.exe"; // Путь к ЕХЕ
+        protected readonly static string baseDir = AppDomain.CurrentDomain.BaseDirectory;   // Папка запуска
+        protected readonly static string baseGiftsPath = $"{baseDir}\\gifts\\";             // Путь к подаркам
+        protected readonly static string subFolderPath = $"{baseDir}\\Dialogs\\Sub\\";      // Я хз что это (by Solicen)
 
-        string greetingsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/greetings.txt"; // Приветствия
-        string idleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/idle.txt";           // Рандомные диалоги
-        string progsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/progs.txt";         // Реакции на программы
-        string sitesDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/sites.txt";         // Реакции на сайты
-        string googleDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/google.txt";       // Реакции на запросы Гугуля
-        string youtubeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/youtube.txt";     // Реакции на запросы Утуба
-        string goodbyeDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/goodbye.txt";     // Прощания
-        string giftsDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/ru/gifts/gifts.txt";// Подарки
-        string updateDialogPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/upd.txt";          // Подарки
+        protected readonly string assetsPath = "pack://application:,,,/assets";             // Папка ассетов
+        protected readonly string ExePath = baseDir + "MonikaOnDesktop.exe";                // Путь к ЕХЕ
+        private string greetingsDialogPath = baseDir + "/Dialogs/greetings.txt";            // Приветствия
+        private string idleDialogPath = baseDir + "/Dialogs/idle.txt";                      // Случайные диалоги
+        private string progsDialogPath = baseDir + "/Dialogs/progs.txt";                    // Реакции на программы
+        private string sitesDialogPath = baseDir + "/Dialogs/sites.txt";                    // Реакции на сайты
+        private string googleDialogPath = baseDir + "/Dialogs/google.txt";                  // Реакции на запросы в Гугуля
+        private string youtubeDialogPath = baseDir + "/Dialogs/youtube.txt";                // Реакции на запросы в Ютабе
+        private string goodbyeDialogPath = baseDir + "/Dialogs/goodbye.txt";                // Прощания
+        private string giftsDialogPath = baseDir + "/Dialogs/ru/gifts/gifts.txt";           // Подарки
+        private string updateDialogPath = baseDir + "/Dialogs/upd.txt";                     // Обновления
 
-        static string subFolderPath = AppDomain.CurrentDomain.BaseDirectory + "/Dialogs/Sub/";
 
         DirectoryInfo subDialogDirectory = new DirectoryInfo(subFolderPath);
         DirectoryInfo greetingsDialogDirectory = new DirectoryInfo(subFolderPath + "Greetings/");
@@ -103,7 +124,7 @@ namespace MonikaOnDesktop {
         const string name = "MonikaStartUp";
         public string lastQuery;
 
-        CharacterModel Monika = new CharacterModel(AppDomain.CurrentDomain.BaseDirectory + "/characters/monika.chr", AppDomain.CurrentDomain.BaseDirectory + "/characters/"); // Персонаж Моники
+        CharacterModel Monika = new CharacterModel($"{baseDir}\\characters\\monika.chr", $"{baseDir}\\characters\\"); // Персонаж Моники
         private Settings settingsWindow;            // Окно настроек
 
         private NotifyIcon NI = new NotifyIcon();
@@ -115,32 +136,64 @@ namespace MonikaOnDesktop {
         public bool mouse = true;
         #endregion
 
-
         string AIpath = @"script.txt";
         string characterId = "aywKj4vjL0-X2QeZj2VFcCqPlZ4HmzH0FNlebJKcjTk";
         CharacterAIClient client;
         Character character;
         string historyId;
+
+        /// <summary>
+        /// Метод начальной инициализации текстового поля.
+        /// </summary>
+        /// Не идеален, просто вынесен в отдельный метод.
+        private void InitializeTextBox()
+        {
+            LangBox.Visibility = Visibility.Hidden;
+            NameBox.Visibility = Visibility.Hidden;
+            textWindow.Visibility = Visibility.Hidden;  // Прячем розовую коробку текста
+            textBlock.Text = "";                        // Убираем весь текст
+        }
+
+        private DirectoryInfo GetCharacterDirectory()
+        {
+            DirectoryInfo dirInfo = new DirectoryInfo(baseDir + "/characters");
+            if (!dirInfo.Exists)
+            {
+                dirInfo.Create();
+            }
+            return dirInfo;
+        }
+
+        private void InitializeLanguage()
+        {
+            m_Languages.Clear();                        // Чистим список языков
+            m_Languages.Add(new CultureInfo("en-US"));  // Нейтральная культура для этого проекта
+            m_Languages.Add(new CultureInfo("ru-RU"));  // Сторонняя культура
+            LanguageChanged += App_LanguageChanged;     // Присваиваем функцию смены языка к ивенту смены языка
+            Lang = new CultureInfo(Monika.lang);        // Ставим язык из настроек
+            Language = Lang.Parent.ToString();          // Ставим имя языка
+            //Debug.WriteLine(Language);                // Дебаг языка
+            setLanguage(Language);                      // Устанавливаем язык
+        }
+
         public MainWindow()     // Код главного окна
         {
-
-
+            CollectAllGarbage();                        // Принудительно собираем мусор перед запуском
             InitializeComponent();                      // Инициализация ЮИ (Юзер Интерфейс)(Вроде для этого)
+            SetProcessWorkingSetSize
+                (Process.GetCurrentProcess()            // Ограничиваем приложению доступ к оперативной памяти (by Solicen)
+                .Handle, -1, -1);                       
 
 
             oldIsNight = IsNight;
             mainFilter = nightFilter;
             AllowsTransparency = true;
-            DirectoryInfo dirInfo = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory + "/characters");
-            if (!dirInfo.Exists) {
-                dirInfo.Create();
-            }
+
+            var dirInfo = GetCharacterDirectory();      // Получение папки персонажей
+
+
             Monika.loadData();
             firsLaunch = !Monika.fileExist();           // Если файла нету, то это первый запуск
-
-            SolicenTEAM.Updater.ExeFileName = "MonikaOnDesktop"; // Имя ЕХЕ для перезапука
-            SolicenTEAM.Updater.IgnoreFiles = "characters/monika.chr";     //  игнорируемый файл
-
             this.settingsWindow = new Settings(this);   // Объявляем окно настроек (так нужно)
             MonikaSettings.Default.Reload();            // Читаем настройки
 
@@ -150,31 +203,19 @@ namespace MonikaOnDesktop {
                 playerName = Monika.playerName;
             }
 
-            m_Languages.Clear();                        // Чистим список языков
-            m_Languages.Add(new CultureInfo("en-US"));  // Нейтральная культура для этого проекта
-            m_Languages.Add(new CultureInfo("ru-RU"));  // Стороняя культура
-            LanguageChanged += App_LanguageChanged;     // Присваиваем функцию смены языка к ивенту смены языка
-            Lang = new CultureInfo(Monika.lang);     // Ставим язык из настроек
-            Language = Lang.Parent.ToString();          // Ставим имя языка
-            //Debug.WriteLine(Language);                  // Дебуг язика
-            setLanguage(Language);                      // Устанавливаем язык
-
-            //playerName = "Denis Solicen";             // Режим Солицена
-            this.setFace(normalPose);                       // Ставим спокойный вид
-
+            InitializeLanguage();                        // Инициализация текущего языка         
+            playerName = 
+                (Environment.GetCommandLineArgs()        // Режим Солицена (by Solicen)
+                .Any(arg => arg == "--solicen"))         // Переписанный код, для активации режима по аргументу вместо закодированного метода
+                ? "Denis Solicen" : playerName;  
+            
+            this.setFace(normalPose);                    // Ставим спокойный вид
             setupFolders();
+            InitializeTextBox();                         // Инициализация текстового поля (вынесено by Solicen)
+            SetAutorunValue(Monika.autoStart);           // Ставим параметр автозапуска
 
-            LangBox.Visibility = Visibility.Hidden;
-            NameBox.Visibility = Visibility.Hidden;
-            textWindow.Visibility = Visibility.Hidden;  // Прячем розовую коробку текста
-            textBlock.Text = "";                        // Убираем весь текст
-
-            SetAutorunValue(Monika.autoStart);  // Ставим параметр автозапуска
-
-            if (IsBDay)
-                Debug.WriteLine("Сегодня день рождения?: Да");
-            else
-                Debug.WriteLine("Сегодня день рождения?: Нет");
+            if (IsBDay) Debug.WriteLine("Сегодня день рождения?: Да");
+            else        Debug.WriteLine("Сегодня день рождения?: Нет");
 
             ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT UserName FROM Win32_ComputerSystem");  // Я хз что это
             ManagementObjectCollection collection = searcher.Get();  // Также
@@ -208,10 +249,31 @@ namespace MonikaOnDesktop {
             acsWatcher.Deleted += AcsWatcher_Deleted;
             acsWatcher.Created += AcsWatcher_Created;
             acsWatcher.EnableRaisingEvents = true;*/
+
+            CollectAllGarbage();
         }
-        public async void Window_Loaded(object sender, RoutedEventArgs e)     // Когда программа проснётся
+
+        // TODO: Расширить этот метод для сбора большего количества мусора
+        private void CollectAllGarbage()
         {
-            if (Monika.AI && !String.IsNullOrEmpty(Monika.aiToken) && isConectedToInternet()) {
+            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+            GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
+
+            SetProcessWorkingSetSize(Process.GetCurrentProcess().Handle, -1, -1);
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);
+            GC.WaitForPendingFinalizers();
+            GC.Collect(0);
+        }
+
+
+        /// <summary>
+        /// Инициализация и настройка CharacterAI модуля для Моники.
+        /// </summary>
+        /// <returns></returns>
+        public async Task SetupCharacterAIModule()
+        {
+            if (Monika.AI && !String.IsNullOrEmpty(Monika.aiToken) && isConectedToInternet())
+            {
                 AIchat.Visibility = Visibility.Visible;
                 client = new CharacterAIClient(Monika.aiToken);
 
@@ -227,16 +289,23 @@ namespace MonikaOnDesktop {
 
                 historyId = await client.CreateNewChatAsync(characterId);
 
-                if (historyId is null) {
+                if (historyId is null)
+                {
                     return;
                 }
-            } else {
+            }
+            else
+            {
                 AIchat.Visibility = Visibility.Hidden;
             }
-            if (IsNight)
-                mainFilter = nightFilter;
-            else
-                mainFilter = dayFilter;
+        }
+
+        public async void Window_Loaded(object sender, RoutedEventArgs e)     // Когда программа проснётся
+        {
+            await SetupCharacterAIModule();
+            if (IsNight) mainFilter = nightFilter;
+            else         mainFilter = dayFilter;
+
             /*
             new ToastContentBuilder()
        .AddArgument("action", "viewConversation")
@@ -244,11 +313,12 @@ namespace MonikaOnDesktop {
        .AddText("Смотри что я умею!")
        .AddText("Я научилась отправлять уведомления =)")
        .Show();*/
+
             var wpfDpi = PresentationSource.FromVisual(this)?.CompositionTarget?.TransformToDevice.M11;
             this.dpiScale = 1f / (float)wpfDpi.GetValueOrDefault(1);
 
-            Monika.loadData(); // Грузим данные 
-            SetupScale(Monika.Scaler);  // Ставим размер окна
+            Monika.loadData();                        // Грузим данные 
+            SetupScale(Monika.Scaler);                // Ставим размер окна
             Lang = MonikaSettings.Default.Language;
 
             //UnpackCostume(Monika.costumeName);
@@ -449,6 +519,8 @@ namespace MonikaOnDesktop {
                     Task.Run(() => {
                         var nextBlink = DateTime.Now + TimeSpan.FromSeconds(random.Next(7, 50));
                         Debug.WriteLine(nextBlink);
+                        GC.Collect(GC.MaxGeneration, GCCollectionMode.Optimized);
+
                         while (this.applicationRunning) {
                             if (DateTime.Now >= nextBlink) {
                                 // Check if currently speaking, only blink if not in dialog
@@ -616,6 +688,11 @@ namespace MonikaOnDesktop {
             }
         }
 
+        /// <summary>
+        /// Метод который активируется при перекидывании подарка.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void GiftWatcher_Created(object sender, FileSystemEventArgs e) {
             string file = e.FullPath;
             // Assuming you have one file that you care about, pass it off to whatever
@@ -626,14 +703,13 @@ namespace MonikaOnDesktop {
                 if (info.Extension == ".gift") {
                     string giftName = info.Name.ToLower().Replace(".gift", String.Empty);
 
-                    string path = AppDomain.CurrentDomain.BaseDirectory + "/gifts/" + giftName + "/"; // or whatever 
-                    string giftsPath = AppDomain.CurrentDomain.BaseDirectory + "/gifts/";
-                    if (!Directory.Exists(giftsPath)) {
-                        DirectoryInfo di = Directory.CreateDirectory(giftsPath);
+                    string path = $"{baseGiftsPath}{giftName}\\";
+                    if (!Directory.Exists(baseGiftsPath)) {
+                        DirectoryInfo di = Directory.CreateDirectory(baseGiftsPath);
                         di.Attributes = FileAttributes.Directory | FileAttributes.Hidden;
                     }
-                    File.Copy(AppDomain.CurrentDomain.BaseDirectory + "/characters/" + giftName + ".gift", giftsPath + giftName + ".gift", true);
-                    ZipFile.ExtractToDirectory(giftsPath + giftName + ".gift", path);
+                    File.Copy(AppDomain.CurrentDomain.BaseDirectory + "/characters/" + giftName + ".gift", baseGiftsPath + giftName + ".gift", true);
+                    ZipFile.ExtractToDirectory(baseGiftsPath + giftName + ".gift", path);
                     RunScript(path + "ru.txt");
                     addGift(giftName, path + giftName + ".png");
                     //getGift(giftName);
@@ -650,8 +726,12 @@ namespace MonikaOnDesktop {
                 }
             }
         }
+        /// <summary>
+        /// Метод который загружает подарки для Моники.
+        /// </summary>
         public void loadGifts() {
-            foreach (string i in Monika.gifts) {
+            var spanGifts = CollectionsMarshal.AsSpan(Monika.gifts);
+            foreach (string i in spanGifts) {
                 string[] gift = i.Split(" | ");
                 BitmapImage bitmapImage = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri(gift[1]), mainFilter));
                 System.Windows.Controls.Image img = new System.Windows.Controls.Image {
@@ -661,6 +741,7 @@ namespace MonikaOnDesktop {
                 if (FindName(gift[0]) == null)
                     RegisterName(gift[0], img);
                 gifts.Children.Add(img);
+                DeleteObject(bitmapImage);
             }
         }
         bool inChoise = false;
@@ -755,6 +836,8 @@ namespace MonikaOnDesktop {
                 await Task.Delay(700);
                 textBlock.Text = "";
             });
+
+            CollectAllGarbage(); // Пытается собирать излишний мусор
         }
         int ch = 0; 
         void Menu(string s, int num, List<Script.Choice> choices) {
@@ -854,17 +937,18 @@ namespace MonikaOnDesktop {
                 if (!directory.Exists)
                     directory.Create();
             }
+            #region Подготовляем изначальный текст
             prepareText(greetingsDialogPath, greetingsDialogDirectory.FullName);
             prepareText(idleDialogPath, idleDialogDirectory.FullName);
             prepareText(goodbyeDialogPath, goodbyeDialogDirectory.FullName);
+            #endregion
 
-            
+            #region Подготовляем дополнительный текст
             prepareText(progsDialogPath, progsDialogDirectory.FullName);
             prepareText(sitesDialogPath, sitesDialogDirectory.FullName);
             prepareText(googleDialogPath, googleDialogDirectory.FullName);
             prepareText(youtubeDialogPath, youtubeDialogDirectory.FullName);
-            
-
+            #endregion
         }
         async void prepareText(string path, string output) {
 
@@ -921,6 +1005,7 @@ namespace MonikaOnDesktop {
 
                 }
             }
+            CollectAllGarbage(); // Пытается собирать излишний мусор (не совсем успешно)
         }
         private void stopWatch_EventArrived(object sender, EventArrivedEventArgs e) // Ивент закрытия процесса
         {
@@ -1054,15 +1139,14 @@ namespace MonikaOnDesktop {
             } else {
             }
         }
+
         public async Task checkUpdatesAsync() {
-            await SolicenTEAM.Updater.CheckUpdate("SAn4Es-TV", "MonikaOnDesktop");  // Проверяем наличие обновления
-            bool updateIsAvaliable = false;
+            await Updater.CheckUpdate("SAn4Es-TV", "MonikaOnDesktop");  // Проверяем наличие обновления
             //Debug.WriteLine("This Ver: " + SolicenTEAM.Updater.CurrentVersion);
             //Debug.WriteLine("New Ver: " + SolicenTEAM.Updater.UpdateVersion);
             //Debug.WriteLine("New Desc: " + SolicenTEAM.Updater.UpdateDescription);
-            if (SolicenTEAM.Updater.UpdateVersion == SolicenTEAM.Updater.CurrentVersion) {
-                updateIsAvaliable = false;
-            } else {
+            if (Updater.UpdateIsAvailable()) {} 
+            else {
                 while (isSpeaking) {
                     await Task.Delay(10);
                 }
@@ -1301,6 +1385,7 @@ namespace MonikaOnDesktop {
                         break;
                     }
                     if (body == 5) { Monika.leaningWord = "leaning-def-"; } else { Monika.leaningWord = ""; }
+                    DeleteObject(Eyes);
                     switch (eye) {
                         case "e":
                         this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[4] + ".png"), mainFilter));
@@ -1348,6 +1433,7 @@ namespace MonikaOnDesktop {
                         this.Eyes.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fe/face-" + Monika.leaningWord + Monika.eyes[4] + ".png"), mainFilter));
                         break;
                     }
+                    DeleteObject(eyebrow);
                     switch (eyebrow) {
                         case "u":
                         this.EyeBrow.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"), mainFilter));
@@ -1368,6 +1454,7 @@ namespace MonikaOnDesktop {
                         this.EyeBrow.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fb/face-" + Monika.leaningWord + Monika.eyesBrow[4] + ".png"), mainFilter));
                         break;
                     }
+                    DeleteObject(mouth);
                     switch (mouth) {
                         case "a":
                         this.Mouth.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/fm/face-" + Monika.leaningWord + Monika.mouth[4] + ".png"), mainFilter));
@@ -1404,6 +1491,11 @@ namespace MonikaOnDesktop {
                     string hairPath = "hair" + Monika.leaningWord + "-" + Monika.hairType;
                     if (body == 5) { Monika.leaningWord = "-leaning"; } else { Monika.leaningWord = ""; }
                     string nosePath = "face" + Monika.leaningWord + "-nose-def.png";
+
+                    DeleteObject(Face);
+                    DeleteObject(Hair);
+                    DeleteObject(HairBack);
+
                     this.Face.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/face/" + nosePath), mainFilter));
                     this.Hair.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/h/" + hairPath + "-front.png"), mainFilter));
                     this.HairBack.Source = BitmapMagic.BitmapToImageSource(BitmapMagic.ToColorTone(new Uri("pack://application:,,,/assets/monika/h/" + hairPath + "-back.png"), mainFilter));
@@ -1416,6 +1508,7 @@ namespace MonikaOnDesktop {
             }
         }
         public void RedrawCostume(int body, string costume) {
+            CollectAllGarbage();
             string pathCost = AppDomain.CurrentDomain.BaseDirectory + "/costumes/";
 
             try {
@@ -1566,16 +1659,16 @@ namespace MonikaOnDesktop {
         }
         public async void updateZip() {
             try {
-                await SolicenTEAM.Updater.CheckUpdate("SAn4Es-TV", "MonikaOnDesktop");
-                if (SolicenTEAM.Updater.UpdateVersion != SolicenTEAM.Updater.CurrentVersion && SolicenTEAM.Updater.UpdateVersion != "") {
-                    SolicenTEAM.Updater.DownloadUpdate(SolicenTEAM.Updater.gitUser, SolicenTEAM.Updater.gitRepo);
+                await Updater.CheckUpdate("SAn4Es-TV", "MonikaOnDesktop");
+                if (Updater.UpdateVersion != Updater.CurrentVersion && Updater.UpdateVersion != "") {
+                    await Updater.DownloadUpdate();
 
-                    while (!SolicenTEAM.Updater.readyToUpdate) {
-                        Debug.WriteLine("Update is ready: " + SolicenTEAM.Updater.readyToUpdate);
+                    while (!Updater.readyToUpdate) {
+                        Debug.WriteLine("Update is ready: " + Updater.readyToUpdate);
                         await Task.Delay(10);
                     }
-                    Debug.WriteLine("Update is ready: " + SolicenTEAM.Updater.readyToUpdate);
-                    SolicenTEAM.Updater.ExtractArchive();
+                    Debug.WriteLine("Update is ready: " + Updater.readyToUpdate);
+                    Updater.ExtractArchive();
                     /*
                     string processName = "Updater";
                     var arrayProcesses = Process.GetProcessesByName(processName);

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net9.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>ico.ico</ApplicationIcon>
@@ -1236,6 +1236,9 @@
     <None Update="MonikaSettings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>MonikaSettings.Designer.cs</LastGenOutput>
+    </None>
+    <None Update="Updater.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
