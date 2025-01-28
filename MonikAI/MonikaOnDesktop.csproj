@@ -338,6 +338,14 @@
     <PackageReference Include="PuppeteerSharp" Version="12.0.0" />
     <PackageReference Include="System.Management" Version="5.0.0" />
     <PackageReference Include="uHttpSharp" Version="0.1.6.22" />
+    <ProjectReference Include="..\Libraries\CharacterAi\CharacterAI.csproj" />
+  </ItemGroup>
+  
+  
+  <ItemGroup>
+    <Reference Include="VGPrompter">
+      <HintPath>..\..\..\до переустановки винды\2\Downloads\VGPrompter.dll</HintPath>
+    </Reference>
   </ItemGroup>
   
   
