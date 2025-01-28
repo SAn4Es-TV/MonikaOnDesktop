@@ -21,10 +21,9 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-
-// using CharacterAI;
-// using CharacterAI.Models;
-
+using CharacterAi.Client;
+using CharacterAi.Client.Models;
+using CharacterAi.Client.Models.Common;
 using Microsoft.Win32;
 using SolicenTEAM;
 using VGPrompter;
@@ -140,12 +139,16 @@ namespace MonikaOnDesktop
 
         public bool mouse = true;
         #endregion
-
+        #region CharacterAI
         string AIpath = @"script.txt";
         string characterId = "aywKj4vjL0-X2QeZj2VFcCqPlZ4HmzH0FNlebJKcjTk";
-        // CharacterAi.Client.CharacterAiClient client;
-        // Character character;
-        string historyId;
+        CharacterAi.Client.CharacterAiClient client = new CharacterAiClient();
+        CaiCharacter character;
+        string chatId;
+        string AUTH_TOKEN;
+        string USERNAME;
+        string USER_ID;
+        #endregion
 
         /// <summary>
         /// Метод начальной инициализации текстового поля.
@@ -276,6 +279,70 @@ namespace MonikaOnDesktop
             GC.Collect();
         }
 
+        string GetCharacterAiHistory(string setHistory = null)
+        {
+            var tokenfile = $"{baseDir}\\token.txt";
+            if (File.Exists(tokenfile))
+            {
+                var line = File.ReadAllLines(tokenfile)[0];
+                if (setHistory == null)
+                {
+                    try
+                    {
+                        return line.Split('|')[3];
+                    }
+                    catch
+                    {
+                        return string.Empty;
+                    }
+                }
+                else
+                {
+                    line += $"|{setHistory}";
+                }
+
+            }
+
+            return string.Empty;
+        }
+        async Task<bool> InitializationSetupCharacterAI()
+        {
+            var tokenfile = $"{baseDir}\\token.txt";
+            var emailFile = $"{baseDir}\\email.txt";
+
+            if (File.Exists(tokenfile))
+            {
+                var line = File.ReadAllLines(tokenfile)[0];
+                var token = line.Split('|')[0];
+                var userId = line.Split('|')[1];
+                var userName = line.Split('|')[2];
+
+                AUTH_TOKEN = token;
+                USERNAME = userName;
+                USER_ID = userId;
+
+                return true;
+
+            }
+            else if (File.Exists(emailFile))
+            {
+                var key = File.ReadAllLines(emailFile)[0];
+                if (key.Contains("@"))
+                {
+                    await client.SendLoginEmailAsync(key);
+                    Environment.Exit(0);
+                }
+                else
+                {
+                    var user = await client.LoginByLinkAsync(key);
+                    File.WriteAllText(tokenfile, $"{user.Token}|{user.UserId}|{user.Username}");
+                    File.Delete(emailFile);
+                    Environment.Exit(0);
+                }       
+            }
+
+            return false;
+        }
 
         /// <summary>
         /// Инициализация и настройка CharacterAI модуля для Моники.
@@ -283,34 +350,31 @@ namespace MonikaOnDesktop
         /// <returns></returns>
         public async Task SetupCharacterAIModule()
         {
-            #if CHARACTER_AI_IS_WORK
-            if (Monika.AI && !String.IsNullOrEmpty(Monika.aiToken) && isConectedToInternet())
+            if (await InitializationSetupCharacterAI() == false) return;
+            if (Monika.AI && isConectedToInternet())
             {
                 AIchat.Visibility = Visibility.Visible;
-                client = new CharacterAIClient(Monika.aiToken);
 
-                // Launch Puppeteer headless browser
-                await client.LaunchBrowserAsync(killDuplicates: true);
+                CaiCharacter character = await client.GetCharacterInfoAsync(characterId, AUTH_TOKEN);
+                List<CaiChat> result = await client.GetChatsAsync(characterId, AUTH_TOKEN);
 
-                // Highly recommend to do this
-                AppDomain.CurrentDomain.ProcessExit += (s, args) => client.KillBrowser();
+                chatId = GetCharacterAiHistory();
+                if (chatId == string.Empty) 
+                {
+                    chatId = client.CreateNewChat(characterId, USER_ID, AUTH_TOKEN);
+                    GetCharacterAiHistory(chatId);
+                } 
 
-                // Send message to a character
-                string characterId = "aywKj4vjL0-X2QeZj2VFcCqPlZ4HmzH0FNlebJKcjTk";
-                character = await client.GetInfoAsync(characterId);
-
-                historyId = await client.CreateNewChatAsync(characterId);
-
-                if (historyId is null)
+                if (chatId is null)
                 {
                     return;
                 }
+                
             }
             else
             {
                 AIchat.Visibility = Visibility.Hidden;
             }
-#endif
         }
 
         public async void Window_Loaded(object sender, RoutedEventArgs e)     // Когда программа проснётся
@@ -673,26 +737,25 @@ namespace MonikaOnDesktop
         bool isTyping = false;
         private async void AIchat_KeyUpAsync(object sender, System.Windows.Input.KeyEventArgs e)
         {
-#if CHARACTER_AI_IS_WORK
-            if (e.Key == Key.Enter && !String.IsNullOrEmpty(Monika.aiToken))
+            if (e.Key == Key.Enter && await InitializationSetupCharacterAI() != false)
             {
                 isTyping = true;
                 string _message = AIchat.Text;
                 AIchat.Text = "";
                 Debug.WriteLine(_message);
-                var characterResponse = await client.CallCharacterAsync(
-                    characterId: character.Id,
-                    characterTgt: character.Tgt,
-                    historyId: historyId,
-                    message: _message
-    );
 
-                if (!characterResponse.IsSuccessful)
+                CaiSendMessageInputData data = new CaiSendMessageInputData
                 {
-                    Debug.WriteLine(characterResponse.ErrorReason);
-                    return;
-                }
-                string message = characterResponse.Response.Text; // => "Hey!"
+                    CharacterId = characterId,
+                    ChatId = chatId,
+                    Message = _message,
+                    UserId = USER_ID,
+                    Username = USERNAME,
+                    UserAuthToken = AUTH_TOKEN
+                };
+
+                var response = client.SendMessageToChat(data);
+                string message = response; // => "Hey!"
                 string text = message.Replace("\n", ".")
                     .Replace("\"", "\'")
                     .Replace("...", "...\n")
@@ -751,7 +814,6 @@ namespace MonikaOnDesktop
 
                 isTyping = false;
             }
-#endif
         }
 
         /// <summary>
