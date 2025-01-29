@@ -338,11 +338,17 @@
     <PackageReference Include="PuppeteerSharp" Version="12.0.0" />
     <PackageReference Include="System.Management" Version="5.0.0" />
     <PackageReference Include="uHttpSharp" Version="0.1.6.22" />
-    <ProjectReference Include="..\Libraries\CharacterAi\CharacterAI.csproj" />
+    <PackageReference Include="Websocket.Client" Version="5.1.2" />
   </ItemGroup>
   
   
   <ItemGroup>
+    <Reference Include="CharacterAI">
+      <HintPath>ThirdParty\CharacterAI.dll</HintPath>
+    </Reference>
+    <Reference Include="CharacterAi.Client">
+      <HintPath>ThirdParty\CharacterAi.Client.dll</HintPath>
+    </Reference>
     <Reference Include="VGPrompter">
       <HintPath>..\..\..\до переустановки винды\2\Downloads\VGPrompter.dll</HintPath>
     </Reference>

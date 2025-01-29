@@ -128,7 +128,7 @@ namespace MonikaOnDesktop
         const string name = "MonikaStartUp";
         public string lastQuery;
 
-        CharacterModel Monika = new CharacterModel($"{baseDir}\\characters\\monika.chr", $"{baseDir}\\characters\\"); // Персонаж Моники
+        CharacterModel Monika = new CharacterModel($"{baseDir}\\characters\\monika.chr", $"{baseDir}characters\\"); // Персонаж Моники
         private Settings settingsWindow;            // Окно настроек
 
         private NotifyIcon NI = new NotifyIcon();
@@ -248,9 +248,9 @@ namespace MonikaOnDesktop
             }
             SystemEvents.PowerModeChanged += OnPowerChange;
 
-            FileSystemWatcher giftWatcher = new FileSystemWatcher();
             giftWatcher.Path = Monika.giftsPath;
             giftWatcher.NotifyFilter = NotifyFilters.FileName;
+            giftWatcher.IncludeSubdirectories = true;
             giftWatcher.Created += GiftWatcher_Created;
             giftWatcher.EnableRaisingEvents = true;
             loadGifts();
@@ -267,6 +267,7 @@ namespace MonikaOnDesktop
             CollectAllGarbage();
         }
 
+        FileSystemWatcher giftWatcher = new FileSystemWatcher();
         // TODO: Расширить этот метод для сбора большего количества мусора
         private void CollectAllGarbage()
         {
@@ -277,6 +278,7 @@ namespace MonikaOnDesktop
             GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);
             GC.WaitForPendingFinalizers();
             GC.Collect();
+            GC.KeepAlive(giftWatcher);
         }
 
         string GetCharacterAiHistory(string setHistory = null)
@@ -1193,7 +1195,7 @@ namespace MonikaOnDesktop
         }
         private void stopWatch_EventArrived(object sender, EventArrivedEventArgs e) // Ивент закрытия процесса
         {
-            Debug.WriteLine("Процесс закрыт: " + e.NewEvent.Properties["ProcessName"].Value.ToString());   // Дебажим имя закрытого процесса
+            //Debug.WriteLine("Процесс закрыт: " + e.NewEvent.Properties["ProcessName"].Value.ToString());   // Дебажим имя закрытого процесса
         }
         private void startWatch_EventArrived(object sender, EventArrivedEventArgs e) // Ивент открытия процесса
         {
@@ -1202,12 +1204,13 @@ namespace MonikaOnDesktop
                 string currentProcess = e.NewEvent.Properties["ProcessName"].Value.ToString();  // Узнаём имя процесса
                 if (currentProcess != lastProcess)  // Если оно не равно прошлому процессу, чтобы небыло повторок
                 {
-                    Debug.WriteLine("Процесс открыт: " + e.NewEvent.Properties["ProcessName"].Value.ToString());   // Дебажим имя закрытого процесса
+                    //Debug.WriteLine("Процесс открыт: " + e.NewEvent.Properties["ProcessName"].Value.ToString());   // Дебажим имя закрытого процесса
 
                     DirectoryInfo info = new DirectoryInfo(progsDialogDirectory.FullName + "\\[" + formatURL(currentProcess) + "]");
                     try
                     {
-                        RunScript(info.FullName + "\\" + new Random().Next(info.GetFiles().Length) + ".txt");
+                        if(new DirectoryInfo(info.FullName).Exists)
+                            RunScript(info.FullName + "\\" + new Random().Next(info.GetFiles().Length) + ".txt");
                     }
                     catch
                     {
