@@ -326,6 +326,7 @@
     <None Remove="assets\null.png" />
     <None Remove="comic.ttf" />
     <None Remove="ico.ico" />
+    <None Remove="RifficFree-Bold.ttf" />
   </ItemGroup>
 
   <ItemGroup>
@@ -1233,6 +1234,9 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="ico.ico">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="RifficFree-Bold.ttf">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

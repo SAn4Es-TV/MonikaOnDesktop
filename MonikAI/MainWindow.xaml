@@ -91,17 +91,6 @@
                 <Image x:Name="UniformHand1" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/null.png" StretchDirection="Both" Stretch="Uniform"/>
                 <Image x:Name="UniformHand2" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/null.png" StretchDirection="Both" Stretch="Uniform"/>
             </Grid>
-            <!--
-            <Image x:Name="ribbon" Margin="0,0,0,0" Source="pack://application:,,,/assets/monika/ribbon/acs-ribbon_def-0.png" StretchDirection="Both" Stretch="Uniform"/>
-        <Image x:Name="hairBack" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/hair/hair-def-back.png" StretchDirection="Both" Stretch="Uniform"/>
-        <Image x:Name="main" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/body/body-1.png" StretchDirection="Both" Stretch="Uniform"/>
-        <Image x:Name="hairFront" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/hair/hair-def-front.png" StretchDirection="Both" Stretch="Uniform"/>
-        <Image x:Name="arms" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/body/1.png" StretchDirection="Both" Stretch="Uniform"/>
-        <Image x:Name="eyes" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/face/eyes/e.png" StretchDirection="Both" Stretch="Uniform"/>
-        <Image x:Name="brow" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/face/brows/s.png" StretchDirection="Both" Stretch="Uniform"/>
-        <Image x:Name="mouth" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/face/mouth/b.png" StretchDirection="Both" Stretch="Uniform"/>
-        <Image x:Name="nose" Margin="0,-0,0,0" Source="pack://application:,,,/assets/monika/face/face-nose-def.png" StretchDirection="Both" Stretch="Uniform"/>
-        -->
         </Grid>
         <Grid x:Name="gifts">
 
@@ -117,9 +106,6 @@
             <Grid.RowDefinitions>
             </Grid.RowDefinitions>
             <!-- Put buttons here. -->
-        </Grid>
-        <Grid>
-            <TextBox x:Name="AIchat" Text="" Height="50" VerticalAlignment="Top" Background="#0000" FontFamily="Comic Sans MS" Foreground="#ffff" KeyUp="AIchat_KeyUpAsync" BorderBrush="#0000" SelectionBrush="#0000"/>
         </Grid>
         <!-- </StackPanel>-->
         <tb:TaskbarIcon x:Name="myNotifyIcon"
