@@ -1,6 +1,6 @@
 # MonikaOnDesktop (MOD)
 
-[**Русский**](README.md) | [**English**](/docs/en/README.en.md) 
+[**Русский**](/README.md) | [**English**](/docs/en/README.en.md) 
 
 Hi! It's me, *Monika!*
 
