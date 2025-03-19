@@ -32,4 +32,6 @@
     <v:String x:Key="s_labelSettings">Настройки</v:String>
     <v:String x:Key="s_labelAbout">О программе</v:String>
 
+    <v:String x:Key="s_labelSay">Что ты хочешь сказать?</v:String>
+
 </ResourceDictionary>

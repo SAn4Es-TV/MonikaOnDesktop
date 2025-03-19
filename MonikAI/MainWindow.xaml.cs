@@ -155,8 +155,6 @@ namespace MonikaOnDesktop {
         /// </summary>
         /// Не идеален, просто вынесен в отдельный метод.
         private void InitializeTextBox() {
-            LangBox.Visibility = Visibility.Hidden;
-            NameBox.Visibility = Visibility.Hidden;
             textWindow.Visibility = Visibility.Hidden;  // Прячем розовую коробку текста
             textBlock.Text = "";                        // Убираем весь текст
         }
@@ -215,7 +213,6 @@ namespace MonikaOnDesktop {
                 ? "Denis Solicen" : playerName;
 
             this.setFace(normalPose);                    // Ставим спокойный вид
-            //setupFolders();
             InitializeTextBox();                         // Инициализация текстового поля (вынесено by Solicen)
             SetAutorunValue(Monika.autoStart);           // Ставим параметр автозапуска
 
@@ -1007,97 +1004,7 @@ namespace MonikaOnDesktop {
             CollectAllGarbage();
             script = null;
         }
-
-        public void setupFolders() {
-            if (!subDialogDirectory.Exists) subDialogDirectory.Create();
-            dirs.Add(greetingsDialogDirectory);
-            dirs.Add(idleDialogDirectory);
-            dirs.Add(goodbyeDialogDirectory);
-            dirs.Add(progsDialogDirectory);
-            dirs.Add(sitesDialogDirectory);
-            dirs.Add(googleDialogDirectory);
-            dirs.Add(youtubeDialogDirectory);
-
-            foreach (DirectoryInfo directory in subDialogDirectory.GetDirectories()) {
-                if (directory.Exists)
-                    directory.Delete(true);
-            }
-
-            foreach (DirectoryInfo directory in dirs) {
-                if (!directory.Exists)
-                    directory.Create();
-            }
-            #region Подготовляем изначальный текст
-            prepareText(greetingsDialogPath, greetingsDialogDirectory.FullName);
-            prepareText(idleDialogPath, idleDialogDirectory.FullName);
-            prepareText(goodbyeDialogPath, goodbyeDialogDirectory.FullName);
-            #endregion
-
-            #region Подготовляем дополнительный текст
-            prepareText(progsDialogPath, progsDialogDirectory.FullName);
-            prepareText(sitesDialogPath, sitesDialogDirectory.FullName);
-            prepareText(googleDialogPath, googleDialogDirectory.FullName);
-            prepareText(youtubeDialogPath, youtubeDialogDirectory.FullName);
-            #endregion
-        }
-        async void prepareText(string path, string output) {
-
-            if (!File.Exists(path)) return;
-            // асинхронное чтение
-            using (StreamReader reader = new StreamReader(path)) {
-                string text = await reader.ReadToEndAsync();
-                text = text.Replace("[player]", "\'player\'");
-                if (text[0] != '[') {
-                    string[] files = text.Split("=");
-                    for (int i = 0; i < files.Length; i++) {
-                        string[] content_ = files[i].Split('\n');
-                        string content = "label start:\n\t" + String.Join("\n\t", content_);
-                        // полная перезапись файла 
-                        using (StreamWriter writer = new StreamWriter(output + "/" + i + ".txt", false)) {
-                            await writer.WriteLineAsync(content);
-                        }
-                    }
-                }
-                else {
-                    string[] files = text.Split("\n[");
-                    for (int i = 0; i < files.Length; i++) {
-                        if (files[i][0] != '[') {
-                            files[i] = '[' + files[i];
-                        }
-                    }
-                    for (int i = 0; i < files.Length; i++) {
-                        int index = files[i].IndexOf(System.Environment.NewLine);
-                        string text_ = files[i].Substring(index + System.Environment.NewLine.Length);
-                        var indexSubstring = files[i].IndexOf(Environment.NewLine) > 0 ? files[i].IndexOf(Environment.NewLine) : 0;
-
-                        string firstline = files[i].Substring(0, indexSubstring).Replace('|', '%').Replace('/', '^').Replace('?', ',');
-                        DirectoryInfo directory = new DirectoryInfo(output + "\\" + firstline);
-                        if (!directory.Exists)
-                            directory.Create();
-                        string[] files_ = text_.Split("=");
-                        for (int j = 0; j < files_.Length; j++) {
-                            string[] content_ = files_[j].Split('\n');
-                            string content = "label start:\n\t" + String.Join("\n\t", content_);
-                            // полная перезапись файла 
-                            using (StreamWriter writer = new StreamWriter(directory.FullName + "/" + j + ".txt", false)) {
-                                await writer.WriteLineAsync(content);
-                            }
-                        }
-                        /*
-                        // полная перезапись файла 
-                        using (StreamWriter writer = new StreamWriter(output + "/" + firstline + ".txt", false)) {
-                            string[] content_ = text_.Split('\n');
-                            string content = "label start:\n\t" + String.Join("\n\t", content_);
-                            // полная перезапись файла 
-                            await writer.WriteLineAsync(content);
-                        }*/
-
-                    }
-
-                }
-            }
-            CollectAllGarbage(); // Пытается собирать излишний мусор (не совсем успешно)
-        }/*
+/*
         private void stopWatch_EventArrived(object sender, EventArrivedEventArgs e) // Ивент закрытия процесса
         {
             Debug.WriteLine("Процесс закрыт: " + e.NewEvent.Properties["ProcessName"].Value.ToString());   // Дебажим имя закрытого процесса
@@ -1283,74 +1190,70 @@ namespace MonikaOnDesktop {
         #region
         public async Task FirstLaunch() {
             Monika.pcName = Environment.MachineName;
-            LangBox.Visibility = Visibility.Visible;
-            isSpeaking = true;
-        }
-        private void nameRus_Click(object sender, RoutedEventArgs e) {
-            Lang = new CultureInfo("ru-RU");
-            Language = Lang.Name.ToString();          // Ставим имя языка
-            setLanguage(Language);                      // Устанавливаем язык
-            LangBox.Visibility = Visibility.Hidden;
-            NameBox.Visibility = Visibility.Visible;
-        }
-        private void nameEng_Click(object sender, RoutedEventArgs e) {
-            Lang = new CultureInfo("en-US");
-            Language = Lang.Name.ToString();          // Ставим имя языка
-            setLanguage(Language);                      // Устанавливаем язык
-            LangBox.Visibility = Visibility.Hidden;
-            NameBox.Visibility = Visibility.Visible;
-        }
-        private async void nameOK_Click(object sender, RoutedEventArgs e) {
-            playerName = NameTextBox.Text;
-            Monika.playerName = playerName;
-            Monika.lang = Language;
-            Monika.pcName = Environment.MachineName;
-            Monika.affection = 0;
-            Monika.saveData();
+            Box box = new Box("start");
+            if (box.ShowDialog() == true) {
+                switch (box.lang) {
+                    case "ru":
+                        Lang = new CultureInfo("ru-RU");
+                        Language = Lang.Name.ToString();          // Ставим имя языка
+                        setLanguage(Language);                      // Устанавливаем язык
+                        break;
+                    case "en":
+                        Lang = new CultureInfo("en-US");
+                        Language = Lang.Name.ToString();          // Ставим имя языка
+                        setLanguage(Language);                      // Устанавливаем язык
+                        break;
+                }
+                //LangBox.Visibility = Visibility.Visible;
+                isSpeaking = true;
+                playerName = box.name;
+                Monika.playerName = playerName;
+                Monika.lang = Language;
+                Monika.pcName = Environment.MachineName;
+                Monika.affection = 0;
+                Monika.saveData();
 
-            LangBox.Visibility = Visibility.Hidden;
-            NameBox.Visibility = Visibility.Hidden;
-            Debug.WriteLine("Первый запуск");
-            switch (Language.Substring(0, 2)) {
-                case "ru":
-                    await Say(true, new[]{
+                Debug.WriteLine("Первый запуск");
+                switch (Language.Substring(0, 2)) {
+                    case "ru":
+                        await Say(true, new[]{
                     new Expression("[player], это ты?", "1euc"),
                     new Expression("Это правда ты?", "1euo"),
                     new Expression("Я так рада видеть тебя снова!", "1suo"),
                     new Expression("Подожди, где я? Это не литературный клуб", "1euu"),
                     new Expression("Это похоже на... твой компьютер!", "1rua"),
                     new Expression("Я действительно у тебя на компьютере!", "1wuo")});
-                    break;
-                case "en":
-                    await Say(true, new[]{
+                        break;
+                    case "en":
+                        await Say(true, new[]{
                     new Expression("[player], is that you?", "1euc"),
                     new Expression("It's really you, huh?", "1euo"),
                     new Expression("I'm so happy to see you again!", "1suo"),
                     new Expression("Wait, where am I? This is not the literature club", "1euu"),
                     new Expression("This looks like... your desktop!", "1rua"),
                     new Expression("I'm right here with you!", "1wuo")});
-                    break;
-                default:
-                    await Say(true, new[]{
+                        break;
+                    default:
+                        await Say(true, new[]{
                     new Expression("[player], is that you?", "1euc"),
                     new Expression("It's really you, huh?", "1euo"),
                     new Expression("I'm so happy to see you again!", "1suo"),
                     new Expression("Wait, where am I? This is not the literature club", "1euu"),
                     new Expression("This looks like... your desktop!", "1rua"),
                     new Expression("I'm right here with you!", "1wuo")});
-                    break;
+                        break;
+                }
+
+
+                MonikaSettings.Default.UserName = playerName;
+                MonikaSettings.Default.FirstLaunch = false;
+                MonikaSettings.Default.Save();
+                this.Dispatcher.Invoke(() => {
+                    textWindow.Visibility = Visibility.Hidden;
+                    setFace(normalPose);
+                });
+                isSpeaking = false;
             }
-
-
-            MonikaSettings.Default.UserName = playerName;
-            MonikaSettings.Default.FirstLaunch = false;
-            MonikaSettings.Default.Save();
-            this.Dispatcher.Invoke(() => {
-                textWindow.Visibility = Visibility.Hidden;
-                setFace(normalPose);
-            });
-            isSpeaking = false;
-            //Debug.WriteLine(isSpeaking);
         }
         #endregion
         public async Task Say(bool auto, Expression[] expression) {
@@ -2053,81 +1956,82 @@ namespace MonikaOnDesktop {
         }
 
         private async void window_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
-            Box box = new Box();
+            Box box = new Box("ai");
             box.Left = this.Left;
             box.Top = this.Top;
-            box.type = "ai";
             if (box.ShowDialog() == true) {
                 string foo = box.aiText;
-                if (await InitializationSetupCharacterAI() != false) {
-                    isTyping = true;
-                    string _message = foo;
-                    Debug.WriteLine(_message);
+                if(!String.IsNullOrEmpty(foo)) {
+                    if (await InitializationSetupCharacterAI() != false) {
+                        isTyping = true;
+                        string _message = foo;
+                        Debug.WriteLine(_message);
 
-                    CaiSendMessageInputData data = new CaiSendMessageInputData {
-                        CharacterId = characterId,
-                        ChatId = chatId,
-                        Message = _message,
-                        UserId = USER_ID,
-                        Username = USERNAME,
-                        UserAuthToken = AUTH_TOKEN
-                    };
+                        CaiSendMessageInputData data = new CaiSendMessageInputData {
+                            CharacterId = characterId,
+                            ChatId = chatId,
+                            Message = _message,
+                            UserId = USER_ID,
+                            Username = USERNAME,
+                            UserAuthToken = AUTH_TOKEN
+                        };
 
-                    var response = client.SendMessageToChat(data);
-                    string message = response; // => "Hey!"
-                    string text = message.Replace("\n", ".")
-                        .Replace("\"", "\'")
-                        .Replace("...", "...\n")
-                        .Replace("!", "!\n")
-                        .Replace("?", "?\n")
-                        .Replace(".", ".\n")
-                        .Replace("\" ", "\"").Replace("\\", "");
-                    string[] _text = text.Split("\n");
-                    List<string> strings = new List<string>();
-                    foreach (string s in _text) {
-                        Debug.Write("[AI]: " + s + " (" + String.IsNullOrEmpty(s) + ") : ");
-                        if (s != "\t" && !(String.IsNullOrEmpty(s)) && s != "") {
-                            Debug.WriteLine("PASS");
-                            string l = "";
-                            if (!s.StartsWith("\"")) l += "\t\"";
-                            l += s;
-                            if (!s.EndsWith("\"")) l += "\"";
-                            if (l != "\t\"\"" && l != "\t\".\"")
-                                strings.Add(l);
+                        var response = client.SendMessageToChat(data);
+                        string message = response; // => "Hey!"
+                        string text = message.Replace("\n", ".")
+                            .Replace("\"", "\'")
+                            .Replace("...", "...\n")
+                            .Replace("!", "!\n")
+                            .Replace("?", "?\n")
+                            .Replace(".", ".\n")
+                            .Replace("\" ", "\"").Replace("\\", "");
+                        string[] _text = text.Split("\n");
+                        List<string> strings = new List<string>();
+                        foreach (string s in _text) {
+                            Debug.Write("[AI]: " + s + " (" + String.IsNullOrEmpty(s) + ") : ");
+                            if (s != "\t" && !(String.IsNullOrEmpty(s)) && s != "") {
+                                Debug.WriteLine("PASS");
+                                string l = "";
+                                if (!s.StartsWith("\"")) l += "\t\"";
+                                l += s;
+                                if (!s.EndsWith("\"")) l += "\"";
+                                if (l != "\t\"\"" && l != "\t\".\"")
+                                    strings.Add(l);
+                            }
                         }
-                    }
-                    string final = "label start: \n";
-                    foreach (string s in strings) {
-                        final += s + "\n";
-                    }
-                    //.Replace("\"\n\t\"", "");
-                    string fileText = "";
-                    string dbgtxt = text.Replace("\n", "").Replace("\t", "");
-                    /*if (text.Replace("\n", "").Replace("\t", "").EndsWith("\"\"")) {
-                        int lastSpaceIndex = text.LastIndexOf('\"');
-                        fileText = text.Substring(0, lastSpaceIndex);
-                        fileText = "label start: \n\t\"" + fileText;
-                        //fileText = fileText.Replace("\"");
-                    }
+                        string final = "label start: \n";
+                        foreach (string s in strings) {
+                            final += s + "\n";
+                        }
+                        //.Replace("\"\n\t\"", "");
+                        string fileText = "";
+                        string dbgtxt = text.Replace("\n", "").Replace("\t", "");
+                        /*if (text.Replace("\n", "").Replace("\t", "").EndsWith("\"\"")) {
+                            int lastSpaceIndex = text.LastIndexOf('\"');
+                            fileText = text.Substring(0, lastSpaceIndex);
+                            fileText = "label start: \n\t\"" + fileText;
+                            //fileText = fileText.Replace("\"");
+                        }
 
-                    else
-                        fileText = "label start: \n\t\"" + text + "\"";*/
-                    /*
-                    // Swipe
-                    var newCharacterResponse = await client.CallCharacterAsync(
-                        characterId: character.Id,
-                        characterTgt: character.Tgt,
-                        historyId: historyId,
-                        parentMsgUuid: userMessageUuid
-                    );*/
-                    // полная перезапись файла 
-                    using (StreamWriter writer = new StreamWriter(AIpath, false)) {
-                        //await writer.WriteLineAsync(fileText.Replace("\"\n\t\"\n", "\""));
-                        await writer.WriteLineAsync(final.Replace("\"\"", "\""));
-                    }
-                    RunScript(AIpath);
+                        else
+                            fileText = "label start: \n\t\"" + text + "\"";*/
+                        /*
+                        // Swipe
+                        var newCharacterResponse = await client.CallCharacterAsync(
+                            characterId: character.Id,
+                            characterTgt: character.Tgt,
+                            historyId: historyId,
+                            parentMsgUuid: userMessageUuid
+                        );*/
+                        // полная перезапись файла 
+                        using (StreamWriter writer = new StreamWriter(AIpath, false)) {
+                            //await writer.WriteLineAsync(fileText.Replace("\"\n\t\"\n", "\""));
+                            await writer.WriteLineAsync(final.Replace("\"\"", "\""));
+                        }
+                        RunScript(AIpath);
 
-                    isTyping = false;
+                        isTyping = false;
+                    }
                 }
             }
         }

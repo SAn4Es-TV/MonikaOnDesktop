@@ -122,27 +122,6 @@
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>
         </tb:TaskbarIcon>
-        <Grid x:Name="NameBox" Background="#FFE6F4" Margin="80,100,80,100" Visibility="Hidden">
-            <Border BorderBrush="#FFBDE1" BorderThickness="10">
-            </Border>
-            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="36" FontFamily="Comic Sans MS" Margin="0,43,0,0" Text="{DynamicResource s_enterName}"/>
-            <Button x:Name="nameOK" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,200,0,0" Width="256" Height="88" FontSize="48" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="{x:Null}" Click="nameOK_Click">
-                <local:OutlinedTextBlock x:Name="textBlock1" FontFamily="Comic Sans MS" Text="OK" TextWrapping="Wrap" StrokeThickness="10" Fill="White" Stroke="#FFFF64B8"/>
-            </Button>
-            <TextBox x:Name="NameTextBox" Text="NameTextBox" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="48" FontFamily="Comic Sans MS" Background="{x:Null}" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" SelectionTextBrush="{x:Null}" BorderThickness="0,0,0,0"/>
-
-        </Grid>
-        <Grid x:Name="LangBox" Background="#FFE6F4" Margin="80,100,80,100" Visibility="Hidden">
-            <Border BorderBrush="#FFBDE1" BorderThickness="10">
-            </Border>
-            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="36" FontFamily="Comic Sans MS" Margin="0,43,0,0" Text="{DynamicResource s_enterLang}"/>
-            <Button x:Name="nameRus" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="300,200,0,0" Width="256" Height="88" FontSize="48" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="{x:Null}" Click="nameRus_Click">
-                <local:OutlinedTextBlock x:Name="textBlock2" FontFamily="Comic Sans MS" Text="Русский" TextWrapping="Wrap" StrokeThickness="10" Fill="White" Stroke="#FFFF64B8"/>
-            </Button>
-            <Button x:Name="nameEng" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="-300,200,0,0" Width="256" Height="88" FontSize="48" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="{x:Null}" Click="nameEng_Click">
-                <local:OutlinedTextBlock x:Name="textBlock3" FontFamily="Comic Sans MS" Text="English" TextWrapping="Wrap" StrokeThickness="10" Fill="White" Stroke="#FFFF64B8"/>
-            </Button>
-        </Grid>
     </Grid>
 
 </Window>

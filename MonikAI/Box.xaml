@@ -5,10 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MonikaOnDesktop"
         mc:Ignorable="d"
-        Title="Box" Height="170" Width="500"
+        Title="Box" Height="250" Width="500"
         WindowStyle="None"
         Topmost="True"
-        Background="#ffbde1" MouseDown="Window_MouseDown">
+        Background="#ffbde1" MouseDown="Window_MouseDown"
+        WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
         <SolidColorBrush x:Key="mainColor" Color="White" />
@@ -43,10 +44,29 @@
     </Window.Resources>
 
     <Grid Background="#ffe6f4" Margin="6">
-        <TextBlock x:Name="textBlock" FontFamily="Comic Sans MS" FontSize="25" Text="Что ты хочешь сказать?"  Height="46" VerticalAlignment="Top" TextAlignment="Center" Margin="0,10,0,0"/>
-        <TextBox x:Name="aiBox" Background="Transparent" BorderBrush="#FFFF64B8" Margin="10,56,10,0" Height="47" FontSize="25" BorderThickness="0,0,0,2" SelectionBrush="#FFFF64B8" HorizontalContentAlignment="Center" VerticalAlignment="Top" FontFamily="Comic Sans MS"></TextBox>
-        <Button x:Name="OK" Click="OK_Click" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,108,0,0" Width="110" Height="35" FontSize="25" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="{x:Null}" d:LayoutOverrides="VerticalAlignment">
-            <local:OutlinedTextBlock x:Name="textBlock1" FontFamily="./#My Font Bold"  Text="OK" TextWrapping="Wrap" StrokeThickness="5" Fill="White" Stroke="#FFFF64B8"/>
-        </Button>
+
+        <Grid x:Name="AiForm" Visibility="Hidden">
+            <TextBlock FontFamily="Comic Sans MS" FontSize="25" Text="{DynamicResource s_labelSay}"  Height="46" VerticalAlignment="Top" TextAlignment="Center" Margin="0,10,0,0"/>
+            <TextBox x:Name="aiBox" Background="Transparent" BorderBrush="#FFFF64B8" Margin="10,56,10,0" Height="47" FontSize="25" BorderThickness="0,0,0,2" SelectionBrush="#FFFF64B8" HorizontalContentAlignment="Center" VerticalAlignment="Top" FontFamily="Comic Sans MS"></TextBox>
+            <Button x:Name="OK" Click="OK_Click" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,108,0,0" Width="110" Height="35" FontSize="25" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="{x:Null}" d:LayoutOverrides="VerticalAlignment">
+                <local:OutlinedTextBlock FontFamily="./#My Font Bold"  Text="OK" TextWrapping="Wrap" StrokeThickness="5" Fill="White" Stroke="#FFFF64B8"/>
+            </Button>
+        </Grid>
+        <Grid x:Name="StartForm" Visibility="Visible">
+            <TextBlock FontFamily="Comic Sans MS" FontSize="25" Text="What is your name?"  VerticalAlignment="Top" TextAlignment="Center" Margin="0,10,0,0"/>
+            <TextBox x:Name="nameBox" Background="Transparent" BorderBrush="#FFFF64B8" Margin="10,45,10,0" FontSize="25" BorderThickness="0,0,0,2" SelectionBrush="#FFFF64B8" HorizontalContentAlignment="Center" VerticalAlignment="Top" FontFamily="Comic Sans MS"></TextBox>
+
+            <TextBlock FontFamily="Comic Sans MS" FontSize="25" Text="What language will you speak to me?"  VerticalAlignment="Top" TextAlignment="Center" Margin="0,100,0,0"/>
+            <Button x:Name="Ru" Click="Ru_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="72,150,0,0" Width="110" FontSize="25" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="{x:Null}" d:LayoutOverrides="TopPosition, BottomPosition">
+                <local:OutlinedTextBlock FontFamily="./#My Font Bold"  Text="RU" TextWrapping="Wrap" StrokeThickness="5" Fill="White" Stroke="#FFFF64B8"/>
+            </Button>
+            <Button x:Name="En" Click="En_Click" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,150,72,0" Width="110" FontSize="25" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="{x:Null}" d:LayoutOverrides="TopPosition, BottomPosition">
+                <local:OutlinedTextBlock FontFamily="./#My Font Bold"  Text="EN" TextWrapping="Wrap" StrokeThickness="5" Fill="White" Stroke="#FFFF64B8"/>
+            </Button>
+            <Button x:Name="startOK" Click="OK_Click" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10" Height="35" FontSize="25" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="{x:Null}">
+                <local:OutlinedTextBlock FontFamily="./#My Font Bold"  Text="OK" TextWrapping="Wrap" StrokeThickness="5" Fill="White" Stroke="#FFFF64B8"/>
+            </Button>
+        </Grid>
+
     </Grid>
 </Window>

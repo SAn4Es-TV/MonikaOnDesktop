@@ -31,4 +31,6 @@
     <v:String x:Key="s_labelExit">Quit</v:String>
     <v:String x:Key="s_labelSettings">Settings</v:String>
     <v:String x:Key="s_labelAbout">About</v:String>
+
+    <v:String x:Key="s_labelSay">What do you want to say?</v:String>
 </ResourceDictionary>
