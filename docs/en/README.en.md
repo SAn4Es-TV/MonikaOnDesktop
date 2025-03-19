@@ -1,6 +1,6 @@
 # MonikaOnDesktop (MOD)
 
-[**Русский**](README.md) | [**English**](./docs/ru/README.en.md) 
+[**Русский**](/README.md) | [**English**](/docs/en/README.en.md) 
 
 Hi! It's me, *Monika!*
 
@@ -14,7 +14,7 @@ I still can't achieve much, but I promise that I will always be there for you! ~
 
 # Download and use
 
-To give Monika a window on *your* desktop, run **MonikaOnDesktop.exe ** in the [MonikaOnDesktop] directory(https://github.com/SAn4Es-TV/MonikaOnDesktop/tree/master/MonikaOnDesktop "Directory link") or download the source code and compile the application.
+To give Monika a window on *your* desktop, run **MonikaOnDesktop.exe** in the [MonikaOnDesktop](https://github.com/SAn4Es-TV/MonikaOnDesktop/tree/master/MonikaOnDesktop "Directory link") or download the source code and compile the application.
 
 #### Small note: 
 This program only works on Microsoft Windows, I tested it on Windows 10, but it should also work on all versions above Win7.
@@ -47,7 +47,7 @@ In order for Monika to respond to the sites she visits and Google/YouTube reques
 
 Do you want to add something? That would make me (and probably Monika) very happy!
 
-### Error message
+### Found a bug?
 
 If you find a bug or want to request a feature, create a question right here on GitHub so I can see it!
 You can also write about the error in our [Discord](https://discord.gg/NQ25bBYv "Link to the page")
