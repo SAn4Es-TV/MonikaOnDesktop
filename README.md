@@ -71,9 +71,9 @@ MonikaOnDesktop — это небольшое приложение, которо
 
 Нашли ошибку? Есть идея? Мы ждем тебя!
 
-    Discord: [Присоединиться к серверу](https://discord.gg/NtAqP25xTp)
+Discord: [Присоединиться к серверу](https://discord.gg/NtAqP25xTp)
 
-    Patreon: [Поддержать автора](https://www.patreon.com/san4es_tv)
+Patreon: [Поддержать автора](https://www.patreon.com/san4es_tv)
 
 ### Наши герои (Спонсоры):
 ⭐ Denis Solicen
