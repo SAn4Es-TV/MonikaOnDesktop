@@ -1,0 +1,51 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="LanguageName">Русский</sys:String>
+
+    <sys:String x:Key="DialogPath">ru</sys:String>
+
+    <sys:String x:Key="loc_Title_Settings">Настройки</sys:String>
+    <sys:String x:Key="loc_Title_Appearance">Внешний вид</sys:String>
+
+    <sys:String x:Key="loc_AI_Prompt">Что я хочу сказать?</sys:String>
+    <sys:String x:Key="loc_Btn_Cancel">Отмена</sys:String>
+    <sys:String x:Key="loc_Btn_Say">Сказать</sys:String>
+
+    <sys:String x:Key="loc_Nav_Monika">Моника</sys:String>
+    <sys:String x:Key="loc_Nav_AI">ИИ</sys:String>
+    <sys:String x:Key="loc_Btn_Save">Сохранить</sys:String>
+    <sys:String x:Key="loc_Btn_Exit">Выход</sys:String>
+
+    <sys:String x:Key="loc_Cat_Parsing">Парсинг</sys:String>
+    <sys:String x:Key="loc_Chk_Programs">Программы</sys:String>
+    <sys:String x:Key="loc_Chk_Sites">Сайты</sys:String>
+    <sys:String x:Key="loc_Chk_Google">Google</sys:String>
+    <sys:String x:Key="loc_Chk_Youtube">Youtube</sys:String>
+
+    <sys:String x:Key="loc_Cat_Other">Прочее</sys:String>
+    <sys:String x:Key="loc_Chk_AutoStart">Автозапуск</sys:String>
+    <sys:String x:Key="loc_Chk_DayNightFilter">Фильтр дня/ночи</sys:String>
+    <sys:String x:Key="loc_Chk_MouseHide">Скрытие курсором</sys:String>
+    <sys:String x:Key="loc_Chk_AppUpdate">Обновление программы</sys:String>
+    <sys:String x:Key="loc_Chk_DialogUpdate">Обновление диалогов</sys:String>
+
+    <sys:String x:Key="loc_Cat_Language">Язык</sys:String>
+    <sys:String x:Key="loc_Cat_DialogFrequency">Частота диалогов</sys:String>
+    <sys:String x:Key="loc_Cat_MonikaSize">Размер Моники</sys:String>
+    <sys:String x:Key="loc_Cat_Name">Имя</sys:String>
+
+    <sys:String x:Key="loc_Cat_Main">Главное</sys:String>
+    <sys:String x:Key="loc_Chk_AI_Enable">ИИ</sys:String>
+    <sys:String x:Key="loc_Cat_Token">Токен</sys:String>
+    <sys:String x:Key="loc_Cat_Port">Порт</sys:String>
+
+    <sys:String x:Key="loc_Wear_Hair">Причёска</sys:String>
+    <sys:String x:Key="loc_Wear_Ahoge">Хвостик</sys:String>
+    <sys:String x:Key="loc_Wear_Ribbon">Бантик</sys:String>
+    <sys:String x:Key="loc_Wear_Hat">Шляпка</sys:String>
+    <sys:String x:Key="loc_Wear_Cloth">Одежда</sys:String>
+    <sys:String x:Key="loc_Wear_Other">Другое</sys:String>
+
+</ResourceDictionary>

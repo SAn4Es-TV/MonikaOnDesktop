@@ -1,0 +1,51 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="LanguageName">English</sys:String>
+    
+    <sys:String x:Key="DialogPath">en</sys:String>
+
+    <sys:String x:Key="loc_Title_Settings">Settings</sys:String>
+    <sys:String x:Key="loc_Title_Appearance">Appearance</sys:String>
+
+    <sys:String x:Key="loc_AI_Prompt">What do I want to say?</sys:String>
+    <sys:String x:Key="loc_Btn_Cancel">Cancel</sys:String>
+    <sys:String x:Key="loc_Btn_Say">Say</sys:String>
+
+    <sys:String x:Key="loc_Nav_Monika">Monika</sys:String>
+    <sys:String x:Key="loc_Nav_AI">AI</sys:String>
+    <sys:String x:Key="loc_Btn_Save">Save</sys:String>
+    <sys:String x:Key="loc_Btn_Exit">Exit</sys:String>
+
+    <sys:String x:Key="loc_Cat_Parsing">Parsing</sys:String>
+    <sys:String x:Key="loc_Chk_Programs">Programs</sys:String>
+    <sys:String x:Key="loc_Chk_Sites">Websites</sys:String>
+    <sys:String x:Key="loc_Chk_Google">Google</sys:String>
+    <sys:String x:Key="loc_Chk_Youtube">Youtube</sys:String>
+
+    <sys:String x:Key="loc_Cat_Other">Other</sys:String>
+    <sys:String x:Key="loc_Chk_AutoStart">Autostart</sys:String>
+    <sys:String x:Key="loc_Chk_DayNightFilter">Day/Night Filter</sys:String>
+    <sys:String x:Key="loc_Chk_MouseHide">Hide by Cursor</sys:String>
+    <sys:String x:Key="loc_Chk_AppUpdate">App Update</sys:String>
+    <sys:String x:Key="loc_Chk_DialogUpdate">Dialog Update</sys:String>
+
+    <sys:String x:Key="loc_Cat_Language">Language</sys:String>
+    <sys:String x:Key="loc_Cat_DialogFrequency">Dialog Frequency</sys:String>
+    <sys:String x:Key="loc_Cat_MonikaSize">Monika Size</sys:String>
+    <sys:String x:Key="loc_Cat_Name">Name</sys:String>
+
+    <sys:String x:Key="loc_Cat_Main">Main</sys:String>
+    <sys:String x:Key="loc_Chk_AI_Enable">AI</sys:String>
+    <sys:String x:Key="loc_Cat_Token">Token</sys:String>
+    <sys:String x:Key="loc_Cat_Port">Port</sys:String>
+
+    <sys:String x:Key="loc_Wear_Hair">Hair</sys:String>
+    <sys:String x:Key="loc_Wear_Ahoge">Ahoge</sys:String>
+    <sys:String x:Key="loc_Wear_Ribbon">Ribbon</sys:String>
+    <sys:String x:Key="loc_Wear_Hat">Hat</sys:String>
+    <sys:String x:Key="loc_Wear_Cloth">Outfit</sys:String>
+    <sys:String x:Key="loc_Wear_Other">Other</sys:String>
+
+</ResourceDictionary>

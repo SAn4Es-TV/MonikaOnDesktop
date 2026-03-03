@@ -1,0 +1,84 @@
+﻿<Window x:Class="Monika.MPT.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Monika.MPT"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800"
+        WindowStyle="None"
+        MouseDown="Window_MouseDown"
+        ResizeMode="NoResize"
+        Topmost="True">
+    <Window.Resources>
+
+        <Style TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="mainBorder" BorderThickness="4" BorderBrush="#FFFFAACC" Background="#FFFFE6F4">
+                            <TextBlock Text="{TemplateBinding Content}" FontFamily="Aller Cyrillic" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="4"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="White" TargetName="mainBorder"/>
+                                <Setter Property="BorderBrush" Value="#FFFFAACC" TargetName="mainBorder"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="Margin" Value="14"/>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Image Source="/images/window_1_fallback.png" />
+        <Image Source="/images/monika_day_room.png"/>
+        <Image x:Name="monika" HorizontalAlignment="Left" Margin="-80,00,0,-30" />
+        <TextBox x:Name="textBox" TextChanged="textBox_TextChanged" Width="50" Height="20" HorizontalAlignment="Left" VerticalAlignment="Top"></TextBox>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Background="#99000000" Width="350" >
+            <StackPanel>
+                <TextBlock Text="" Foreground="White"/>
+                <TextBlock Text="Pose" Foreground="White"/>
+                <TextBlock Text="Eyebrows" Foreground="White"/>
+                <TextBlock Text="Eyes" Foreground="White"/>
+                <TextBlock Text="Tears" Foreground="White"/>
+                <TextBlock Text="Blush" Foreground="White"/>
+                <TextBlock Text="Mouth" Foreground="White"/>
+            </StackPanel>
+            <StackPanel Margin="0,0,0,0">
+                <TextBlock Text="" Foreground="White"/>
+                <Button x:Name="pose" Content="&lt;" Margin="10" Click="Button_Click"/>
+                <Button x:Name="brows" Content="&lt;" Margin="10" Click="Button_Click"/>
+                <Button x:Name="eyes" Content="&lt;" Margin="10" Click="Button_Click"/>
+                <Button x:Name="tears" Content="&lt;" Margin="10" Click="Button_Click"/>
+                <Button x:Name="blush" Content="&lt;" Margin="10" Click="Button_Click"/>
+                <Button x:Name="month" Content="&lt;" Margin="10" Click="Button_Click"/>
+            </StackPanel>
+            <StackPanel Width="130">
+                <TextBlock Text="" HorizontalAlignment="Center" Foreground="White"/>
+                <TextBlock x:Name="poseText" Text="Pose" HorizontalAlignment="Center" Foreground="White"/>
+                <TextBlock x:Name="browsText" Text="Eyebrows" HorizontalAlignment="Center" Foreground="White"/>
+                <TextBlock x:Name="eyesText" Text="Eyes" HorizontalAlignment="Center" Foreground="White"/>
+                <TextBlock x:Name="tearsText" Text="Tears" HorizontalAlignment="Center" Foreground="White"/>
+                <TextBlock x:Name="blushText" Text="Blush" HorizontalAlignment="Center" Foreground="White"/>
+                <TextBlock x:Name="mouthText" Text="Month" HorizontalAlignment="Center" Foreground="White"/>
+            </StackPanel>
+            <StackPanel Margin="0,0,0,0">
+                <TextBlock Text="" Foreground="White"/>
+                <Button x:Name="pose1" Content=">" Margin="10" Click="Button_Click_1"/>
+                <Button x:Name="brows1" Content=">" Margin="10" Click="Button_Click_1"/>
+                <Button x:Name="eyes1" Content=">" Margin="10" Click="Button_Click_1"/>
+                <Button x:Name="tears1" Content=">" Margin="10" Click="Button_Click_1"/>
+                <Button x:Name="blush1" Content=">" Margin="10" Click="Button_Click_1"/>
+                <Button x:Name="month1" Content=">" Margin="10" Click="Button_Click_1"/>
+            </StackPanel>
+        </StackPanel>
+        <TextBlock x:Name="msg" Text="Code: " HorizontalAlignment="Right" VerticalAlignment="Top" Width="325" Foreground="White"/>
+        <Button Content="Copy" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,14,10,0" Width="90" Click="Button_Click_2"/>
+    </Grid>
+</Window>

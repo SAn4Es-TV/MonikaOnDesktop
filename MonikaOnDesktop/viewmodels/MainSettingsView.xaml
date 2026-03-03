@@ -1,0 +1,230 @@
+﻿<UserControl
+    x:Class="MonikaOnDesktop.MainSettingsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:MonikaOnDesktop"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="336"
+    d:DesignWidth="510"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <Style TargetType="RadioButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <WrapPanel Margin="0,3,0,0">
+                            <Image
+                                x:Name="img"
+                                Width="17"
+                                Source="/images/check_selected_foreground.png"
+                                Visibility="Hidden" />
+                            <TextBlock
+                                x:Name="buttText"
+                                Margin="0,0,0,0"
+                                VerticalAlignment="Center"
+                                FontFamily="Halogen"
+                                FontSize="17"
+                                Foreground="#FFA5A5A5"
+                                Text="{TemplateBinding Content}" />
+                        </WrapPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="buttText" Property="Foreground" Value="#FFBB5599" />
+                                <Setter TargetName="img" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="buttText" Property="Foreground" Value="#FFBB5599" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+
+            </Setter>
+        </Style>
+        <Style TargetType="CheckBox">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <WrapPanel Margin="0,3,0,0">
+                            <Image
+                                x:Name="img"
+                                Width="17"
+                                Source="/images/check_selected_foreground.png"
+                                Visibility="Hidden" />
+                            <TextBlock
+                                x:Name="buttText"
+                                Margin="0,0,0,0"
+                                VerticalAlignment="Center"
+                                FontFamily="Halogen"
+                                FontSize="17"
+                                Foreground="#FFA5A5A5"
+                                Text="{TemplateBinding Content}" />
+                        </WrapPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="buttText" Property="Foreground" Value="#FFBB5599" />
+                                <Setter TargetName="img" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="buttText" Property="Foreground" Value="#FFBB5599" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+
+            </Setter>
+        </Style>
+        <Style x:Key="ScrollBarThumb" TargetType="{x:Type Thumb}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Image RenderOptions.BitmapScalingMode="NearestNeighbor" Source="/images/horizontal_hover_thumb.png" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ScrollBarBtn" TargetType="{x:Type RepeatButton}">
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="OverridesDefaultStyle" Value="True" />
+            <Setter Property="IsTabStop" Value="False" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type RepeatButton}">
+                        <Border Background="Transparent" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="ScrollBar">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollBar">
+                        <Grid>
+                            <Grid.Background>
+                                <ImageBrush ImageSource="/images/horizontal_poem_bar.png" RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                            </Grid.Background>
+                            <Track
+                                x:Name="PART_Track"
+                                IsDirectionReversed="true"
+                                ViewportSize="NaN">
+
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton
+                                        Margin="2"
+                                        Command="ScrollBar.PageUpCommand"
+                                        Opacity="1"
+                                        Style="{StaticResource ScrollBarBtn}" />
+                                </Track.DecreaseRepeatButton>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton
+                                        Margin="2"
+                                        Command="ScrollBar.PageDownCommand"
+                                        Opacity="1"
+                                        Style="{StaticResource ScrollBarBtn}" />
+                                </Track.IncreaseRepeatButton>
+
+                                <Track.Thumb>
+                                    <Thumb Style="{StaticResource ScrollBarThumb}" />
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="sub" TargetType="Button">
+            <Setter Property="Background" Value="Aqua" />
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Background="#01ffffff">
+                            <local:OutlinedTextBlock
+                                x:Name="buttText"
+                                Margin="0,0,0,0"
+                                Fill="White"
+                                FontFamily="My Font"
+                                FontSize="24"
+                                Stroke="#FFBB5599"
+                                StrokeThickness="2.5"
+                                Text="{TemplateBinding Content}" />
+                            <local:OutlinedTextBlock
+                                x:Name="buttText1"
+                                Margin="0,0,0,0"
+                                Fill="White"
+                                FontFamily="My Font"
+                                FontSize="24"
+                                Stroke="#FFBB5599"
+                                StrokeThickness="0"
+                                Text="{TemplateBinding Content}" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <Grid Background="Transparent">
+        <WrapPanel Margin="20">
+            <StackPanel Margin="0,0,50,0">
+                <Button Content="{DynamicResource loc_Cat_Parsing}" Style="{StaticResource sub}" />
+                <CheckBox Content="{DynamicResource loc_Chk_Programs}" IsChecked="{Binding Settings.Parsing[Processes], Mode=TwoWay}" />
+                <CheckBox Content="{DynamicResource loc_Chk_Sites}" IsChecked="{Binding Settings.Parsing[Sites], Mode=TwoWay}" />
+                <CheckBox Content="{DynamicResource loc_Chk_Google}" IsChecked="{Binding Settings.Parsing[Google], Mode=TwoWay}" />
+                <CheckBox Content="{DynamicResource loc_Chk_Youtube}" IsChecked="{Binding Settings.Parsing[Youtube], Mode=TwoWay}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,30,0">
+                <Button Content="{DynamicResource loc_Cat_Other}" Style="{StaticResource sub}" />
+                <CheckBox Content="{DynamicResource loc_Chk_AutoStart}" IsChecked="{Binding Settings.AutoStart}" />
+                <CheckBox Content="{DynamicResource loc_Chk_DayNightFilter}" IsChecked="{Binding Settings.Filter}" />
+                <CheckBox Content="{DynamicResource loc_Chk_MouseHide}" IsChecked="{Binding Settings.MouseHide}" />
+                <!--<CheckBox Content="{DynamicResource loc_Chk_AppUpdate}" IsChecked="{Binding Settings.AutoUpdate}"/>-->
+                <CheckBox Content="{DynamicResource loc_Chk_DialogUpdate}" IsChecked="{Binding Settings.DialogAutoUpdate}" />
+            </StackPanel>
+            <StackPanel x:Name="langCategory" Margin="0,0,00,0">
+                <Button Content="{DynamicResource loc_Cat_Language}" Style="{StaticResource sub}" />
+            </StackPanel>
+            <StackPanel Margin="0,20,60,0">
+                <Button Content="{DynamicResource loc_Cat_DialogFrequency}" Style="{StaticResource sub}" />
+                <ScrollBar
+                    Margin="0,0,0,10"
+                    FlowDirection="RightToLeft"
+                    Maximum="3"
+                    Minimum="0.5"
+                    Orientation="Horizontal"
+                    Value="{Binding Settings.IdleRarity}" />
+                <Button Content="{DynamicResource loc_Cat_MonikaSize}" Style="{StaticResource sub}" />
+                <ScrollBar
+                    FlowDirection="RightToLeft"
+                    Maximum="2"
+                    Minimum="0.5"
+                    Orientation="Horizontal"
+                    ValueChanged="ScrollBar_ValueChanged"
+                    Value="{Binding Settings.Scale}" />
+            </StackPanel>
+            <StackPanel Margin="0,20,0,0">
+                <Button Content="{DynamicResource loc_Cat_Name}" Style="{StaticResource sub}" />
+                <Border Padding="1" BorderThickness="0">
+                    <Border.Background>
+                        <ImageBrush ImageSource="/images/textbox_background.png" RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                    </Border.Background>
+
+                    <TextBox
+                        Width="150"
+                        Background="{x:Null}"
+                        BorderBrush="{x:Null}"
+                        BorderThickness="0"
+                        FontFamily="Halogen"
+                        FontSize="17"
+                        Foreground="#FFA5A5A5"
+                        SelectionBrush="Transparent"
+                        SelectionTextBrush="#FFBB5599"
+                        Text="{Binding Settings.Username}" />
+
+                </Border>
+            </StackPanel>
+        </WrapPanel>
+    </Grid>
+</UserControl>

@@ -1,0 +1,105 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net10.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UseWPF>true</UseWPF>
+		<PublishSingleFile>true</PublishSingleFile>
+		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+		<DebugType>embedded</DebugType>
+		<ApplicationIcon>s_sticker_1.ico</ApplicationIcon>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Remove="Halogen_0.ttf" />
+		<None Remove="hangman\hm_0.png" />
+		<None Remove="hangman\hm_1.png" />
+		<None Remove="hangman\hm_2.png" />
+		<None Remove="hangman\hm_3.png" />
+		<None Remove="hangman\hm_4.png" />
+		<None Remove="hangman\hm_5.png" />
+		<None Remove="hangman\hm_6.png" />
+		<None Remove="hangman\hm_frame.png" />
+		<None Remove="hangman\hm_frame_d.png" />
+		<None Remove="hangman\hm_s1.png" />
+		<None Remove="hangman\hm_s2.png" />
+		<None Remove="hangman\hm_sm_0.png" />
+		<None Remove="hangman\hm_sm_1.png" />
+		<None Remove="hangman\hm_sm_2.png" />
+		<None Remove="hangman\hm_sm_3.png" />
+		<None Remove="hangman\hm_sm_4.png" />
+		<None Remove="hangman\hm_sm_5.png" />
+		<None Remove="hangman\hm_sm_6.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="s_sticker_1.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Monika.Shared\Monika.Shared.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Resource Include="Halogen_0.ttf">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_0.png">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_1.png">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_2.png">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_3.png">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_4.png">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_5.png">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_6.png">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_frame.png">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_frame_d.png">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_s1.png">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_s2.png">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_sm_0.png">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_sm_1.png">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_sm_2.png">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_sm_3.png">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_sm_4.png">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_sm_5.png">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_sm_6.png">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+	</ItemGroup>
+
+</Project>

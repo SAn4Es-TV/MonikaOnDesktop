@@ -1,0 +1,120 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <PublishSingleFile>true</PublishSingleFile>
+	  <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+	  <DebugType>embedded</DebugType>
+	  <ApplicationIcon>MOD Logo.ico</ApplicationIcon>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="allercyrillic.ttf" />
+    <None Remove="comic.ttf" />
+    <None Remove="Halogen_0.ttf" />
+    <None Remove="images\check_selected_foreground.png" />
+    <None Remove="images\horizontal_hover_thumb.png" />
+    <None Remove="images\horizontal_poem_bar.png" />
+    <None Remove="images\horizontal_poem_thumb.png" />
+    <None Remove="images\logo.png" />
+    <None Remove="images\menu.png" />
+    <None Remove="images\textbox.png" />
+    <None Remove="images\textbox_background.png" />
+    <None Remove="images\textbox_mask.png" />
+    <None Remove="images\vertical_poem_bar.png" />
+    <None Remove="images\vertical_poem_thumb.png" />
+    <None Remove="MultiplyEffect.ps" />
+    <None Remove="OutlineEffect.ps" />
+    <None Remove="riffic-bold.ttf" />
+    <None Remove="RifficFree-Bold.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Remove="langs\en-US.xaml" />
+    <Page Remove="langs\ru-RU.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="MOD Logo.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="System.Management" Version="10.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Monika.Shared\Monika.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="fonts\allercyrillic.ttf">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="fonts\comic.ttf">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="fonts\Halogen_0.ttf">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="images\check_selected_foreground.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="images\horizontal_hover_thumb.png" />
+    <Resource Include="images\horizontal_poem_bar.png" />
+    <Resource Include="images\horizontal_poem_thumb.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="images\logo.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="images\menu.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="images\textbox.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="images\textbox_background.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="images\textbox_mask.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="images\vertical_poem_bar.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="images\vertical_poem_thumb.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="fonts\riffic-bold.ttf">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="fonts\RifficFree-Bold.ttf">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="langs\en-US.xaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="langs\ru-RU.xaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="MultiplyEffect.ps">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="outlineeffect.ps">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="fonts\Aller_Rg.ttf">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

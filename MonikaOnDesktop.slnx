@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="Monika.Hangman/Monika.Hangman.csproj" Id="b13d630e-4d04-4343-bdb3-776092d61118" />
+  <Project Path="Monika.MPT/Monika.MPT.csproj" Id="7a74b243-9470-4628-88b8-405afafdaaef" />
+  <Project Path="Monika.Shared/Monika.Shared.csproj" />
+  <Project Path="MonikaOnDesktop/MonikaOnDesktop.csproj" />
+  <Project Path="Shimeji/Shimeji.csproj" Id="ae83defe-4e5b-4d5d-ad0d-d8d5a6a3f46c" />
+</Solution>
