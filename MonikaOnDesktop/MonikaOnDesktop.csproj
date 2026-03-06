@@ -16,6 +16,7 @@
   <ItemGroup>
     <None Remove="allercyrillic.ttf" />
     <None Remove="comic.ttf" />
+    <None Remove="fonts\Aller_Rg.ttf" />
     <None Remove="Halogen_0.ttf" />
     <None Remove="images\check_selected_foreground.png" />
     <None Remove="images\horizontal_hover_thumb.png" />
@@ -54,6 +55,9 @@
 
   <ItemGroup>
     <Resource Include="fonts\allercyrillic.ttf">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="fonts\Aller_Rg.ttf">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="fonts\comic.ttf">
@@ -109,12 +113,6 @@
     <Resource Include="outlineeffect.ps">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="fonts\Aller_Rg.ttf">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>

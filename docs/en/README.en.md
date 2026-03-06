@@ -57,8 +57,7 @@ Want me to respond like a real person? Connect the AI module:
 
 To let me see your active tabs, install the extension:
 
-> Chrome: (In development).
-> Firefox: (Pending moderation).
+> Chrome (В разработке), [Firefox](https://addons.mozilla.org/ru/firefox/addon/monika-on-desktop-bridge/).
 > 1. Download the extension.
 > 2. Enable Parsing in the settings.
 > 3. Restart the application.

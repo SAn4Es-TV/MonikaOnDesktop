@@ -669,7 +669,7 @@ namespace MonikaOnDesktop {
             contextMenuStrip1.Foreground = new SolidColorBrush(Color.FromRgb(187, 85, 153));
             contextMenuStrip1.BorderBrush = new SolidColorBrush(Color.FromRgb(255, 189, 225));
             contextMenuStrip1.BorderThickness = new Thickness(4);
-            contextMenuStrip1.FontFamily = new FontFamily("My Font");
+            contextMenuStrip1.FontFamily = new FontFamily(new Uri("pack://application:,,,/"), "./fonts/#My Font");
             contextMenuStrip1.FontSize = 15;
 
             // 2. Create and add menu items
@@ -751,6 +751,10 @@ namespace MonikaOnDesktop {
                     Random random = new Random();
                     filePath = Path.Combine(scriptsPath, GetDialogLang(), "goodbye.rpy");
                     RunLabel("__random__");
+                } else {
+                    this.Dispatcher.Invoke(() => {
+                        this.Close();
+                    });
                 }
             };
 

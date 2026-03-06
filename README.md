@@ -57,8 +57,7 @@ MonikaOnDesktop — это небольшое приложение, которо
 
 Чтобы я видела твои вкладки, установи расширение:
 
-> Chrome (В разработке).
-> Firefox (На модерации).
+> Chrome (В разработке), [Firefox](https://addons.mozilla.org/ru/firefox/addon/monika-on-desktop-bridge/).
 > 1. Скачай расширение
 > 2. В настройках включи парсинг
 > 3. Перезайпусти приложение

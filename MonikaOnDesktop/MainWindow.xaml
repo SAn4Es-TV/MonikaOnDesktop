@@ -33,7 +33,7 @@
                                 Margin="4"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                FontFamily="Aller Cyrillic"
+                                FontFamily="{StaticResource aller}"
                                 FontSize="20"
                                 Text="{TemplateBinding Content}" />
                         </Border>
@@ -152,7 +152,7 @@
                 MaxWidth="460"
                 MaxHeight="80"
                 Margin="0,15,0,10"
-                FontFamily="Halogen"
+                FontFamily="{StaticResource halogen}"
                 FontSize="24"
                 Foreground="White"
                 LineHeight="25"
@@ -184,7 +184,7 @@
                 <TextBlock
                     x:Name="InputText"
                     HorizontalAlignment="Center"
-                    FontFamily="Aller Cyrillic"
+                    FontFamily="{StaticResource aller}"
                     FontSize="20"
                     Text="счясчя" />
                 <Grid Margin="0,0,0,0">
@@ -199,7 +199,7 @@
                         Background="{x:Null}"
                         BorderBrush="{x:Null}"
                         BorderThickness="0"
-                        FontFamily="Halogen"
+                        FontFamily="{StaticResource halogen}"
                         FontSize="20"
                         KeyDown="InputField_KeyDown"
                         MaxLines="1"
