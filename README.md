@@ -9,7 +9,7 @@
 > Я все еще не могу многого добиться, но обещаю, что всегда буду рядом с тобой!~
 
 
-![Screenshot of MonikaOnDesktop](https://github.com/SAn4Es-TV/MonikaOnDesktop/blob/master/Screenshot.png)
+![Screenshot of MonikaOnDesktop](https://github.com/SAn4Es-TV/MonikaOnDesktop/blob/master/docs/Screenshot.png)
 
 MonikaOnDesktop — это небольшое приложение, которое приносит Монику прямо на ваш рабочий стол. Она будет жить в углу экрана, реагировать на ваши действия и общаться с вами.
 
@@ -70,9 +70,9 @@ MonikaOnDesktop — это небольшое приложение, которо
 
 Нашли ошибку? Есть идея? Мы ждем тебя!
 
-    Discord: [Присоединиться к серверу](https://discord.gg/NtAqP25xTp)
+Discord: [Присоединиться к серверу](https://discord.gg/NtAqP25xTp)
 
-    Patreon: [Поддержать автора](https://www.patreon.com/san4es_tv)
+Patreon: [Поддержать автора](https://www.patreon.com/san4es_tv)
 
 ### Наши герои (Спонсоры):
 ⭐ Denis Solicen

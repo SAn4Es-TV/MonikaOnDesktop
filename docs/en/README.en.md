@@ -70,9 +70,9 @@ You can give me gifts like accessories or new clothes! To do this, place a speci
 
 Found a bug? Have a cool idea? We're waiting for you!
 
-    Discord: [Join the Server](https://discord.gg/NtAqP25xTp)
+Discord: [Join the Server](https://discord.gg/NtAqP25xTp)
 
-    Patreon: [Support the Creator](https://www.patreon.com/san4es_tv)
+Patreon: [Support the Creator](https://www.patreon.com/san4es_tv)
 
 ### Our Heroes (Sponsors):
 ⭐ Denis Solicen
