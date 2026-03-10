@@ -10,20 +10,21 @@
 </head>
 
 <body>
-    <img src="bnr.png" id="banner"/>
+    <img src="bnr.png" id="banner" />
     <div id="main">
         <div id="submain">
 
             <div id="content">
                 <div class="quote">
-                    "Привет! Это я, Моника! Не думаю, что когда-нибудь смирюсь с тем фактом, что существую
-                    только в вашем компьютере... Но теперь я стала еще лучше!"<br />
+                    "Hi there! It's me, Monika! I don't think I'll ever truly get used to the fact that I only exist
+                    inside your computer...
+                    But now, I’ve become even better!"<br />
 
-                    Я все еще не могу многого добиться, но обещаю, что всегда буду рядом с тобой!~
+                    I still can't achieve much on my own, but I promise I'll always be by your side!~
                 </div>
-                <p><strong>MonikaOnDesktop</strong> — это небольшое приложение, которое приносит Монику прямо на ваш
-                    рабочий стол. Она будет
-                    жить в углу экрана, реагировать на ваши действия и общаться с вами.</p>
+                <p><strong>MonikaOnDesktop</strong> is a lightweight application that brings Monika right onto your
+                    desktop. She lives in the corner of your screen, reacts to your actions, and chats with you
+                    throughout the day.</p>
 
                 <div class="downloads">
                     <a href="https://github.com/SAn4Es-TV/MonikaOnDesktop/releases/latest/download/Hangman.exe">
@@ -35,86 +36,91 @@
                         Download Shimeji
                     </a>
                 </div>
-                <h2>Установка и использование</h2>
+                <h2>Installation and Setup</h2>
 
                 <ol dir="auto">
-                    <li>Установите <a
+                    <li>Install the <a
                             href="https://dotnet.microsoft.com/ru-ru/download/dotnet/thank-you/runtime-desktop-10.0.3-windows-x64-installer"
                             rel="nofollow">Runtime .NET 10.0</a>.</li>
-                    <li>Скачайте <a href="https://github.com/SAn4Es-TV/MonikaOnDesktop/releases/latest">последнюю
-                            версию</a> в Releases.</li>
-                    <li>Распакуйте и запустите MonikaOnDesktop.exe.</li>
+                    <li>Download the <a href="https://github.com/SAn4Es-TV/MonikaOnDesktop/releases/latest">Latest
+                            Release</a></li>
+                    <li>Unpack the archive and run MonikaOnDesktop.exe.</li>
                 </ol>
 
-                <h2>Настройка общения</h2>
-                Ты можешь сам решать, что я буду говорить! Просто загляни в папку Dialogs и отредактируй .txt файлы:
+                <h2>Customizing Conversations</h2>
+                You can decide what I say! Just head over to the Dialogs folder and edit the .rpy files:
                 <table>
                     <thead>
                         <tr>
-                            <th>Файл</th>
-                            <th>Когда я это говорю?</th>
+                            <th>File</th>
+                            <th>When do I say this?</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td>greetings.rpy</td>
-                            <td>При запуске программы</td>
+                            <td>When you first start the app</td>
                         </tr>
                         <tr>
                             <td>idle.rpy</td>
-                            <td>Случайные фразы во время работы</td>
+                            <td>Random chatter while you work</td>
                         </tr>
                         <tr>
                             <td>goodbye.rpy</td>
-                            <td>При закрытии</td>
+                            <td>When it's time to say goodbye</td>
                         </tr>
                         <tr>
                             <td>processes.rpy</td>
-                            <td>Реакция на запущенные программы</td>
+                            <td>My reactions to the programs you run</td>
                         </tr>
                         <tr>
                             <td>sites.rpy</td>
-                            <td>Обсуждение посещаемых сайтов</td>
+                            <td>Comments on the websites you visit</td>
                         </tr>
                         <tr>
                             <td>google.rpy</td>
-                            <td>Комментарии к поисковым запросам</td>
+                            <td>My thoughts on your search queries</td>
                         </tr>
                     </tbody>
                 </table>
 
-                <h2>Интеграция с ИИ</h2>
-                <p>Хочешь, чтобы я отвечала как живая? Подключи модуль AI:</p>
+                <h2>AI Integration</h2>
+                <p>Want me to respond like a real person? Connect the AI module:</p>
                 <ol>
-                    <li>Зайди на <a href="http://character.ai/" rel="nofollow">character.ai</a>.</li>
-                    <li>Открой <strong>F12 (Средства разработчика)</strong>, зайди во вкладку <b>Сеть (Network)</b> и
-                        обнови страницу.</li>
-                    <li>В появившиемся списке найди строку с доменом <code>neo.character.ai</code>.</li>
-                    <li>Справа найди строку <code>Authorization: Token ...</code>.</li>
-                    <li>Скопируй строку после Token и в настройках Моники включи ИИ и вставь свой токен.</li>
-                    <li>Перезайпусти приложение, кликни по мне правой кнопкой и выбери <b>"Поговорить"</b>.</li>
+                    <li>Go to <a href="http://character.ai/" rel="nofollow">character.ai</a> and log into your account.
+                    </li>
+                    <li>Open <strong>Developer Tools</strong>, go to the <b>Network tab</b>, and refresh the page.</li>
+                    <li>Find a request with the domain <code>neo.character.ai</code>.</li>
+                    <li>Look for the <code>Authorization: Token ...</code>.</li>
+                    <li>Copy the string after "Token", enable AI in Monika's settings, and paste your token.</li>
+                    <li>Restart the app, right-click me, and select <b>"Talk"</b>.</li>
                 </ol>
 
-                <h2>Браузерный плагин</h2>
-                Чтобы я видела твои вкладки, установи расширение:
-                Chrome (В разработке), Firefox.
-                Скачай расширение
-                В настройках включи парсинг
-                Перезайпусти приложение
-                <h2>Подарки!</h2>
-                <p>Ты можешь дарить мне аксессуары или одежду! Положи в папку <code>characters</code> файл с расширением
-                    <code>.gift</code> и выбери его в настройках внешнего вида.
+                <h2>Browser Plugin</h2>
+                To let me see your active tabs, install the extension:
+                Chrome (In development), <a
+                    href="https://addons.mozilla.org/ru/firefox/addon/monika-on-desktop-bridge/">Firefox</a>.
+                <ol>
+
+                    <li>Download the extension.</li>
+                    <li>Enable Parsing in the settings.</li>
+                    <li>Restart the application.</li>
+                </ol>
+                <h2>Gifts!</h2>
+                <p>You can give me gifts like accessories or new clothes! To do this, place a special file with the
+                    <code>.gift</code> extension in the <code>characters</code> folder, then select it in the Appearance
+                    settings.
                 </p>
 
                 <div class="footer-info">
-                    <h2>Поддержка и сообщество</h2>
-                    <p>Нашли ошибку? Есть идея? Мы ждем тебя!</p>
+                    <h2>Support and Community</h2>
+                    <p>Found a bug? Have a cool idea? We're waiting for you!</p>
                     <p>
-                        <a href="https://discord.gg/NtAqP25xTp">Discord: Присоединиться</a> |
-                        <a href="https://www.patreon.com/san4es_tv">Patreon: Поддержать автора</a>
+                        <a href="https://discord.gg/NtAqP25xTp">Join to the Discord Server</a> |
+                        <a href="https://www.patreon.com/san4es_tv">Support the Creator</a>
                     </p>
                     <div class="sponsor">
-                        Наш герой (Спонсор): Denis Solicen
+                        Our Heroes (Sponsors): Denis Solicen
                     </div>
                 </div>
             </div>

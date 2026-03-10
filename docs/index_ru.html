@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport">
+    <title>Monika On Desktop</title>
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+    <img src="bnr.png" id="banner" />
+    <div id="main">
+        <div id="submain">
+
+            <div id="content">
+                <div class="quote">
+                    "Привет! Это я, Моника! Не думаю, что когда-нибудь смирюсь с тем фактом, что существую
+                    только в вашем компьютере... Но теперь я стала еще лучше!"<br />
+
+                    Я все еще не могу многого добиться, но обещаю, что всегда буду рядом с тобой!~
+                </div>
+                <p><strong>MonikaOnDesktop</strong> — это небольшое приложение, которое приносит Монику прямо на ваш
+                    рабочий стол. Она будет
+                    жить в углу экрана, реагировать на ваши действия и общаться с вами.</p>
+
+                <div class="downloads">
+                    <a href="https://github.com/SAn4Es-TV/MonikaOnDesktop/releases/latest/download/Hangman.exe">
+                        Download Hangman
+                    </a><a
+                        href="https://github.com/SAn4Es-TV/MonikaOnDesktop/releases/latest/download/MonikaOnDesktop.zip">
+                        Download MonikaOnDesktop
+                    </a><a href="https://github.com/SAn4Es-TV/MonikaOnDesktop/releases/latest/download/Shimeji.exe">
+                        Download Shimeji
+                    </a>
+                </div>
+                <h2>Установка и использование</h2>
+
+                <ol dir="auto">
+                    <li>Установите <a
+                            href="https://dotnet.microsoft.com/ru-ru/download/dotnet/thank-you/runtime-desktop-10.0.3-windows-x64-installer"
+                            rel="nofollow">Runtime .NET 10.0</a>.</li>
+                    <li>Скачайте <a href="https://github.com/SAn4Es-TV/MonikaOnDesktop/releases/latest">последнюю
+                            версию</a> в Releases.</li>
+                    <li>Распакуйте и запустите MonikaOnDesktop.exe.</li>
+                </ol>
+
+                <h2>Настройка общения</h2>
+                Ты можешь сам решать, что я буду говорить! Просто загляни в папку Dialogs и отредактируй .txt файлы:
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Файл</th>
+                            <th>Когда я это говорю?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>greetings.rpy</td>
+                            <td>При запуске программы</td>
+                        </tr>
+                        <tr>
+                            <td>idle.rpy</td>
+                            <td>Случайные фразы во время работы</td>
+                        </tr>
+                        <tr>
+                            <td>goodbye.rpy</td>
+                            <td>При закрытии</td>
+                        </tr>
+                        <tr>
+                            <td>processes.rpy</td>
+                            <td>Реакция на запущенные программы</td>
+                        </tr>
+                        <tr>
+                            <td>sites.rpy</td>
+                            <td>Обсуждение посещаемых сайтов</td>
+                        </tr>
+                        <tr>
+                            <td>google.rpy</td>
+                            <td>Комментарии к поисковым запросам</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>Интеграция с ИИ</h2>
+                <p>Хочешь, чтобы я отвечала как живая? Подключи модуль AI:</p>
+                <ol>
+                    <li>Зайди на <a href="http://character.ai/" rel="nofollow">character.ai</a>.</li>
+                    <li>Открой <strong>F12 (Средства разработчика)</strong>, зайди во вкладку <b>Сеть (Network)</b> и
+                        обнови страницу.</li>
+                    <li>В появившиемся списке найди строку с доменом <code>neo.character.ai</code>.</li>
+                    <li>Справа найди строку <code>Authorization: Token ...</code>.</li>
+                    <li>Скопируй строку после Token и в настройках Моники включи ИИ и вставь свой токен.</li>
+                    <li>Перезайпусти приложение, кликни по мне правой кнопкой и выбери <b>"Поговорить"</b>.</li>
+                </ol>
+
+                <h2>Браузерный плагин</h2>
+                Чтобы я видела твои вкладки, установи расширение:
+                Chrome (В разработке), <a
+                    href="https://addons.mozilla.org/ru/firefox/addon/monika-on-desktop-bridge/">Firefox</a>.
+                <ol>
+                    <li>Скачай расширение.</li>
+                    <li>В настройках включи парсинг.</li>
+                    <li>Перезайпусти приложение.</li>
+                </ol>
+                <h2>Подарки!</h2>
+                <p>Ты можешь дарить мне аксессуары или одежду! Положи в папку <code>characters</code> файл с расширением
+                    <code>.gift</code> и выбери его в настройках внешнего вида.
+                </p>
+
+                <div class="footer-info">
+                    <h2>Поддержка и сообщество</h2>
+                    <p>Нашли ошибку? Есть идея? Мы ждем тебя!</p>
+                    <p>
+                        <a href="https://discord.gg/NtAqP25xTp">Discord: Присоединиться</a> |
+                        <a href="https://www.patreon.com/san4es_tv">Patreon: Поддержать автора</a>
+                    </p>
+                    <div class="sponsor">
+                        Наш герой (Спонсор): Denis Solicen
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -25,7 +25,7 @@ body {
 
     line-height: 1.6;
     margin: 0;
-    padding: 20px;
+    padding: 0px 0px 0px 0px;
     /* Flexbox на body помогает центрировать всё содержимое по горизонтали */
     display: flex;
     flex-direction: column;
@@ -40,8 +40,6 @@ body {
     width: 100%;
     /* Делаем адаптивной (тянется на узких экранах) */
     height: auto;
-    /* Сохраняем пропорции */
-    margin-bottom: 20px;
     /* Отступ снизу до контейнера #main */
     border-radius: 8px;
     /* Необязательно: скругление углов */
@@ -49,7 +47,7 @@ body {
 
 #main {
     max-width: 900px;
-    margin: 200px auto auto auto;
+    margin: 0px auto auto auto;
     background: var(--primary-color);
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
