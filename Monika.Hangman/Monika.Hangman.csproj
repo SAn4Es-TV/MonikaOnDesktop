@@ -32,6 +32,15 @@
 		<None Remove="hangman\hm_sm_4.png" />
 		<None Remove="hangman\hm_sm_5.png" />
 		<None Remove="hangman\hm_sm_6.png" />
+		<None Remove="hangman\hm_s_0.png" />
+		<None Remove="hangman\hm_s_1.png" />
+		<None Remove="hangman\hm_s_2.png" />
+		<None Remove="hangman\hm_s_3.png" />
+		<None Remove="hangman\hm_s_4.png" />
+		<None Remove="hangman\hm_s_5.png" />
+		<None Remove="hangman\hm_s_6.png" />
+		<None Remove="words.txt" />
+		<None Remove="words_ru.txt" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -100,6 +109,27 @@
 		<Resource Include="hangman\hm_sm_6.png">
 			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
 		</Resource>
+		<Resource Include="hangman\hm_s_0.png">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_s_1.png">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_s_2.png">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_s_3.png">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_s_4.png">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_s_5.png">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="hangman\hm_s_6.png" />
+		<EmbeddedResource Include="words.txt" />
+		<EmbeddedResource Include="words_ru.txt" />
 	</ItemGroup>
 
 </Project>

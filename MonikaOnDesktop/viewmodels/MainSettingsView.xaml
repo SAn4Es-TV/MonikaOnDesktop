@@ -177,6 +177,7 @@
             </StackPanel>
             <StackPanel Margin="0,0,30,0">
                 <Button Content="{DynamicResource loc_Cat_Other}" Style="{StaticResource sub}" />
+                <CheckBox Content="{DynamicResource loc_Chk_AutoDialog}" IsChecked="{Binding Settings.IsAuto}" />
                 <CheckBox Content="{DynamicResource loc_Chk_AutoStart}" IsChecked="{Binding Settings.AutoStart}" />
                 <CheckBox Content="{DynamicResource loc_Chk_DayNightFilter}" IsChecked="{Binding Settings.Filter}" />
                 <CheckBox Content="{DynamicResource loc_Chk_MouseHide}" IsChecked="{Binding Settings.MouseHide}" />
@@ -192,7 +193,7 @@
                     Margin="0,0,0,10"
                     FlowDirection="RightToLeft"
                     Maximum="3"
-                    Minimum="0.5"
+                    Minimum="0"
                     Orientation="Horizontal"
                     Value="{Binding Settings.IdleRarity}" />
                 <Button Content="{DynamicResource loc_Cat_MonikaSize}" Style="{StaticResource sub}" />

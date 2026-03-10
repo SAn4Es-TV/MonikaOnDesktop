@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
@@ -10,12 +11,7 @@ namespace Monika.Hangman {
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
-        string[] WordList = File.ReadAllLines(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "words.txt"));
-        List<KeyValuePair<string, int>> dictionary = File.ReadLines(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "words.txt"))
-       .Select(line => line.Split(','))
-       .Where(parts => parts.Length == 2 && int.TryParse(parts[1], out _))
-       .Select(parts => new KeyValuePair<string, int>(parts[0].Trim(), int.Parse(parts[1])))
-       .ToList();
+        List<KeyValuePair<string, int>> dictionary = new List<KeyValuePair<string, int>>();
         string Word = "";
         string character = "m";
         string FormatedWord = "";
@@ -28,10 +24,79 @@ namespace Monika.Hangman {
 
         bool losed = false;
         bool win = false;
+
+        bool want_close = true;
+
+        string isSayori = "s";
+        void loadWords() {
+
+            /*if (!File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ru.txt"))) {
+                dictionary = File.ReadLines(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "words.txt"))
+       .Select(line => line.Split(','))
+       .Where(parts => parts.Length == 2 && int.TryParse(parts[1], out _))
+       .Select(parts => new KeyValuePair<string, int>(parts[0].Trim(), int.Parse(parts[1])))
+       .ToList();
+            } else {
+                dictionary = File.ReadLines(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "words_ru.txt"))
+       .Select(line => line.Split(','))
+       .Where(parts => parts.Length == 2 && int.TryParse(parts[1], out _))
+       .Select(parts => new KeyValuePair<string, int>(parts[0].Trim(), int.Parse(parts[1])))
+       .ToList();
+            }*/
+            string[] resources = Assembly.GetExecutingAssembly().GetManifestResourceNames();
+            foreach (var res in resources) Debug.WriteLine(res);
+
+            string resName;
+            string all = "";
+            // Формат: "ИмяПроекта.Папка.Файл.расширение"
+            //string resourceName = "Monika.Hangman.Resources.words.txt";
+
+            if (!File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ru.txt")))
+                resName = "Monika.Hangman.words.txt";
+            else
+                resName = "Monika.Hangman.words_ru.txt";
+
+            var assembly = Assembly.GetExecutingAssembly();
+            using (Stream stream = assembly.GetManifestResourceStream(resName))
+            using (StreamReader reader = new StreamReader(stream)) {
+                all = reader.ReadToEnd();
+            }
+            /*
+            var file = GetResourceStream(resName);
+
+            using (var reader = new StreamReader(file)) {
+                all = reader.ReadToEnd();
+            }*/
+
+            dictionary = all.Split('\n')
+       .Select(line => line.Split(','))
+       .Where(parts => parts.Length == 2 && int.TryParse(parts[1], out _))
+       .Select(parts => new KeyValuePair<string, int>(parts[0].Trim(), int.Parse(parts[1])))
+       .ToList();
+        }
+        static UnmanagedMemoryStream GetResourceStream(string resName) {
+            var assembly = Assembly.GetExecutingAssembly();
+            var strResources = assembly.GetName().Name + ".g.resources";
+            var rStream = assembly.GetManifestResourceStream(strResources);
+            var resourceReader = new System.Resources.ResourceReader(rStream);
+            var items = resourceReader.OfType<System.Collections.DictionaryEntry>();
+            var stream = items.First(x => (x.Key as string) == resName.ToLower()).Value;
+            return (UnmanagedMemoryStream)stream;
+        }
         public MainWindow() {
             InitializeComponent();
 
-            hangman.Source = new BitmapImage(new Uri("pack://application:,,,/hangman/hm_6.png"));
+            loadWords();
+            Random random = new Random();
+            if (random.Next(1, 10) == 1) {
+                isSayori = "_s";
+
+            } else {
+                isSayori = "";
+            }
+
+            hangman.Source = new BitmapImage(new Uri($"pack://application:,,,/hangman/hm{isSayori}_6.png"));
+
             random = new Random();
             GetWord();
             Debug.WriteLine(Word);
@@ -55,6 +120,11 @@ namespace Monika.Hangman {
                     }
                     switch (key) {
                         case "HM_RESTART":
+                            popitka = 6;
+                            correct = 0;
+
+                            hangman.Source = new BitmapImage(new Uri($"pack://application:,,,/hangman/hm{isSayori}_{popitka}.png"));
+
                             win = false;
                             losed = false;
                             FormatedWord = "";
@@ -71,6 +141,7 @@ namespace Monika.Hangman {
 
                             break;
                         case "HM_QUIT":
+                            want_close = false;
                             this.Close();
                             break;
                     }
@@ -90,9 +161,13 @@ namespace Monika.Hangman {
                         }
                     }
                     if (!Answered && !Missed.Contains(textBox.Text)) {
+                        if (isSayori == "_s") {
+                            Title = "Ĥ̵̴̸̵̶̷̡̛̯̗͔̠̳͇̫̣͙̹̗̪̺̜͓̮̺̽̈̐̎̎͗̊̆̏̽̔͛͑̏͊͒͌̎̔̐̚̚͘̕͝͠͝͝ạ̴̶̴̷̸̢̛̘̬̖̠͚͈̳̘̩͕̳̳͎̦̺͓̥̯̝͋̃̈́̆̾͌̈́̂̐͛͊͂͘̕ñ̴̴̵̶̶̨̢̧̛͉̰̲̫̱̼̻̫̙̳͇̰̝̩͇͛̐̆̔̄̉͆̆̊̿̄̓̐̽̿̕̚͝ͅg̷̶̵̵̴̡̛̪̠͚̪̖̳̤̱̖͍̱̪̟͔̠̫̪̩̮̈́͆͛̇̇̈́̈́͐̊̐͌̽̿́̕͜͝͠m̷̶̸̶̵̨̡̛̟̜̠͎͇̝̣͔̰͔̳͍̜̞͎̞̀̈́̿̾̒̐̋̓͑̍͋̌̇́͗̌͝͝ặ̴̶̷̴̶̢̢̧̨̨̛̗̹͚͍̤̙͖̠̥͇̗̱̥͍͙̠͎̯̟̖̟̳̄͆̿̌̉̋͆͆͐̿̃̃͆̋͂̈̔͜ň̸̴̴̴̶̨̢̧̨̟̥͚͔̟͕̗͇̩̭̰̜̯̺̱̱͓̈́́͂̇͌̆̈͌̀̒͊̑̃̑̔̒̇̿̆̿̚͜͝͝";
+                        }
+
                         Missed.Add(textBox.Text);
                         popitka -= 1;
-                        hangman.Source = new BitmapImage(new Uri($"pack://application:,,,/hangman/hm_{popitka}.png"));
+                        hangman.Source = new BitmapImage(new Uri($"pack://application:,,,/hangman/hm{isSayori}_{popitka}.png"));
 
                         if (popitka == 0) {
                             losed = true;
@@ -120,7 +195,7 @@ namespace Monika.Hangman {
                     textBox.Text = "";
                 }
                 this.Closing += (sender, e) => {
-                    if (!losed && !win) {
+                    if (!losed && !win && want_close) {
                         PipeManager.SendMessage("MonikaInteractionPipe", $"HM_CLOSING,{Word};{popitka};{correct}");
                     }
                 };

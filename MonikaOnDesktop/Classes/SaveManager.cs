@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Drawing;
+using System.IO;
 using System.Text.Json;
 
 namespace MonikaOnDesktop {
@@ -30,6 +31,8 @@ namespace MonikaOnDesktop {
         public bool AI { get; set; } = false;
         public string token { get; set; } = "null";
         public string port { get; set; } = "3000";
+        public Point MonikaPosition { get; set; } = new Point();
+        public bool IsAuto { get; set; } = true;
 
 
     }

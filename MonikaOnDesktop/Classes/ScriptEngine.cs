@@ -35,6 +35,8 @@ namespace MonikaOnDesktop {
         public int CurrentIndex = 0;
         public bool isRandom = false;
 
+        public bool isAuto = true;
+
         public void LoadContent(string content) {
             Commands.Clear();
             Labels.Clear();
@@ -146,7 +148,10 @@ namespace MonikaOnDesktop {
                     case CommandType.Speech:
                         CurrentIndex++;
                         if (OnSpeech != null) await OnSpeech(cmd.Text, cmd.Character);
-                        continue;
+                        if (!isAuto)
+                            return; // Останавливаемся и ЖДЕМ КЛИКА игрока;
+                        else
+                            continue; // Останавливаемся и ЖДЕМ КЛИКА игрока
                     case CommandType.Return:
                         CurrentIndex = Commands.Count;
                         break;
@@ -162,7 +167,7 @@ namespace MonikaOnDesktop {
 
                     case CommandType.Menu:
                         if (isRandom) {
-                            AutoSelectRandomOption(cmd.IndentLevel);
+                            AutoSelectRandomOptionAsync(cmd.IndentLevel);
                         } else {
                             OnMenuRequired?.Invoke(cmd.IndentLevel);
                         }
@@ -203,7 +208,7 @@ namespace MonikaOnDesktop {
             if (CurrentIndex >= Commands.Count)
                 OnScriptFinished?.Invoke();
         }
-        private void AutoSelectRandomOption(int menuIndent) {
+        private async Task AutoSelectRandomOptionAsync(int menuIndent) {
             List<int> optionIndices = new List<int>();
             int i = CurrentIndex + 1;
 
@@ -218,11 +223,14 @@ namespace MonikaOnDesktop {
                 Random rnd = new Random();
                 CurrentIndex = optionIndices[rnd.Next(optionIndices.Count)];
 
-                _ = ExecuteNext();
+
+                await ExecuteNext();
                 SkipBlock(menuIndent);
-                _ = ExecuteNext();
+                await ExecuteNext();
+            } else {
+                isRandom = false;
+                CurrentIndex++; // Если кнопок нет, просто идем дальше
             }
-            isRandom = false;
         }
         public void SkipBlock(int currentIndent) {
             CurrentIndex++;

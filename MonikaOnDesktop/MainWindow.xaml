@@ -167,6 +167,15 @@
                         Thickness="1" />
                 </TextBlock.Effect>
             </TextBlock>
+            <TextBlock
+                Margin="10"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Background="#01000000"
+                FontFamily="{StaticResource halogen}"
+                Foreground="#FFBB5599"
+                MouseDown="TextBlock_MouseDown"
+                Text="Skip" />
         </Grid>
         <StackPanel x:Name="MenuStackPanel" Margin="70,0,70,0" />
         <Border

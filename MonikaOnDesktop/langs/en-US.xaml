@@ -1,9 +1,10 @@
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <sys:String x:Key="LanguageName">English</sys:String>
-    
+
     <sys:String x:Key="DialogPath">en</sys:String>
 
     <sys:String x:Key="loc_Title_Settings">Settings</sys:String>
@@ -25,6 +26,7 @@
     <sys:String x:Key="loc_Chk_Youtube">Youtube</sys:String>
 
     <sys:String x:Key="loc_Cat_Other">Other</sys:String>
+    <sys:String x:Key="loc_Chk_AutoDialog">Autoskip</sys:String>
     <sys:String x:Key="loc_Chk_AutoStart">Autostart</sys:String>
     <sys:String x:Key="loc_Chk_DayNightFilter">Day/Night Filter</sys:String>
     <sys:String x:Key="loc_Chk_MouseHide">Hide by Cursor</sys:String>

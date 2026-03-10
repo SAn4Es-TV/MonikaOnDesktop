@@ -176,9 +176,14 @@ namespace MonikaOnDesktop {
 
             screenSize.X = SystemParameters.WorkArea.Width;
             screenSize.Y = SystemParameters.WorkArea.Height;
-
-            Left = screenSize.X - Width;
-            Top = screenSize.Y - Height;
+            Debug.WriteLine(settings.MonikaPosition.X);
+            if (settings.MonikaPosition.X == 0) {
+                Left = screenSize.X - Width;
+                Top = screenSize.Y - Height;
+            } else {
+                Left = settings.MonikaPosition.X - this.ActualWidth;
+                Top = screenSize.Y - Height;
+            }
 
             Log("Application started.");
 
@@ -187,6 +192,7 @@ namespace MonikaOnDesktop {
             _engine.OnMenuRequired = (indent) => ShowMenu(indent);
             _engine.OnLog = (msg) => Log(msg);
             _engine.OnScriptFinished = () => {
+                Log("Скрипт завершён");
                 Dispatcher.Invoke(() => saybox.Visibility = Visibility.Hidden);
                 _isTyping = false;
                 setPose(idle_pose);
@@ -234,6 +240,8 @@ namespace MonikaOnDesktop {
             MonikaContainer.Effect = monikaShader;
             if (settings.Username == "__fistrun__" && !File.Exists(Path.Combine(scriptsPath, "firstrun"))) {
                 isMonikaHere = false;
+                Left = screenSize.X - Width;
+                Top = screenSize.Y - Height;
             }
 
             setPose(idle_pose);
@@ -329,7 +337,38 @@ namespace MonikaOnDesktop {
             Closing += (e, s) => {
                 _server.Stop();
             };
+            MouseLeftButtonDown += (s, e) => {
+                anchorPoint = PointToScreen(e.GetPosition(this));
+                inDrag = true;
+                CaptureMouse();
+                e.Handled = true;
+            };
+            MouseLeftButtonUp += async (s, e) => {
+                if (inDrag && isMonikaHere) {
+                    ReleaseMouseCapture();
+                    inDrag = false;
+                    e.Handled = true;
+                    settings.MonikaPosition = new System.Drawing.Point((int)((int)this.Left + this.ActualWidth), (int)this.Top);
+                    SaveSettings();
+                }
+
+                if (!settings.IsAuto) {
+                    // Если меню открыто, клики по экрану игнорируем
+                    if (MenuStackPanel.Children.Count != 0 || InputContainer.Visibility == Visibility.Visible)
+                        return;
+                    await Task.Run(async () => await _engine.ExecuteNext());
+                }
+            };
+            MouseMove += (s, e) => {
+                if (inDrag && isMonikaHere) {
+                    Point currentPoint = PointToScreen(e.GetPosition(this));
+                    this.Left = this.Left + currentPoint.X - anchorPoint.X; // only allow vertical movements
+                    anchorPoint = currentPoint;
+                }
+            };
         }
+        bool inDrag = false;
+        Point anchorPoint;
         async void GetDialogs() {
             if (settings.DialogAutoUpdate && CheckForInternetConnection()) {
                 Log("Получаем диалоги...");
@@ -411,7 +450,7 @@ namespace MonikaOnDesktop {
                 var nextMove = DateTime.Now + TimeSpan.FromSeconds(random.Next(40, 180));
                 var nextEye = DateTime.Now + TimeSpan.FromSeconds(random.Next(30, 60));
                 var nextBlink = DateTime.Now + TimeSpan.FromSeconds(random.Next(1, 10));
-                var nextDialog = DateTime.Now + TimeSpan.FromSeconds(random.Next(120, 300));
+                var nextDialog = DateTime.Now + TimeSpan.FromSeconds(random.Next((int)(120 * settings.IdleRarity), (int)(300 * settings.IdleRarity)));
                 while (true) {
                     // Idle animation
                     if (DateTime.Now >= nextMove && !_isTyping) {
@@ -444,9 +483,11 @@ namespace MonikaOnDesktop {
                         setPose(idle_pose);
                     }
                     if (DateTime.Now >= nextDialog && !_isTyping) {
-                        filePath = Path.Combine(scriptsPath, GetDialogLang(), "idle.rpy");
-                        RunLabel("__random__");
-                        nextDialog = DateTime.Now + TimeSpan.FromSeconds(random.Next(120, 300));
+                        if (settings.IdleRarity != 0) {
+                            filePath = Path.Combine(scriptsPath, GetDialogLang(), "idle.rpy");
+                            RunLabel("__random__");
+                        }
+                        nextDialog = DateTime.Now + TimeSpan.FromSeconds(random.Next((int)(120 * settings.IdleRarity), (int)(300 * settings.IdleRarity)));
                     }
                     await Task.Delay(50);
                 }
@@ -599,7 +640,7 @@ namespace MonikaOnDesktop {
             _server.Start(Path.Combine(mainPath, "cai-bridge.exe"));
         }
         public void StartHttpServer() {
-            HttpListener listener = new HttpListener();
+            /*HttpListener listener = new HttpListener();
             listener.Prefixes.Add("http://localhost:7878/"); // Слушаем этот порт
             listener.Start();
 
@@ -617,7 +658,7 @@ namespace MonikaOnDesktop {
                     }
                     context.Response.Close();
                 }
-            });
+            });*/
         }
         private void ReactToBrowser(string jsonData) {
             var data = JsonSerializer.Deserialize<BrowserData>(jsonData);
@@ -742,19 +783,27 @@ namespace MonikaOnDesktop {
                 if (settingsWindow.ShowDialog() == true) {
                     setPose(idle_pose);
                     SaveSettings();
+                    LoadSettings();
                 }
             };
             quitItem.Click += (s, e) => {
-                SaveSettings();
+                if (isMonikaHere) {
+                    SaveSettings();
 
-                if (!_isTyping) {
-                    Random random = new Random();
-                    filePath = Path.Combine(scriptsPath, GetDialogLang(), "goodbye.rpy");
-                    RunLabel("__random__");
+                    if (!_isTyping) {
+                        Random random = new Random();
+                        filePath = Path.Combine(scriptsPath, GetDialogLang(), "goodbye.rpy");
+                        RunLabel("__random__");
+                    } else {
+                        this.Dispatcher.Invoke(() => {
+                            this.Close();
+                        });
+                    }
                 } else {
                     this.Dispatcher.Invoke(() => {
                         this.Close();
                     });
+
                 }
             };
 
@@ -1332,6 +1381,8 @@ namespace MonikaOnDesktop {
             sprite.acs.Add(currHat);
             sprite.acs.Add(currRibbon);
 
+            _engine.isAuto = settings.IsAuto;
+
             ApplySmoothScale(settings.Scale);
 
 
@@ -1460,8 +1511,16 @@ namespace MonikaOnDesktop {
             var desktopWorkingArea = SystemParameters.WorkArea;
 
             // Устанавливаем положение окна так, чтобы его правый нижний угол совпадал с углом экрана
-            this.Left = desktopWorkingArea.Right - this.ActualWidth;
-            this.Top = desktopWorkingArea.Bottom - this.ActualHeight;
+            //this.Left = desktopWorkingArea.Right - this.ActualWidth;
+            if (settings.MonikaPosition.X == 0 || !isMonikaHere) {
+                Left = screenSize.X - Width;
+                Top = screenSize.Y - Height;
+            } else {
+                Left = settings.MonikaPosition.X - this.ActualWidth;
+                Top = screenSize.Y - Height;
+            }/*
+            this.Left = settings.MonikaPosition.X - this.ActualWidth;
+            this.Top = desktopWorkingArea.Bottom - this.ActualHeight;*/
             //MyOutline.UpdateScale(e.NewSize.Width);
         }
         public string GetDialogLang() {
@@ -1493,6 +1552,10 @@ namespace MonikaOnDesktop {
 
         [DllImport("user32.dll")]
         private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+
+        private void TextBlock_MouseDown(object sender, MouseButtonEventArgs e) {
+            _engine.CurrentIndex = _engine.Commands.Count;
+        }
 
         [DllImport("user32.dll")]
         private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
