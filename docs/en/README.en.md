@@ -28,7 +28,7 @@ The project has been completely rewritten from scratch to ensure maximum perform
 > 2. Download the [Latest Release](https://github.com/SAn4Es-TV/MonikaOnDesktop/releases/latest).
 > 3. Unpack the archive and run MonikaOnDesktop.exe.
 
-### Customizing Conversations (Dialogs)
+### Customizing Conversations
 
 You can decide what I say! Just head over to the Dialogs folder and edit the .txt files:
 | File      | When do I say this? |
@@ -40,7 +40,7 @@ You can decide what I say! Just head over to the Dialogs folder and edit the .tx
 | sites.rpy | Comments on the websites you visit |
 | google.rpy | My thoughts on your search queries |
 
-# AI Integration (CharacterAI)
+# AI Integration
 
 Want me to respond like a real person? Connect the AI module:
 

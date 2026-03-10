@@ -1,0 +1,168 @@
+:root {
+    --primary-color: #ffb7c5;
+    /* Розовый Моники */
+    --secondary-color: #fce4ec;
+    --accent-color: #4a90e2;
+    --text-color: #4a4a4a;
+    --bg-color: #f0f2f5;
+}
+
+body {
+    font-family: 'Ubuntu', sans-serif;
+
+    --dotSize: 0.4rem;
+    position: relative;
+    background-repeat: round;
+
+    background-color: #91e290;
+    --bgSize: 2.35rem;
+    --bgPosition: calc(var(--bgSize) / 2);
+    background-image:
+        radial-gradient(circle at center, #a3f4a2 var(--dotSize), transparent 0),
+        radial-gradient(circle at center, #a3f4a2 var(--dotSize), transparent 0);
+    background-size: var(--bgSize) var(--bgSize);
+    background-position: 0 0, var(--bgPosition) var(--bgPosition);
+
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+    /* Flexbox на body помогает центрировать всё содержимое по горизонтали */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#banner {
+    display: block;
+    /* Убираем отступ снизу, характерный для строчных элементов */
+    max-width: 900px;
+    /* Ограничиваем максимальную ширину (как у контейнера) */
+    width: 100%;
+    /* Делаем адаптивной (тянется на узких экранах) */
+    height: auto;
+    /* Сохраняем пропорции */
+    margin-bottom: 20px;
+    /* Отступ снизу до контейнера #main */
+    border-radius: 8px;
+    /* Необязательно: скругление углов */
+}
+
+#main {
+    max-width: 900px;
+    margin: 200px auto auto auto;
+    background: var(--primary-color);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: 4px solid var(--primary-color);
+}
+
+#submain {
+    background-color: var(--primary-color);
+    border-style: dashed;
+    border-radius: 20px;
+    border-color: #ed145b;
+    border-width: 5px;
+    padding: 20px;
+    margin: 10px;
+}
+
+#content {
+    margin: auto;
+    padding: 20px;
+}
+
+.quote {
+    background: var(--secondary-color);
+    padding: 20px;
+    border-left: 5px solid #f39bc1;
+    border-radius: 10px;
+    font-style: italic;
+    font-size: 1.1em;
+    margin-bottom: 30px;
+    color: #d81b60;
+}
+
+h2 {
+    color: #d81b60;
+    border-bottom: 3px solid #d81b60;
+    ;
+    padding-bottom: 10px;
+    margin-top: 40px;
+}
+
+/* Ссылки */
+a {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+a:hover {
+    color: #d81b60;
+    text-decoration: none;
+}
+
+/* Таблицы */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+th {
+    background-color: #f39bc1;
+    color: white;
+    padding: 12px;
+    text-align: left;
+}
+
+tr:nth-child(even) {
+    background: #f8f8f846;
+}
+
+td {
+    padding: 12px;
+}
+
+/* Списки */
+ol {
+    padding-left: 20px;
+}
+
+li {
+    margin-bottom: 10px;
+}
+
+code {
+    background: #f8f8f86e;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.downloads {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.downloads a {
+    background-color: #d81b60;
+    color: white;
+    padding: 10px;
+    margin: 5px;
+    border-radius: 5px;
+}
+
+.downloads a:hover {
+    background-color: #f39bc1;
+    color: white;
+    padding: 10px;
+    margin: 5px;
+    border-radius: 5px;
+}
